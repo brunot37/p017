@@ -1,0 +1,144 @@
+.pagina-inicial {
+  background-color: #f9f9fa;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+}
+
+.pagina-inicial .conteudo {
+  background-color: #f9f9fa;
+  height: 900px;
+  position: relative;
+  width: 1440px;
+}
+
+.pagina-inicial .texto-botao {
+  height: 23px;
+  left: 1280px;
+  position: absolute;
+  top: 829px;
+  width: 132px;
+}
+
+.pagina-inicial .precisa-ajuda {
+  color: #424242;
+  font-family: "Zen Kaku Gothic Antique-Regular", Helvetica;
+  font-size: 12.8px;
+  font-weight: 400;
+  left: 28px;
+  letter-spacing: 0;
+  line-height: 22.5px;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+
+.pagina-inicial .icone-info {
+  height: 18px;
+  left: 0;
+  position: absolute;
+  top: 2px;
+  width: 18px;
+}
+
+.pagina-inicial .cabecalho {
+  align-items: center;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 12px;
+  left: 740px;
+  position: absolute;
+  top: 171px;
+}
+
+.pagina-inicial .titulo {
+  color: #212121;
+  font-family: "Zen Kaku Gothic Antique-Black", Helvetica;
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 44px;
+  position: relative;
+  text-align: center;
+  white-space: nowrap;
+  width: fit-content;
+}
+
+.pagina-inicial .formulario {
+  align-items: flex-start;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 18px;
+  left: 746px;
+  position: absolute;
+  top: 332px;
+}
+
+.pagina-inicial .botao-primario {
+  height: 72px;
+  margin-right: -2.00px;
+  position: relative;
+  width: 422px;
+}
+
+.pagina-inicial .fundo-botao {
+  background-color: #0a2647;
+  height: 72px;
+  position: relative;
+  width: 420px;
+}
+
+.pagina-inicial .texto-botao {
+  color: #ffffff;
+  font-family: "Zen Kaku Gothic Antique-Medium", Helvetica;
+  font-size: 16px;
+  font-weight: 500;
+  left: 40px;
+  letter-spacing: 0;
+  line-height: 28.2px;
+  position: absolute;
+  top: 22px;
+  white-space: nowrap;
+}
+
+.pagina-inicial .icone-seta {
+  height: 32px !important;
+  left: 356px !important;
+  position: absolute !important;
+  top: 20px !important;
+  width: 32px !important;
+}
+
+.pagina-inicial .container-botao {
+  align-items: flex-start;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 18px;
+  left: 746px;
+  position: absolute;
+  top: 430px;
+}
+
+.pagina-inicial .imagem {
+  height: 900px;
+  left: 0;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  width: 525px;
+}
+
+.pagina-inicial .descricao {
+  color: #424242;
+  font-family: "Zen Kaku Gothic Antique-Regular", Helvetica;
+  font-size: 16px;
+  font-weight: 400;
+  left: 599px;
+  letter-spacing: 0;
+  line-height: 28.2px;
+  position: absolute;
+  text-align: center;
+  top: 215px;
+  white-space: nowrap;
+}
