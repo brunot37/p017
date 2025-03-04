@@ -1,5 +1,6 @@
 import React from "react";
-
+import "./App.css";
+ 
 const Home = () => {
   return (
     <div className="home-container">
@@ -13,10 +14,16 @@ const Home = () => {
           DISPONIBILIDADE
         </p>
         <div className="buttons">
-          <button className="btn">Login →</button>
-          <button className="btn">Registar →</button>
+          <button className="btn">
+            Login <span className="arrow">→</span>
+          </button>
+          <button className="btn">
+            Registar <span className="arrow">→</span>
+          </button>
         </div>
-        <footer className="footer">Precisas de ajuda?</footer>
+        <footer className="footer">
+          <span className="help">Precisas de ajuda?</span>
+        </footer>
       </div>
     </div>
   );
