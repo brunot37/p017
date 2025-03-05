@@ -4,7 +4,8 @@ import './index.css';
 import App from './App.jsx';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Registo from './views/Registo.jsx';
-import Login from './views/Login.jsx'; // Importação do componente Login
+import Login from './views/Login.jsx';
+
 
 const router = createBrowserRouter([
   {
@@ -17,7 +18,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/Login",
-    element: <Login />, // Corrigido e garantido que o componente existe
+    element: <Login />,
   },
 ]);
 
