@@ -4,28 +4,29 @@ import "./Registo.css";
 
 const Registo = () => {
   return (
-    <div className="registo-container">
-      <div className="registo-illustration">
-      <img src="/src/assets/LogoAgenda.png" alt="Caderno" className="illustration" />
+    <div className="registration-container">
+      <div className="registration-illustration">
+        <img src="/src/assets/LogoAgenda.png" alt="Caderno" className="illustration-image" />
       </div>
-      <div className="registo-form">
-        <Link to="/" className="back-link">&larr; Voltar Página Principal</Link>
-        <h2>Gestão de Disponibilidade de Horários</h2>
-        <p>REGISTRE-SE PARA CONTINUAR</p>
+      <div className="registration-form">
+        {/* Colocando o link "Voltar à Página Principal" mais alto */}
+        <Link to="/" className="back-to-home-link">&larr; Voltar Página Principal</Link>
+        <h2 className="registration-title">Gestão de Disponibilidade de Horários</h2>
+        <p className="registration-description">REGISTRE-SE PARA CONTINUAR</p>
         <form>
-          <div className="input-group">
-            <input type="text" placeholder="Utilizador" required />
+          <div className="input-field">
+            <input type="text" placeholder="Utilizador" required className="input-field__red" />
           </div>
-          <div className="input-group">
-            <input type="email" placeholder="exemplo@gmail.com" required />
+          <div className="input-field">
+            <input type="email" placeholder="exemplo@gmail.com" required className="input-field__red" />
           </div>
-          <div className="input-group">
-            <input type="password" placeholder="********" required />
+          <div className="input-field">
+            <input type="password" placeholder="********" required className="input-field__red" />
           </div>
-          <button type="submit" className="register-button">Registrar &rarr;</button>
+          <button type="submit" className="register-button red-button">Registrar &rarr;</button>
         </form>
-        <p className="help-link">
-         <Link to="/ajuda">Precisa de Ajuda?</Link>
+        <p className="help-section">
+          <Link to="/ajuda" className="help-link">Precisa de Ajuda?</Link>
         </p>
       </div>
     </div>
