@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Registo from './views/Registo.jsx';
 import Login from './views/Login.jsx';
 import RecuperarPassword from './views/RecuperarPassword.jsx';
+import DocenteVizualizarHorario from './views/DocenteVizualizarHorario.jsx';
 
 
 const router = createBrowserRouter([
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
   {
     path: "/RecuperarPassword",
     element: <RecuperarPassword />,
+  },
+  {
+    path: "/DocenteVizualizarHorario",
+    element: <DocenteVizualizarHorario />,
   }
 ]);
 
