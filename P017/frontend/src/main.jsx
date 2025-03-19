@@ -7,6 +7,7 @@ import Registo from './views/Registo.jsx';
 import Login from './views/Login.jsx';
 import RecuperarPassword from './views/RecuperarPassword.jsx';
 import DocenteVizualizarHorario from './views/DocenteVizualizarHorario.jsx';
+import DocenteSubmeter from './views/DocenteSubmeter.jsx';
 
 
 const router = createBrowserRouter([
@@ -29,7 +30,11 @@ const router = createBrowserRouter([
   {
     path: "/DocenteVizualizarHorario",
     element: <DocenteVizualizarHorario />,
-  }
+  },
+  {
+    path: "/DocenteSubmeter",
+    element: <DocenteSubmeter />,
+  },
 ]);
 
 createRoot(document.getElementById('root')).render(

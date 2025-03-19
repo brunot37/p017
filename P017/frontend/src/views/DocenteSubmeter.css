@@ -1,0 +1,121 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #0d2240;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.user-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    background-color: gray;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    margin: 15px 0;
+    cursor: pointer;
+}
+
+.active {
+    font-weight: bold;
+}
+
+.logout {
+    margin-top: auto;
+    background: none;
+    border: none;
+    color: red;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.content {
+    flex-grow: 1;
+    background-color: #f8f9fb;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.availability-form {
+    background: #5F99AE;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+}
+
+.availability-form input, .availability-form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc; /* Borda para os inputs */
+}
+
+.date-time-group {
+    display: flex;
+    justify-content: space-between;
+}
+
+.date-time-group div {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.date-time-group div:last-child {
+    margin-right: 0;
+}
+
+.submit-button {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #0d2240;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.submit-button:hover {
+    background-color: #092033;
+}
+
+/* Estilos para número de sala e nome da cadeira com fundo preto */
+.room-number, .course-name {
+    background-color: black; /* Cor preta igual aos campos de data e hora */
+    color: white;
+    border: 1px solid #ccc; /* Borda para manter consistência */
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
