@@ -12,11 +12,11 @@ body {
 
 .sidebar {
   width: 250px;
-  background-color: #0d2240;
+  background-color: #112D4E;
   color: white;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center;  
   padding: 20px;
   height: 100vh;
   position: fixed;
@@ -107,12 +107,12 @@ nav ul li {
 .nav-button {
   padding: 10px 15px;
   border: none;
-  background-color: #0d2240;
+  background-color: #112D4E;
   color: white;
   cursor: pointer;
   border-radius: 5px;
 }
 
 .nav-button:hover {
-  background-color: #092033;
+  background-color: #112D4E;
 }

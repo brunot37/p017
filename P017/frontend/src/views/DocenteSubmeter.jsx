@@ -31,7 +31,7 @@ const SubmeterDisponibilidade = () => {
           <div className="date-time-group">
             <div>
               <label>Dia</label>
-              <select>
+              <select className="date-field">
                 {[...Array(31).keys()].map((day) => (
                   <option key={day + 1}>{String(day + 1).padStart(2, "0")}</option>
                 ))}
@@ -39,7 +39,7 @@ const SubmeterDisponibilidade = () => {
             </div>
             <div>
               <label>Mês</label>
-              <select>
+              <select className="date-field">
                 {["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"].map(
                   (month, index) => (
                     <option key={index}>{month}</option>
@@ -49,7 +49,7 @@ const SubmeterDisponibilidade = () => {
             </div>
             <div>
               <label>Ano</label>
-              <select>
+              <select className="date-field">
                 <option>23</option>
               </select>
             </div>
@@ -58,7 +58,7 @@ const SubmeterDisponibilidade = () => {
           <div className="date-time-group">
             <div>
               <label>Hora de Início</label>
-              <select>
+              <select className="time-field">
                 {[...Array(24).keys()].map((hour) => (
                   <option key={hour}>{`${String(hour).padStart(2, "0")}:00`}</option>
                 ))}
@@ -66,7 +66,7 @@ const SubmeterDisponibilidade = () => {
             </div>
             <div>
               <label>Hora de Fim</label>
-              <select>
+              <select className="time-field">
                 {[...Array(24).keys()].map((hour) => (
                   <option key={hour}>{`${String(hour).padStart(2, "0")}:00`}</option>
                 ))}

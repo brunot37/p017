@@ -10,7 +10,7 @@ body {
 
 .sidebar {
     width: 250px;
-    background-color: #0d2240;
+    background-color: #112D4E;
     color: white;
     display: flex;
     flex-direction: column;
@@ -64,10 +64,10 @@ nav ul li {
 }
 
 .availability-form {
-    background: #5F99AE;
+    background: #3282B8;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px #3282B8;
     width: 80%;
     max-width: none;
     display: flex;
@@ -79,7 +79,7 @@ nav ul li {
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 4px;
-    border: 1px solid #ccc; /* Borda para os inputs */
+    border: 1px solid #ccc;
 }
 
 .date-time-group {
@@ -99,7 +99,7 @@ nav ul li {
 .submit-button {
     margin-top: 20px;
     padding: 10px;
-    background-color: #0d2240;
+    background-color: #112D4E;
     color: white;
     border: none;
     border-radius: 4px;
@@ -107,15 +107,21 @@ nav ul li {
 }
 
 .submit-button:hover {
-    background-color: #092033;
+    background-color: #112D4E;
 }
 
-/* Estilos para número de sala e nome da cadeira com fundo preto */
-.room-number, .course-name {
-    background-color: black; /* Cor preta igual aos campos de data e hora */
-    color: white;
-    border: 1px solid #ccc; /* Borda para manter consistência */
+
+.room-number, .course-name, .date-field, .time-field {
+    background-color: white; 
+    color: black; 
+    border: 1px solid #ccc; 
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 4px;
+}
+
+.date-time-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
 }
