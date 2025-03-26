@@ -50,7 +50,9 @@ const SubmeterDisponibilidade = () => {
             <div>
               <label>Ano</label>
               <select className="date-field">
-                <option>23</option>
+                {[...Array(10).keys()].map((year) => (
+                  <option key={2025 + year}>{2025 + year}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -59,17 +61,27 @@ const SubmeterDisponibilidade = () => {
             <div>
               <label>Hora de Início</label>
               <select className="time-field">
-                {[...Array(24).keys()].map((hour) => (
-                  <option key={hour}>{`${String(hour).padStart(2, "0")}:00`}</option>
-                ))}
+                {[...Array(34).keys()].map((hour) => {
+                  const actualHour = 6 + Math.floor(hour / 2); 
+                  const minutes = hour % 2 === 0 ? "00" : "30"; 
+                  if (actualHour <= 22) {
+                    return <option key={hour}>{`${String(actualHour).padStart(2, "0")}:${minutes}`}</option>;
+                  }
+                  return null; 
+                })}
               </select>
             </div>
             <div>
               <label>Hora de Fim</label>
               <select className="time-field">
-                {[...Array(24).keys()].map((hour) => (
-                  <option key={hour}>{`${String(hour).padStart(2, "0")}:00`}</option>
-                ))}
+                {[...Array(34).keys()].map((hour) => {
+                  const actualHour = 6 + Math.floor(hour / 2); 
+                  const minutes = hour % 2 === 0 ? "00" : "30"; 
+                  if (actualHour <= 22) {
+                    return <option key={hour}>{`${String(actualHour).padStart(2, "0")}:${minutes}`}</option>;
+                  }
+                  return null; 
+                })}
               </select>
             </div>
           </div>
