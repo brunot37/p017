@@ -1,0 +1,119 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #112D4E;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.user-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    background-color: gray;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+}
+
+nav ul li {
+    margin: 15px 0;
+    cursor: pointer;
+    text-align: center;
+}
+
+.active {
+    font-weight: bold;
+}
+
+.logout {
+    margin-top: auto;
+    background: none;
+    border: none;
+    color: red;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.content {
+    flex-grow: 1;
+    background-color: #f8f9fb;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.availability-form {
+    background: #3282B8;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #3282B8;
+    width: 80%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group,
+.date-time-group {
+    margin-bottom: 20px;
+}
+
+.input-group label,
+.date-time-group label {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.input-group select,
+.date-time-group select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: white;
+    color: black; 
+}
+
+.date-time-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.submit-button {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #112D4E;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.submit-button:hover {
+    background-color: #112D4E;
+}

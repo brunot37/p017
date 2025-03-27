@@ -8,6 +8,7 @@ import Login from './views/Login.jsx';
 import RecuperarPassword from './views/RecuperarPassword.jsx';
 import DocenteVizualizarHorario from './views/DocenteVizualizarHorario.jsx';
 import DocenteSubmeter from './views/DocenteSubmeter.jsx';
+import ColaboradorConsultar from './views/ColaboradorConsultar.jsx';
 
 
 const router = createBrowserRouter([
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
   {
     path: "/DocenteSubmeter",
     element: <DocenteSubmeter />,
+  },
+  {
+    path: "/ColaboradorConsultar",
+    element: <ColaboradorConsultar />,
   },
 ]);
 
