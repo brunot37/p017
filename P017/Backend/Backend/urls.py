@@ -1,12 +1,7 @@
-from rest_framework.routers import DefaultRouter
+from django.contrib import admin
 from django.urls import path, include
-from .views import UserViewSet, DisponibilidadeViewSet, HorarioViewSet
-
-router = DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'disponibilidades', DisponibilidadeViewSet)
-router.register(r'horarios', HorarioViewSet)
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('admin/', admin.site.urls),
+    path('api/', include('api.urls')),  
 ]

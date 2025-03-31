@@ -9,7 +9,7 @@ const Registo = () => {
         <img src="/src/assets/LogoAgenda.png" alt="Caderno" className="illustration-image" />
       </div>
       <div className="registration-form">
-        {/* Colocando o link "Voltar à Página Principal" mais alto */}
+       
         <Link to="/" className="back-to-home-link">&larr; Voltar Página Principal</Link>
         <h2 className="registration-title">Gestão de Disponibilidade de Horários</h2>
         <p className="registration-description">REGISTRE-SE PARA CONTINUAR</p>

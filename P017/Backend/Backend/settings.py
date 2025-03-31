@@ -2,12 +2,12 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Carregar variáveis do arquivo .env
+
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Segurança
+
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'chave-secreta-padrao')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
@@ -15,15 +15,19 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.contenttypes',
+    'django.contrib.contenttypes',  
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',
+
     'rest_framework',
-    'api',
+    'corsheaders',
+    'api', 
     'corsheaders',
 ]
+
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -36,7 +40,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'P017.urls'
+ROOT_URLCONF = 'Backend.urls'
 
 TEMPLATES = [
     {
@@ -54,16 +58,16 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'P017.wsgi.application'
+WSGI_APPLICATION = 'Backend.wsgi.application'
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'P017'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', '123'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'NAME': 'P017',  
+        'USER': 'bruno',
+        'PASSWORD': '123',
+        'HOST': 'localhost',  
+        'PORT': '5432',       
     }
 }
 
@@ -88,8 +92,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTH_USER_MODEL = 'api.User'  
+
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',  # React
+    'http://localhost:5173', 
+    
     'http://127.0.0.1:5173',
 ]
 CORS_ALLOW_CREDENTIALS = True
@@ -103,3 +110,4 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
 }
+
