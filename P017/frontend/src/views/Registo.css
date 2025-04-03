@@ -3,7 +3,7 @@
   width: 100vw;
   height: 100vh;
   align-items: stretch;
-  background: linear-gradient(120deg, #eaf3ff, #ffffff);
+  background-color: #ffffff;
   animation: fadeInUp 0.6s ease-out;
 }
 
@@ -35,19 +35,40 @@
   text-align: center;
   padding: 3rem;
   background-color: #ffffff;
+  position: relative;
 }
 
 .back-to-home-link {
-  align-self: flex-start;
-  margin-bottom: 1rem;
-  font-size: 0.95rem;
-  color: #003366;
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  background-color: #ffffff;
+  color: #041c42;
+  border: 2px solid #041c42;
+  padding: 8px 14px;
+  border-radius: 12px;
   text-decoration: none;
-  transition: color 0.3s;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  outline: none;
 }
 
 .back-to-home-link:hover {
-  text-decoration: underline;
+  background-color: #002b5c;
+  color: #ffffff;
+  transform: scale(1.03);
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.back-to-home-link:focus,
+.back-to-home-link:focus-visible {
+  outline: none;
 }
 
 .registration-title {
@@ -77,16 +98,41 @@
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
+  position: relative;
+  padding-left: 30px;
+}
+
+.role-select input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #041c42;
+  border-radius: 50%;
+  outline: none;
+  background-color: white;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: background 0.2s ease;
+}
+
+.role-select input[type="radio"]:checked {
+  background-color: #041c42;
+  box-shadow: inset 0 0 0 4px white;
 }
 
 .input-field {
   width: 100%;
   margin-bottom: 1rem;
+  position: relative;
 }
 
 .input-field input {
   width: 100%;
-  padding: 14px;
+  padding: 14px 40px 14px 16px;
   border: 2px solid #e0e0e0;
   border-radius: 10px;
   font-size: 1rem;
@@ -98,6 +144,48 @@
   border-color: #041c42;
   background-color: #eef5ff;
   outline: none;
+}
+
+.input-field.user::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  background-image: url('https://cdn-icons-png.flaticon.com/512/1077/1077114.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.input-field.email::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  background-image: url('https://cdn-icons-png.flaticon.com/512/561/561127.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.input-field.password::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  background-image: url('https://cdn-icons-png.flaticon.com/512/3064/3064155.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
 }
 
 .register-button {
@@ -112,6 +200,9 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .register-button:hover {

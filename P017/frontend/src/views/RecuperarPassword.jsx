@@ -4,22 +4,30 @@ import "./RecuperarPassword.css";
 
 const RecuperarPassword = () => {
   return (
-    <div className="registration-container">
+    <div className="registration-container fade-in">
       <div className="registration-illustration">
-        <img src="/src/assets/LogoAgenda.png" alt="Caderno" className="illustration-image" />
+        <img
+          src="/src/assets/LogoAgenda.png"
+          alt="Caderno"
+          className="illustration-image"
+        />
       </div>
       <div className="registration-form">
-        <Link to="/" className="back-to-home-link">&larr; Voltar Página Principal</Link>
-        <h2 className="registration-title">Gestão de Disponibilidade de Horários</h2>
-        <p className="registration-description">VERIFIQUE O SEU EMAIL PARA REDEFINIR A SENHA</p>
+        <Link to="/" className="back-to-home-link">← Voltar</Link>
+        <h2 className="registration-title">Recuperar Palavra-passe</h2>
+        <p className="registration-description">Verifica o teu email para redefinir a palavra-passe</p>
         <form>
-          <div className="input-field">
-            <input type="email" placeholder="exemplo@gmail.com" required className="input-field__red" />
+          <div className="input-field email">
+            <input
+              type="email"
+              placeholder="Email"
+              required
+            />
           </div>
-          <button type="submit" className="register-button red-button">Recuperar Password &rarr;</button>
+          <button type="submit" className="register-button">Recuperar →</button>
         </form>
         <p className="help-section">
-          <Link to="/ajuda" className="help-link">Precisa de Ajuda?</Link>
+          <Link to="/ajuda" className="help-link">Precisas de ajuda?</Link>
         </p>
       </div>
     </div>

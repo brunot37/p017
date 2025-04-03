@@ -6,17 +6,23 @@ const Login = () => {
   return (
     <div className="registration-container fade-in">
       <div className="registration-illustration">
-        <img src="/src/assets/LogoAgenda.png" alt="Caderno" className="illustration-image" />
+        <img
+          src="/src/assets/LogoAgenda.png"
+          alt="Caderno"
+          className="illustration-image"
+        />
       </div>
       <div className="registration-form">
         <Link to="/" className="back-to-home-link">← Voltar</Link>
         <h2 className="registration-title">Inicia Sessão</h2>
-        <p className="registration-description">Insere os teus dados para continuar</p>
+        <p className="registration-description">
+          Insere os teus dados para continuar
+        </p>
         <form>
-          <div className="input-field">
+          <div className="input-field email">
             <input type="email" placeholder="Email" required />
           </div>
-          <div className="input-field">
+          <div className="input-field password">
             <input type="password" placeholder="Palavra-passe" required />
           </div>
           <div className="forgot-password-link">
