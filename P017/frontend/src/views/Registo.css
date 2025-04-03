@@ -3,7 +3,8 @@
   width: 100vw;
   height: 100vh;
   align-items: stretch;
-  background-color: #041c42;
+  background: linear-gradient(120deg, #eaf3ff, #ffffff);
+  animation: fadeInUp 0.6s ease-out;
 }
 
 .registration-illustration {
@@ -12,100 +13,137 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 2rem;
 }
 
 .registration-illustration img {
-  max-width: 70%;
+  max-width: 80%;
   height: auto;
+  transition: transform 0.4s ease;
+}
+
+.registration-illustration img:hover {
+  transform: scale(1.05);
 }
 
 .registration-form {
   width: 55%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; 
+  justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 2rem;
+  padding: 3rem;
   background-color: #ffffff;
-  position: relative; 
 }
 
 .back-to-home-link {
-  margin-top: 0px; 
   align-self: flex-start;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #003366;
   text-decoration: none;
-  color: #333;
-  font-size: 1rem;
+  transition: color 0.3s;
+}
+
+.back-to-home-link:hover {
+  text-decoration: underline;
 }
 
 .registration-title {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #000;
-  margin-top: 135px; 
-  margin-bottom: 10px;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #041c42;
+  margin-bottom: 0.5rem;
 }
 
 .registration-description {
-  font-size: 0.95rem;
-  color: gray;
-  margin-bottom: 25px;
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.role-select {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  color: #041c42;
+}
+
+.role-select label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
 }
 
 .input-field {
   width: 100%;
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
 }
 
 .input-field input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-  color: black;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
 }
 
-.input-field__red {
-  border: 2px solid #041c42;
-  background-color: #F5F5F5;
-  color: black;
+.input-field input:focus {
+  border-color: #041c42;
+  background-color: #eef5ff;
+  outline: none;
 }
 
 .register-button {
   width: 100%;
-  padding: 12px;
-  background-color: #002b5c;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  padding: 14px;
   font-size: 1rem;
   font-weight: bold;
-  transition: all 0.3s ease;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.red-button {
   background-color: #041c42;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.red-button:hover {
-  background-color: #001d3d;
+.register-button:hover {
+  background-color: #002b5c;
+  transform: scale(1.03);
 }
 
 .help-section {
-  margin-top: 15px;
+  margin-top: 1.5rem;
 }
 
 .help-link {
   text-decoration: none;
-  color: #001f3f;
+  font-size: 0.95rem;
+  color: #003366;
 }
 
 .help-link:hover {
   text-decoration: underline;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeInUp 0.6s ease-out;
 }

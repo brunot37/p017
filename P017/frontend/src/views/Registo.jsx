@@ -1,32 +1,54 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Registo.css";
 
 const Registo = () => {
+  const [tipoConta, setTipoConta] = useState("docente");
+
   return (
-    <div className="registration-container">
+    <div className="registration-container fade-in">
       <div className="registration-illustration">
         <img src="/src/assets/LogoAgenda.png" alt="Caderno" className="illustration-image" />
       </div>
       <div className="registration-form">
-       
-        <Link to="/" className="back-to-home-link">&larr; Voltar Página Principal</Link>
-        <h2 className="registration-title">Gestão de Disponibilidade de Horários</h2>
-        <p className="registration-description">REGISTRE-SE PARA CONTINUAR</p>
+        <Link to="/" className="back-to-home-link">← Voltar</Link>
+        <h2 className="registration-title">Cria a tua conta</h2>
+        <p className="registration-description">Começa agora a gerir a tua disponibilidade</p>
         <form>
+          <div className="role-select">
+            <label>
+              <input
+                type="radio"
+                value="docente"
+                checked={tipoConta === "docente"}
+                onChange={() => setTipoConta("docente")}
+              />
+              Docente
+            </label>
+            <label>
+              <input
+                type="radio"
+                value="coordenador"
+                checked={tipoConta === "coordenador"}
+                onChange={() => setTipoConta("coordenador")}
+              />
+              Coordenador
+            </label>
+          </div>
+
           <div className="input-field">
-            <input type="text" placeholder="Utilizador" required className="input-field__red" />
+            <input type="text" placeholder="Utilizador" required />
           </div>
           <div className="input-field">
-            <input type="email" placeholder="exemplo@gmail.com" required className="input-field__red" />
+            <input type="email" placeholder="Email" required />
           </div>
           <div className="input-field">
-            <input type="password" placeholder="********" required className="input-field__red" />
+            <input type="password" placeholder="Palavra-passe" required />
           </div>
-          <button type="submit" className="register-button red-button">Registrar &rarr;</button>
+          <button type="submit" className="register-button">Registar →</button>
         </form>
         <p className="help-section">
-          <Link to="/ajuda" className="help-link">Precisa de Ajuda?</Link>
+          <Link to="/ajuda" className="help-link">Precisas de ajuda?</Link>
         </p>
       </div>
     </div>
