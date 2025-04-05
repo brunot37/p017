@@ -1,8 +1,8 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; 
 import "./App.css";
 
-const Home = () => {
+const App = () => {  
   const navigate = useNavigate();
 
   return (
@@ -28,4 +28,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default App;

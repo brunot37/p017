@@ -1,31 +1,57 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.timezone import now
+from django.utils import timezone
 
-class User(AbstractUser):
-    ROLE_CHOICES = [
+class Utilizador(models.Model):
+    TIPO_CONTA_CHOICES = [
         ('docente', 'Docente'),
         ('coordenador', 'Coordenador'),
-        ('administrador', 'Administrador')
     ]
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='docente')
+    nome = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    senha = models.CharField(max_length=128)  
+    tipo_conta = models.CharField(max_length=20, choices=TIPO_CONTA_CHOICES)
+
+    def __str__(self):
+        return self.email
+    
+class Conta(models.Model):
+    TIPO_CONTA_CHOICES = [
+        ('docente', 'Docente'),
+        ('coordenador', 'Coordenador'),
+    ]
+
+    tipo_conta = models.CharField(max_length=20, choices=TIPO_CONTA_CHOICES)
+    utilizador = models.CharField(max_length=50)
+    email = models.EmailField(unique=True)
+    senha = models.CharField(max_length=128)  
+    
+    def __str__(self):
+        return self.utilizador
+
+class User(AbstractUser):
+    tipo_conta = models.CharField(
+        max_length=20,
+        choices=[('docente', 'Docente'), ('coordenador', 'Coordenador')],
+        default='docente'
+    )
+    
 
 class Disponibilidade(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    dia_semana = models.CharField(max_length=20, choices=[
-        ('segunda', 'Segunda-feira'),
-        ('terca', 'Terça-feira'),
-        ('quarta', 'Quarta-feira'),
-        ('quinta', 'Quinta-feira'),
-        ('sexta', 'Sexta-feira')
-    ])
-    horario_inicio = models.TimeField()
-    horario_fim = models.TimeField()
-    restricao = models.BooleanField(default=False)
+    utilizador = models.ForeignKey('User', on_delete=models.CASCADE)
+    dia = models.DateField(default=timezone.now)  
+    hora_inicio = models.TimeField()
+    hora_fim = models.TimeField()
 
+    def __str__(self):
+        return f"{self.utilizador} - {self.dia}"
+    
 class Horario(models.Model):
-    docente = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'docente'})
-    dia_semana = models.CharField(max_length=20)
-    horario_inicio = models.TimeField()
-    horario_fim = models.TimeField()
-    criado_em = models.DateTimeField(default=now)
+    utilizador = models.ForeignKey('User', on_delete=models.CASCADE, default=1)  
+    dia = models.DateField(default=timezone.now)  
+    hora_inicio = models.TimeField()
+    hora_fim = models.TimeField()
+
+    def __str__(self):
+        return f"{self.utilizador} - {self.dia}"

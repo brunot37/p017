@@ -238,3 +238,9 @@
 .fade-in {
   animation: fadeInUp 0.6s ease-out;
 }
+.success-message {
+  color: green;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 15px;
+}

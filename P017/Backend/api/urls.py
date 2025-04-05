@@ -1,12 +1,7 @@
-from rest_framework.routers import DefaultRouter
-from .views import UserViewSet, DisponibilidadeViewSet, HorarioViewSet
-
-router = DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'disponibilidades', DisponibilidadeViewSet)
-router.register(r'horarios', HorarioViewSet)
-
+from django.urls import path
+from .views import RegistoView, LoginView
 
 urlpatterns = [
-    path('register/', RegisterView.as_view(), name='register'),
+    path('registo/', RegistoView.as_view(), name='registo'),
+    path('login/', LoginView.as_view(), name='login'),
 ]

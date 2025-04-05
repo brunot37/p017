@@ -23,7 +23,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'api', 
-    'corsheaders',
 ]
 
 
@@ -85,14 +84,15 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'Frontend' / 'dist']
+STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'public']
 
 MEDIA_URL = '/media/'
+
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'api.User'  
+AUTH_USER_MODEL = 'api.User'
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173', 

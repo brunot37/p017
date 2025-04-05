@@ -1,33 +1,55 @@
-from rest_framework import viewsets
-from .models import User, Disponibilidade, Horario
-from .serializers import UserSerializer, DisponibilidadeSerializer, HorarioSerializer
-from rest_framework import permissions
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
+from .models import Utilizador
+from django.contrib.auth import authenticate
 
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-class DisponibilidadeViewSet(viewsets.ModelViewSet):
-    queryset = Disponibilidade.objects.all()
-    serializer_class = DisponibilidadeSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        if self.request.user.role == 'docente':
-            return self.queryset.filter(user=self.request.user)
-        return self.queryset
-
-class HorarioViewSet(viewsets.ModelViewSet):
-    queryset = Horario.objects.all()
-    serializer_class = HorarioSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-class RegisterView(APIView):
+class RegistoView(APIView):
     def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "Utilizador registado com sucesso"}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        tipo_conta = request.data.get('tipo_conta')
+        nome = request.data.get('nome')
+        email = request.data.get('email')
+        senha = request.data.get('senha')
+
+        print(f"Recebido tipo_conta: {tipo_conta}, nome: {nome}, email: {email}, senha: {senha}") 
+
+        if Utilizador.objects.filter(email=email).exists():
+            return Response({"message": "Email já registrado!"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = Utilizador.objects.create(
+                email=email,
+                senha=make_password(senha),
+                tipo_conta=tipo_conta,
+                nome=nome
+            )
+            user.save()
+            print(f"Conta criada: {user}")  
+            return Response({"message": f"Conta {tipo_conta} criada com sucesso!"}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            print(f"Erro ao criar conta: {str(e)}")  
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class LoginView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+       
+        user = authenticate(request, username=email, password=password)
+
+        if user is not None:
+            
+            return Response({
+                "message": "Login bem-sucedido",
+                "tipo_conta": user.tipo_conta if hasattr(user, 'tipo_conta') else 'desconhecido',
+            }, status=status.HTTP_200_OK)
+        else:
+            
+            return Response({
+                "message": "Credenciais incorretas",
+            }, status=status.HTTP_400_BAD_REQUEST)
