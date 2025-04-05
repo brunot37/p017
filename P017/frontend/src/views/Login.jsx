@@ -1,19 +1,20 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
-import { Link } from "react-router-dom"; 
+import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState(""); 
-  const [error, setError] = useState("");
+  const [popupErro, setPopupErro] = useState({ visivel: false, mensagem: "" });
+  const [popupSucesso, setPopupSucesso] = useState(false);
+  const [tipoConta, setTipoConta] = useState("");
   const navigate = useNavigate(); 
 
   const handleLogin = async (event) => {
     event.preventDefault(); 
 
     try {
-      const response = await fetch("http://localhost:8000/api/login", {
+      const response = await fetch("http://127.0.0.1:8000/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -24,18 +25,29 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        if (data.tipo_conta === "docente") {
-          navigate("/DocenteVizualizarHorario"); 
-        } else if (data.tipo_conta === "coordenador") {
-          navigate("/ColaboradorConsultar"); 
+        if (data.tipo_conta === "docente" || data.tipo_conta === "coordenador") {
+          setTipoConta(data.tipo_conta);
+          setPopupSucesso(true);
         } else {
-          setError("Tipo de conta não reconhecido.");
+          setPopupErro({ visivel: true, mensagem: "Tipo de conta não reconhecido." });
         }
       } else {
-        setError(data.message || "Credenciais incorretas");
+        setPopupErro({ visivel: true, mensagem: data.message || "Conta não registada." });
       }
     } catch (err) {
-      setError("Erro ao comunicar com o servidor.");
+      setPopupErro({ visivel: true, mensagem: "Erro ao comunicar com o servidor." });
+    }
+  };
+
+  const fecharPopupErro = () => {
+    setPopupErro({ visivel: false, mensagem: "" });
+  };
+
+  const fecharPopupSucesso = () => {
+    if (tipoConta === "docente") {
+      navigate("/DocenteVizualizarHorario");
+    } else if (tipoConta === "coordenador") {
+      navigate("/ColaboradorConsultar");
     }
   };
 
@@ -73,7 +85,7 @@ const Login = () => {
               required
             />
           </div>
-          {error && <p className="error">{error}</p>}
+
           <div className="forgot-password-link">
             <Link to="/RecuperarPassword">Esqueceste-te da palavra-passe?</Link>
           </div>
@@ -82,6 +94,41 @@ const Login = () => {
         <p className="help-section">
           <Link to="/ajuda" className="help-link">Precisas de ajuda?</Link>
         </p>
+      </div>
+
+      {popupErro.visivel && (
+        <PopupErroLogin mensagem={popupErro.mensagem} onClose={fecharPopupErro} />
+      )}
+
+      {popupSucesso && (
+        <PopupSucessoLogin tipoConta={tipoConta} onClose={fecharPopupSucesso} />
+      )}
+    </div>
+  );
+};
+
+
+const PopupErroLogin = ({ mensagem, onClose }) => (
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <h3 style={{ color: "#cc0000" }}>Erro</h3>
+      <p>{mensagem}</p>
+      <button onClick={onClose} className="popup-button">Fechar</button>
+      <Link to="/Registo" className="popup-link">Não tens conta? Criar conta</Link>
+    </div>
+  </div>
+);
+
+
+const PopupSucessoLogin = ({ tipoConta, onClose }) => {
+  const tipoFormatado = tipoConta.charAt(0).toUpperCase() + tipoConta.slice(1);
+
+  return (
+    <div className="popup-overlay">
+      <div className="popup-box">
+        <h3 style={{ color: "#008000" }}>Conta criada com sucesso</h3>
+        <p>Conta de <strong>{tipoFormatado}</strong> criada com sucesso!</p>
+        <button onClick={onClose} className="popup-button">Fechar</button>
       </div>
     </div>
   );

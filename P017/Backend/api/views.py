@@ -1,10 +1,10 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from .models import Utilizador
 from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import check_password
 
 class RegistoView(APIView):
     def post(self, request):
@@ -33,23 +33,20 @@ class RegistoView(APIView):
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class LoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
-        password = request.data.get('password')
+        senha = request.data.get("senha")
 
-       
-        user = authenticate(request, username=email, password=password)
+        try:
+            user = Utilizador.objects.get(email=email)
+        except Utilizador.DoesNotExist:
+            return Response({"message": "Conta não registada"}, status=400)
 
-        if user is not None:
-            
+        if check_password(senha, user.senha):
             return Response({
                 "message": "Login bem-sucedido",
-                "tipo_conta": user.tipo_conta if hasattr(user, 'tipo_conta') else 'desconhecido',
-            }, status=status.HTTP_200_OK)
+                "tipo_conta": user.tipo_conta
+            }, status=200)
         else:
-            
-            return Response({
-                "message": "Credenciais incorretas",
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Palavra-passe incorreta"}, status=400)
