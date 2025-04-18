@@ -32,9 +32,11 @@ const Login = () => {
           setPopupErro({ visivel: true, mensagem: "Tipo de conta não reconhecido." });
         }
       } else {
-        setPopupErro({ visivel: true, mensagem: data.message || "Conta não registada." });
-      }
+        console.log("Mensagem de erro do backend:", data.message);
+        setPopupErro({ visivel: true, mensagem: data.message || "Erro ao fazer login." });
+      } 
     } catch (err) {
+      console.error("Erro de rede ou servidor:", err);
       setPopupErro({ visivel: true, mensagem: "Erro ao comunicar com o servidor." });
     }
   };
@@ -121,17 +123,18 @@ const PopupErroLogin = ({ mensagem, onClose }) => (
 
 
 const PopupSucessoLogin = ({ tipoConta, onClose }) => {
-  const tipoFormatado = tipoConta.charAt(0).toUpperCase() + tipoConta.slice(1);
+  const tipoFormatado = tipoConta === "docente" ? "Docente" : "Coordenador";
 
   return (
     <div className="popup-overlay">
       <div className="popup-box">
-        <h3 style={{ color: "#008000" }}>Conta criada com sucesso</h3>
-        <p>Conta de <strong>{tipoFormatado}</strong> criada com sucesso!</p>
-        <button onClick={onClose} className="popup-button">Fechar</button>
+        <h3 style={{ color: "#008000" }}>Login efetuado com sucesso</h3>
+        <p>Login de <strong>{tipoFormatado}</strong> com sucesso.</p>
+        <button onClick={onClose} className="popup-button">Continuar</button>
       </div>
     </div>
   );
 };
+
 
 export default Login;
