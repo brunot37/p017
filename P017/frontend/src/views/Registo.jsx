@@ -148,7 +148,7 @@ const Registo = () => {
   );
 };
 
-// Popup de sucesso
+
 const PopupSucesso = ({ tipoConta, onClose }) => {
   if (!tipoConta) return null;
 
@@ -166,7 +166,7 @@ const PopupSucesso = ({ tipoConta, onClose }) => {
 };
 
 
-// Popup de erro
+
 const PopupErro = ({ mensagem, onClose }) => (
   <div className="popup-overlay">
     <div className="popup-box">
