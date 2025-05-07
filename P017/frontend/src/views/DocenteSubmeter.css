@@ -92,6 +92,10 @@ html, body {
   background-color: #f9fbff;
 }
 
+.semestre-selector, .unidade-curricular-selector {
+  margin-bottom: 20px; 
+}
+
 .dias-selector {
   display: flex;
   justify-content: flex-start;

@@ -2,10 +2,15 @@ import React, { useState } from "react";
 import "./DocenteSubmeter.css";
 
 const DocenteSubmeter = () => {
-  const [semestre, setSemestre] = useState("1"); 
-  const [diasSelecionados, setDiasSelecionados] = useState([]); 
-  const [horasSelecionadas, setHorasSelecionadas] = useState({}); 
+  const [semestre, setSemestre] = useState("1");
+  const [unidadeCurricular, setUnidadeCurricular] = useState(""); 
+  const [diasSelecionados, setDiasSelecionados] = useState([]);
+  const [horasSelecionadas, setHorasSelecionadas] = useState({});
   const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
+  const unidadesCurriculares = ["Sistemas Distribuidos", "Cibersegurança", "Internet das Coisas", "Inteligência Artificial"];
+
+  
+  const unidadesOrdenadas = unidadesCurriculares.sort();
 
   const gerarHoras = () => {
     const horas = [];
@@ -33,32 +38,33 @@ const DocenteSubmeter = () => {
         : [...prev, dia]
     );
 
-  
     setHorasSelecionadas((prev) => {
-      if (!prev[dia]) {
-        return { ...prev, [dia]: [] }; 
-        return { ...prev }; 
+      const updated = { ...prev };
+      if (!diasSelecionados.includes(dia)) {
+        updated[dia] = [];
+      } else {
+        if (!updated[dia]) {
+          updated[dia] = [];
+        }
       }
+      return updated;
     });
   };
 
-  
   const handleHoraChange = (dia, hora) => {
     setHorasSelecionadas((prev) => {
       const updated = { ...prev };
-      
       if (updated[dia]?.includes(hora)) {
-        updated[dia] = updated[dia].filter((h) => h !== hora); 
+        updated[dia] = updated[dia].filter((h) => h !== hora);
       } else {
-        updated[dia] = [...(updated[dia] || []), hora]; 
+        updated[dia] = [...(updated[dia] || []), hora];
       }
       return updated;
     });
   };
 
   const submeterDisponibilidade = () => {
-   
-    console.log("Disponibilidade submetida", { semestre, diasSelecionados, horasSelecionadas });
+    console.log("Disponibilidade submetida", { semestre, unidadeCurricular, diasSelecionados, horasSelecionadas });
   };
 
   return (
@@ -92,6 +98,22 @@ const DocenteSubmeter = () => {
             >
               <option value="1">1º Semestre</option>
               <option value="2">2º Semestre</option>
+            </select>
+          </div>
+
+          <div className="unidade-curricular-selector">
+            <label>Escolha a unidade curricular:</label>
+            <select
+              value={unidadeCurricular}
+              onChange={(e) => setUnidadeCurricular(e.target.value)}
+              className="unidade-curricular-select"
+            >
+              <option value="">Selecione a Unidade Curricular</option>
+              {unidadesOrdenadas.map((uc) => (
+                <option key={uc} value={uc}>
+                  {uc}
+                </option>
+              ))}
             </select>
           </div>
 

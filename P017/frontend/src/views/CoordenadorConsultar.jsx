@@ -1,162 +1,136 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
-import "./CoordenadorConsultar.css";
+import React, { useState, useEffect } from "react";
+import "./DocenteVisualizarHorario.css";
 
-const CoordenadorConsultar = () => {
-  const navigate = useNavigate(); 
-  const [formData, setFormData] = useState({
-    docente: "",
-    startDate: "",
-    endDate: "",
-  });
+const DocenteVisualizarHorario = () => {
+  const [paginaIndex, setPaginaIndex] = useState(1);
+  const [docentes, setDocentes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+  const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
+
+  // Função para buscar dados da base de dados
+  const fetchDocentes = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/docentes"); // Substitua por sua URL de API
+      const data = await response.json();
+      setDocentes(data);
+    } catch (error) {
+      console.error("Erro ao buscar docentes:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // Buscar dados ao carregar o componente
+  useEffect(() => {
+    fetchDocentes();
+  }, []);
 
-    console.log(formData); 
+  // Limitar docentes por página
+  const docentesPorPagina = 10;
+  const inicio = (paginaIndex - 1) * docentesPorPagina;
+  const fim = inicio + docentesPorPagina;
+  const docentesPaginaAtual = docentes.slice(inicio, fim);
 
-    navigate("/visualizar-disponibilidades");  
+  // Função para enviar a aprovação ou rejeição para a base de dados
+  const atualizarAprovacao = async (docenteId, aprovacao) => {
+    try {
+      const response = await fetch(`/api/docentes/${docenteId}/aprovacao`, {
+        method: "PUT", // Ou "POST", dependendo do seu backend
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ aprovacao }), // Enviando o status de aprovação
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar a aprovação");
+      }
+
+      // Atualizar a lista de docentes após a resposta da API
+      fetchDocentes();
+    } catch (error) {
+      console.error("Erro ao atualizar aprovação:", error);
+    }
+  };
+
+  const mudarPagina = (direcao) => {
+    setPaginaIndex((prev) => prev + direcao);
   };
 
   return (
-    <div className="container">
-      <div className="sidebar">
-        <nav>
+    <div className="horario-container fade-in">
+      <aside className="horario-sidebar">
+        <nav className="menu">
           <ul>
-            <li className="active">Consultar Disponibilidades Docentes</li>
-            <li>Consultar Submissões</li>
+            <li className="active">Disponibilidades dos Docentes</li>
+            <li>Gerar Horário</li>
           </ul>
         </nav>
         <button className="logout">SAIR</button>
-      </div>
+      </aside>
 
-      <div className="content">
-        <form className="availability-form" onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label>Docente</label>
-            <select 
-              className="docente-select" 
-              name="docente" 
-              value={formData.docente} 
-              onChange={handleChange} 
-              required
-            >
-              <option value="">Selecione o Docente</option>
-              <option value="docente1">Docente 1</option>
-              <option value="docente2">Docente 2</option>
-              <option value="docente3">Docente 3</option>
-            </select>
+      <main className="horario-content">
+        <div className="horario-header">
+          <h2 className="horario-titulo">
+            Disponibilidade - Página {paginaIndex}
+          </h2>
+          <div className="semana-navegacao">
+            <button onClick={() => mudarPagina(-1)}>&larr; Anterior</button>
+            <button onClick={() => mudarPagina(1)}>Próxima &rarr;</button>
           </div>
+        </div>
 
-          <div className="date-time-group">
-            <div>
-              <label>Data de Início</label>
-              <div className="date-field-group">
-                <select
-                  name="startDate"
-                  className="date-field"
-                  value={formData.startDate}
-                  onChange={handleChange}
-                  required
-                >
-                  {[...Array(31).keys()].map((day) => (
-                    <option key={day + 1} value={String(day + 1).padStart(2, "0")}>
-                      {String(day + 1).padStart(2, "0")}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  name="startMonth"
-                  className="date-field"
-                  value={formData.startMonth}
-                  onChange={handleChange}
-                  required
-                >
-                  {["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"].map(
-                    (month, index) => (
-                      <option key={index} value={String(index + 1).padStart(2, "0")}>
-                        {month}
-                      </option>
-                    )
-                  )}
-                </select>
-                <select
-                  name="startYear"
-                  className="date-field"
-                  value={formData.startYear}
-                  onChange={handleChange}
-                  required
-                >
-                  {[...Array(10).keys()].map((year) => (
-                    <option key={2025 + year} value={2025 + year}>
-                      {2025 + year}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label>Data de Fim</label>
-              <div className="date-field-group">
-                <select
-                  name="endDate"
-                  className="date-field"
-                  value={formData.endDate}
-                  onChange={handleChange}
-                  required
-                >
-                  {[...Array(31).keys()].map((day) => (
-                    <option key={day + 1} value={String(day + 1).padStart(2, "0")}>
-                      {String(day + 1).padStart(2, "0")}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  name="endMonth"
-                  className="date-field"
-                  value={formData.endMonth}
-                  onChange={handleChange}
-                  required
-                >
-                  {["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"].map(
-                    (month, index) => (
-                      <option key={index} value={String(index + 1).padStart(2, "0")}>
-                        {month}
-                      </option>
-                    )
-                  )}
-                </select>
-                <select
-                  name="endYear"
-                  className="date-field"
-                  value={formData.endYear}
-                  onChange={handleChange}
-                  required
-                >
-                  {[...Array(10).keys()].map((year) => (
-                    <option key={2025 + year} value={2025 + year}>
-                      {2025 + year}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <button type="submit" className="submit-button">Visualizar</button>
-        </form>
-      </div>
+        <div className="horario-tabela-wrapper">
+          <table className="horario-tabela">
+            <thead>
+              <tr>
+                <th>Docentes</th>
+                {dias.map((dia) => <th key={dia}>{dia}</th>)}
+                <th>Aprovação</th> {/* Nova coluna Aprovação */}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="7">Carregando...</td>
+                </tr>
+              ) : docentesPaginaAtual.length === 0 ? (
+                <tr>
+                  <td colSpan="7">Sem dados para exibir</td>
+                </tr>
+              ) : (
+                docentesPaginaAtual.map((docente) => (
+                  <tr key={docente.id}>
+                    <td className="hora-coluna">{docente.nome}</td>
+                    {dias.map((dia) => {
+                      const disponibilidade = docente.disponibilidade.includes(dia) ? "Disponível" : "-";
+                      return (
+                        <td key={`${docente.id}-${dia}`} className="horario-celula">{disponibilidade}</td>
+                      );
+                    })}
+                    <td>
+                      <button 
+                        onClick={() => atualizarAprovacao(docente.id, "aceito")}
+                        className="aceitar-btn">
+                        Aceitar
+                      </button>
+                      <button 
+                        onClick={() => atualizarAprovacao(docente.id, "rejeitado")}
+                        className="rejeitar-btn">
+                        Rejeitar
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </main>
     </div>
   );
 };
 
-export default CoordenadorConsultar;
+export default DocenteVisualizarHorario;
