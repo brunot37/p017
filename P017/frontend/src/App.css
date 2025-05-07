@@ -1,5 +1,3 @@
-/* Estilos principais para o layout global da aplicação */
-
 * {
   margin: 0;
   padding: 0;
@@ -11,7 +9,7 @@ html, body {
   height: 100vh;
   overflow: hidden;
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #f0f4ff, #ffffff); /* Gradiente suave */
+  background: linear-gradient(135deg, #f0f4ff, #ffffff);
 }
 
 body {

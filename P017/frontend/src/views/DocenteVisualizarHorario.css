@@ -19,27 +19,15 @@ html, body {
   overflow: hidden;
 }
 
+
 .horario-sidebar {
   width: 240px;
   background-color: #112D4E;
   color: white;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   padding: 20px;
-}
-
-.user-info {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.user-avatar {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background-color: gray;
-  margin-bottom: 10px;
 }
 
 .menu {
@@ -60,13 +48,9 @@ html, body {
   color: white;
   transition: background-color 0.3s, transform 0.2s;
   border-radius: 8px;
+  position: relative; 
 }
 
-.menu li:hover {
-  background-color: #0e2645;
-  transform: scale(1.02);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
 
 .menu li.active {
   background-color: #3282B8;
@@ -74,12 +58,33 @@ html, body {
   border-radius: 8px;
 }
 
-/* Botão Sair agora com azul claro */
+
+.menu li:hover {
+  background-color: #3282B8; 
+  color: white;
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+.menu li.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background-color: #3282B8;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+
 .logout {
   margin-top: auto;
   background: none;
   border: none;
-  color: #3282B8; /* Azul claro */
+  color: #3282B8; 
   font-size: 14px;
   cursor: pointer;
   transition: color 0.3s ease, transform 0.2s ease;
@@ -87,9 +92,10 @@ html, body {
 }
 
 .logout:hover {
-  color: #0e233c; /* Tom mais escuro de azul ao passar o rato */
-  transform: scale(1.05); /* Animação de aumento no hover */
+  color: #0e233c; 
+  transform: scale(1.05); 
 }
+
 
 .horario-content {
   flex: 1;
@@ -100,6 +106,7 @@ html, body {
   gap: 20px;
   background-color: #f9fbff;
 }
+
 
 .horario-header {
   display: flex;
@@ -113,6 +120,7 @@ html, body {
   margin: 0;
   color: #112D4E;
 }
+
 
 .semana-navegacao button {
   background-color: #112D4E;
@@ -130,6 +138,7 @@ html, body {
   background-color: #0e233c;
 }
 
+
 .horario-tabela-wrapper {
   flex: 1;
   overflow-x: auto;
@@ -138,6 +147,7 @@ html, body {
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
+
 
 .horario-tabela {
   width: 100%;

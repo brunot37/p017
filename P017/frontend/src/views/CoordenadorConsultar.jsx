@@ -10,7 +10,6 @@ const CoordenadorConsultar = () => {
     endDate: "",
   });
 
- 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -19,24 +18,17 @@ const CoordenadorConsultar = () => {
     });
   };
 
-  
   const handleSubmit = (e) => {
     e.preventDefault();
 
-
     console.log(formData); 
 
-    
     navigate("/visualizar-disponibilidades");  
   };
 
   return (
     <div className="container">
       <div className="sidebar">
-        <div className="user-info">
-          <div className="user-avatar"></div>
-          <p>User1</p>
-        </div>
         <nav>
           <ul>
             <li className="active">Consultar Disponibilidades Docentes</li>

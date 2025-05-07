@@ -5,12 +5,10 @@ import "./DocenteConsultarSubmissoes.css";
 const ConsultarHorario = () => {
   const navigate = useNavigate();  
 
-  
   const goToPreviousPage = () => {
     navigate("/pagina-anterior");  
   };
 
- 
   const goToNextPage = () => {
     navigate("/pagina-proxima");
   };
@@ -18,15 +16,11 @@ const ConsultarHorario = () => {
   return (
     <div className="container">
       <div className="sidebar">
-        <div className="user-info">
-          <div className="user-avatar"></div>
-          <p>User1</p>
-        </div>
         <nav>
           <ul>
             <li>Visualizar Horário</li>
             <li>Submeter Disponibilidade</li>
-            <li className="active">Consultar Submissões</li> 
+            <li className="active" id="consultar-submissoes">Consultar Submissões</li> 
           </ul>
         </nav>
         <button className="logout">SAIR</button>

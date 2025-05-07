@@ -47,9 +47,9 @@ const Login = () => {
 
   const fecharPopupSucesso = () => {
     if (tipoConta === "docente") {
-      navigate("/DocenteVizualizarHorario");
+      navigate("/DocenteVisualizarHorario");
     } else if (tipoConta === "coordenador") {
-      navigate("/ColaboradorConsultar");
+      navigate("/CoordenadorConsultar");
     }
   };
 

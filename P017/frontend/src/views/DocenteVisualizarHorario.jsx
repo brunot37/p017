@@ -49,14 +49,9 @@ const DocenteVisualizarHorario = () => {
     setSemanaIndex(calcularSemanaAtual());
   };
 
-  const nomeUtilizador = "Nome do Utilizador";  
-
   return (
     <div className="horario-container fade-in">
       <aside className="horario-sidebar">
-        <div className="user-info">
-          <p className="user-name">{nomeUtilizador}</p>
-        </div>
         <nav className="menu">
           <ul>
             <li className="active">Visualizar Horário</li>
@@ -107,4 +102,4 @@ const DocenteVisualizarHorario = () => {
   );
 };
 
-export default DocenteVisualizarHorario;  
+export default DocenteVisualizarHorario;
