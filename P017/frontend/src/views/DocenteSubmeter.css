@@ -1,127 +1,168 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.container {
-    display: flex;
-    height: 100vh;
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f0f2f5;
 }
 
-.sidebar {
-    width: 250px;
-    background-color: #112D4E;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
+.horario-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.horario-sidebar {
+  width: 240px;
+  background-color: #112D4E;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
 }
 
 .user-info {
-    text-align: center;
-    margin-bottom: 20px;
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-.user-avatar {
-    width: 80px;
-    height: 80px;
-    background-color: gray;
-    border-radius: 50%;
-    margin-bottom: 10px;
+.menu {
+  width: 100%;
 }
 
-nav ul {
-    list-style: none;
-    padding: 0;
+.menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 
-nav ul li {
-    margin: 15px 0;
-    cursor: pointer;
+.menu li {
+  padding: 12px 16px;
+  cursor: pointer;
+  text-align: left;
+  color: white;
+  transition: background-color 0.3s, transform 0.2s;
+  border-radius: 8px;
 }
 
-.active {
-    font-weight: bold;
+.menu li:hover {
+  background-color: #0e2645;
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.menu li.active {
+  background-color: #3282B8;
+  font-weight: bold;
+  border-radius: 8px;
 }
 
 .logout {
-    margin-top: auto;
-    background: none;
-    border: none;
-    color: red;
-    font-size: 14px;
-    cursor: pointer;
+  margin-top: auto;
+  background: none;
+  border: none;
+  color: #3282B8;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.2s ease;
+  font-weight: 500;
 }
 
-.content {
-    flex-grow: 1;
-    background-color: #f8f9fb;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.logout:hover {
+  color: #0e233c;
+  transform: scale(1.05);
 }
 
-.availability-form {
-    background: #3282B8;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px #3282B8;
-    width: 80%;
-    max-width: none;
-    display: flex;
+.horario-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: #f9fbff;
+}
+
+.dias-selector {
+  display: flex;
+  justify-content: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 20px; 
+}
+
+.dias-selector label {
+  width: auto;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.horas-selector {
+  display: flex;
+  justify-content: flex-start; 
+  gap: 30px; 
+  flex-wrap: wrap; 
+  margin-top: 20px;
+}
+
+.horas-dia {
+  display: flex;
+  flex-direction: column; 
+  gap: 10px; 
+  width: 120px;
+}
+
+.horas-dia p {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.hora-label {
+  font-size: 14px;
+}
+
+.submeter-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px; 
+  background-color: #112D4E;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 16px;
+}
+
+.semana-atual-btn:hover {
+  background-color: #0e233c;
+}
+
+@media (max-width: 768px) {
+  .dias-selector {
     flex-direction: column;
-}
+    align-items: flex-start;
+  }
 
-.availability-form input, .availability-form select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc; 
-}
+  .horas-selector {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-.date-time-group {
-    display: flex;
-    justify-content: space-between;
-}
-
-.date-time-group div {
-    flex: 1;
-    margin-right: 10px;
-}
-
-.date-time-group div:last-child {
-    margin-right: 0;
-}
-
-.submit-button {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #112D4E;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.submit-button:hover {
-    background-color: #112D4E;
-}
-
-
-.room-number, .course-name, .date-field, .time-field {
-    background-color: white; 
-    color: black; 
-    border: 1px solid #ccc; 
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-}
-
-.date-time-group {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
+  .submeter-container {
+    flex-direction: column;
+    align-items: center;
+  }
 }

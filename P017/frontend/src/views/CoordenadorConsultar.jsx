@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
-import "./ColaboradorConsultar.css";
+import "./CoordenadorConsultar.css";
 
-const ColaboradorConsultar = () => {
+const CoordenadorConsultar = () => {
   const navigate = useNavigate(); 
   const [formData, setFormData] = useState({
     docente: "",
@@ -167,4 +167,4 @@ const ColaboradorConsultar = () => {
   );
 };
 
-export default ColaboradorConsultar;
+export default CoordenadorConsultar;

@@ -1,5 +1,13 @@
-body {
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
   font-family: 'Poppins', sans-serif;
   background-color: #f0f2f5;
 }
@@ -66,13 +74,21 @@ body {
   border-radius: 8px;
 }
 
+/* Botão Sair agora com azul claro */
 .logout {
   margin-top: auto;
   background: none;
   border: none;
-  color: red;
+  color: #3282B8; /* Azul claro */
   font-size: 14px;
   cursor: pointer;
+  transition: color 0.3s ease, transform 0.2s ease;
+  font-weight: 500;
+}
+
+.logout:hover {
+  color: #0e233c; /* Tom mais escuro de azul ao passar o rato */
+  transform: scale(1.05); /* Animação de aumento no hover */
 }
 
 .horario-content {

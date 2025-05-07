@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import "./DocenteVizualizarHorario.css";
+import "./DocenteVisualizarHorario.css";
 
-const DocenteVizualizarHorario = () => {
+const DocenteVisualizarHorario = () => {
   const calcularSemanaAtual = () => {
     const hoje = new Date();
     const base = new Date("2025-09-14");
@@ -49,12 +49,13 @@ const DocenteVizualizarHorario = () => {
     setSemanaIndex(calcularSemanaAtual());
   };
 
+  const nomeUtilizador = "Nome do Utilizador";  
+
   return (
     <div className="horario-container fade-in">
       <aside className="horario-sidebar">
         <div className="user-info">
-          <div className="user-avatar"></div>
-          <p>User1</p>
+          <p className="user-name">{nomeUtilizador}</p>
         </div>
         <nav className="menu">
           <ul>
@@ -106,4 +107,4 @@ const DocenteVizualizarHorario = () => {
   );
 };
 
-export default DocenteVizualizarHorario;
+export default DocenteVisualizarHorario;  

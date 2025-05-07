@@ -6,9 +6,10 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Registo from './views/Registo.jsx';
 import Login from './views/Login.jsx';
 import RecuperarPassword from './views/RecuperarPassword.jsx';
-import DocenteVizualizarHorario from './views/DocenteVizualizarHorario.jsx';
+import DocenteVisualizarHorario from './views/DocenteVisualizarHorario.jsx';
 import DocenteSubmeter from './views/DocenteSubmeter.jsx';
-import ColaboradorConsultar from './views/ColaboradorConsultar.jsx';
+import DocenteConsultarSubmissoes from './views/DocenteConsultarSubmissoes.jsx';
+import CoordenadorConsultar from './views/CoordenadorConsultar.jsx';
 
 
 const router = createBrowserRouter([
@@ -29,16 +30,20 @@ const router = createBrowserRouter([
     element: <RecuperarPassword />,
   },
   {
-    path: "/DocenteVizualizarHorario",
-    element: <DocenteVizualizarHorario />,
+    path: "/DocenteVisualizarHorario",
+    element: <DocenteVisualizarHorario />,
   },
   {
     path: "/DocenteSubmeter",
     element: <DocenteSubmeter />,
   },
   {
-    path: "/ColaboradorConsultar",
-    element: <ColaboradorConsultar />,
+    path: "/DocenteConsultarSubmissoes",
+    element: <DocenteConsultarSubmissoes />,
+  },
+  {
+    path: "/CoordenadorConsultar",
+    element: <CoordenadorConsultar />,
   },
 ]);
 
