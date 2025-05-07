@@ -97,7 +97,7 @@ html, body {
   justify-content: flex-start;
   gap: 20px;
   flex-wrap: wrap;
-  margin-top: 20px; 
+  margin-top: 20px;
 }
 
 .dias-selector label {
@@ -109,16 +109,16 @@ html, body {
 
 .horas-selector {
   display: flex;
-  justify-content: flex-start; 
-  gap: 30px; 
-  flex-wrap: wrap; 
+  justify-content: flex-start;
+  gap: 30px;
+  flex-wrap: wrap;
   margin-top: 20px;
 }
 
 .horas-dia {
   display: flex;
-  flex-direction: column; 
-  gap: 10px; 
+  flex-direction: column;
+  gap: 10px;
   width: 120px;
 }
 
@@ -134,7 +134,10 @@ html, body {
 .submeter-container {
   display: flex;
   justify-content: center;
-  margin-top: 30px; 
+  margin-top: 30px;
+}
+
+.semana-atual-btn {
   background-color: #112D4E;
   color: white;
   border: none;
