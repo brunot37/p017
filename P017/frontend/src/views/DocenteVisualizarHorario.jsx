@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./DocenteVisualizarHorario.css";
 
 const DocenteVisualizarHorario = () => {
+  const navigate = useNavigate();
+
   const calcularSemanaAtual = () => {
     const hoje = new Date();
     const base = new Date("2025-09-14");
@@ -49,17 +52,26 @@ const DocenteVisualizarHorario = () => {
     setSemanaIndex(calcularSemanaAtual());
   };
 
+  const handleSubmeterDisponibilidade = () => {
+    navigate('/DocenteSubmeter');
+  };
+
+  
+  const handleLogout = () => {
+    navigate("/Registo"); 
+  };
+
   return (
     <div className="horario-container fade-in">
       <aside className="horario-sidebar">
         <nav className="menu">
           <ul>
             <li className="active">Visualizar Horário</li>
-            <li>Submeter Disponibilidade</li>
+            <li onClick={handleSubmeterDisponibilidade}>Submeter Disponibilidade</li>
             <li>Consultar Submissões</li>
           </ul>
         </nav>
-        <button className="logout">SAIR</button>
+        <button onClick={handleLogout} className="logout">SAIR</button> 
       </aside>
 
       <main className="horario-content">

@@ -3,9 +3,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate, login, get_user_model
-
+from django.contrib.auth.models import AnonymousUser
+from .models import Horario, Disponibilidade
+from .serializers import HorarioSerializer, DisponibilidadeSerializer
+from rest_framework.permissions import IsAuthenticated
 User = get_user_model()
-
 
 class RegistoView(APIView):
     def post(self, request):
@@ -55,16 +57,10 @@ class LoginView(APIView):
         except User.DoesNotExist:
             return Response({"message": "Email não registado"}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({"message": "Email não registado"}, status=status.HTTP_400_BAD_REQUEST)
-
-       
         user = authenticate(request, email=email, password=senha)
 
         if user is not None:
-            login(request, user)  
+            login(request, user)
             return Response({
                 "message": f"Login de {user.tipo_conta} com sucesso",
                 "tipo_conta": user.tipo_conta,
@@ -73,8 +69,31 @@ class LoginView(APIView):
         else:
             return Response({"message": "Palavra-passe incorreta"}, status=status.HTTP_400_BAD_REQUEST)
 
-    
+
+class SubmeterHorarioView(APIView):
+    permission_classes = [IsAuthenticated] 
+
+    def post(self, request):
+        user = request.user
+
+       
+        if isinstance(user, AnonymousUser):
+            return Response({"message": "Usuário não autenticado!"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        horarios = request.data.get('horarios', [])
+
         
+        for horario_data in horarios:
+            serializer = HorarioSerializer(data=horario_data)
+            if serializer.is_valid():
+                serializer.save(utilizador=user) 
+            else:
+                return Response({"message": "Erro ao submeter horário."}, status=status.HTTP_400_BAD_REQUEST)
 
+        return Response({"message": "Horários submetidos com sucesso!"}, status=status.HTTP_201_CREATED)
 
-    
+    def get(self, request):
+        user = request.user
+        horarios = Horario.objects.filter(utilizador=user)
+        serializer = HorarioSerializer(horarios, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

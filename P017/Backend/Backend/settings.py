@@ -106,17 +106,17 @@ REST_FRAMEWORK = {
     ],
 }
 
-# --- LDAP CONFIGURATION ---
+
 AUTH_LDAP_SERVER_URI = os.getenv("LDAP_SERVER_URI", "ldap://127.0.0.1")
 AUTH_LDAP_BIND_DN = os.getenv("LDAP_BIND_DN", "")
 AUTH_LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD", "")
 AUTH_LDAP_USER_SEARCH = LDAPSearch(
     os.getenv("LDAP_BASE_DN", "dc=exemplo,dc=pt"),
     ldap.SCOPE_SUBTREE,
-    "(mail=%(user)s)"  # ou usa uid/sAMAccountName/cn conforme o servidor LDAP
+    "(mail=%(user)s)"  
 )
 
 AUTHENTICATION_BACKENDS = [
     'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
-]  # fallback para contas locais
+]  

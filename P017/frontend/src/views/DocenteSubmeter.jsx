@@ -1,15 +1,31 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./DocenteSubmeter.css";
 
 const DocenteSubmeter = () => {
+  const navigate = useNavigate();
+
   const [semestre, setSemestre] = useState("1");
   const [unidadeCurricular, setUnidadeCurricular] = useState(""); 
-  const [diasSelecionados, setDiasSelecionados] = useState([]);
   const [horasSelecionadas, setHorasSelecionadas] = useState({});
   const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
-  const unidadesCurriculares = ["Sistemas Distribuidos", "Cibersegurança", "Internet das Coisas", "Inteligência Artificial"];
 
-  
+  const unidadesCurriculares1Semestre = [
+    "Sistemas Distribuídos", 
+    "Cibersegurança", 
+    "Internet das Coisas", 
+    "Inteligência Artificial"
+  ];
+
+  const unidadesCurriculares2Semestre = [
+    "Análise Matemática",
+    "Sistemas Embebidos",
+    "POO",
+    "Sistemas Digitais"
+  ];
+
+  const unidadesCurriculares = semestre === "1" ? unidadesCurriculares1Semestre : unidadesCurriculares2Semestre;
+
   const unidadesOrdenadas = unidadesCurriculares.sort();
 
   const gerarHoras = () => {
@@ -31,26 +47,6 @@ const DocenteSubmeter = () => {
 
   const horas = gerarHoras();
 
-  const handleDiaChange = (dia) => {
-    setDiasSelecionados((prev) =>
-      prev.includes(dia)
-        ? prev.filter((item) => item !== dia)
-        : [...prev, dia]
-    );
-
-    setHorasSelecionadas((prev) => {
-      const updated = { ...prev };
-      if (!diasSelecionados.includes(dia)) {
-        updated[dia] = [];
-      } else {
-        if (!updated[dia]) {
-          updated[dia] = [];
-        }
-      }
-      return updated;
-    });
-  };
-
   const handleHoraChange = (dia, hora) => {
     setHorasSelecionadas((prev) => {
       const updated = { ...prev };
@@ -64,7 +60,43 @@ const DocenteSubmeter = () => {
   };
 
   const submeterDisponibilidade = () => {
-    console.log("Disponibilidade submetida", { semestre, unidadeCurricular, diasSelecionados, horasSelecionadas });
+    const horarios = [];
+    Object.keys(horasSelecionadas).forEach((dia) => {
+      horasSelecionadas[dia].forEach((hora) => {
+        horarios.push({
+          dia: new Date().toISOString().split('T')[0], 
+          hora_inicio: hora,
+          hora_fim: hora,
+        });
+      });
+    });
+
+    fetch("http://localhost:8000/api/submeter-horario", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ horarios }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        alert("Horários submetidos com sucesso!");
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Erro ao submeter horários.");
+      });
+  };
+
+  const handleVisualizarHorario = () => {
+    navigate('/DocenteVisualizarHorario');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token"); 
+    navigate("/Registo"); 
   };
 
   return (
@@ -75,12 +107,12 @@ const DocenteSubmeter = () => {
         </div>
         <nav className="menu">
           <ul>
-            <li>Visualizar Horário</li>
+            <li onClick={handleVisualizarHorario}>Visualizar Horário</li>
             <li className="active">Submeter Disponibilidade</li>
             <li>Consultar Submissões</li>
           </ul>
         </nav>
-        <button className="logout">SAIR</button>
+        <button onClick={handleLogout} className="logout">SAIR</button>
       </aside>
 
       <main className="horario-content">
@@ -119,23 +151,10 @@ const DocenteSubmeter = () => {
 
           <div className="dias-selector">
             <p>Selecione os dias da semana:</p>
-            {dias.map((dia) => (
-              <label key={dia} className="dias-label">
-                <input
-                  type="checkbox"
-                  checked={diasSelecionados.includes(dia)}
-                  onChange={() => handleDiaChange(dia)}
-                />
-                {dia}
-              </label>
-            ))}
-          </div>
-
-          {diasSelecionados.length > 0 && (
             <div className="horas-selector">
-              {diasSelecionados.map((dia) => (
-                <div key={dia} className="horas-dia">
-                  <p>{dia}:</p>
+              {dias.map((dia) => (
+                <div key={dia} className="dias-label">
+                  <p>{dia}</p>
                   {horas.map((hora) => (
                     <label key={hora} className="hora-label">
                       <input
@@ -149,7 +168,7 @@ const DocenteSubmeter = () => {
                 </div>
               ))}
             </div>
-          )}
+          </div>
 
           <div className="submeter-container">
             <button onClick={submeterDisponibilidade} className="semana-atual-btn">

@@ -28,6 +28,7 @@ const Login = () => {
         if (data.tipo_conta === "docente" || data.tipo_conta === "coordenador") {
           setTipoConta(data.tipo_conta);
           setPopupSucesso(true);
+          localStorage.setItem("token", data.token); // Salva o token no localStorage
         } else {
           setPopupErro({ visivel: true, mensagem: "Tipo de conta não reconhecido." });
         }
@@ -109,7 +110,6 @@ const Login = () => {
   );
 };
 
-
 const PopupErroLogin = ({ mensagem, onClose }) => (
   <div className="popup-overlay">
     <div className="popup-box">
@@ -120,7 +120,6 @@ const PopupErroLogin = ({ mensagem, onClose }) => (
     </div>
   </div>
 );
-
 
 const PopupSucessoLogin = ({ tipoConta, onClose }) => {
   const tipoFormatado = tipoConta === "docente" ? "Docente" : "Coordenador";
@@ -135,6 +134,5 @@ const PopupSucessoLogin = ({ tipoConta, onClose }) => {
     </div>
   );
 };
-
 
 export default Login;

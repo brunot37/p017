@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./DocenteVisualizarHorario.css";
 
 const DocenteVisualizarHorario = () => {
   const [paginaIndex, setPaginaIndex] = useState(1);
   const [docentes, setDocentes] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate(); 
   const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 
-  // Função para buscar dados da base de dados
+ 
   const fetchDocentes = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/docentes"); // Substitua por sua URL de API
+      const response = await fetch("/api/docentes");
       const data = await response.json();
       setDocentes(data);
     } catch (error) {
@@ -22,33 +23,33 @@ const DocenteVisualizarHorario = () => {
     }
   };
 
-  // Buscar dados ao carregar o componente
+  
   useEffect(() => {
     fetchDocentes();
   }, []);
 
-  // Limitar docentes por página
+
   const docentesPorPagina = 10;
   const inicio = (paginaIndex - 1) * docentesPorPagina;
   const fim = inicio + docentesPorPagina;
   const docentesPaginaAtual = docentes.slice(inicio, fim);
 
-  // Função para enviar a aprovação ou rejeição para a base de dados
+  
   const atualizarAprovacao = async (docenteId, aprovacao) => {
     try {
       const response = await fetch(`/api/docentes/${docenteId}/aprovacao`, {
-        method: "PUT", // Ou "POST", dependendo do seu backend
+        method: "PUT", 
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ aprovacao }), // Enviando o status de aprovação
+        body: JSON.stringify({ aprovacao }),
       });
 
       if (!response.ok) {
         throw new Error("Erro ao atualizar a aprovação");
       }
 
-      // Atualizar a lista de docentes após a resposta da API
+      
       fetchDocentes();
     } catch (error) {
       console.error("Erro ao atualizar aprovação:", error);
@@ -57,6 +58,12 @@ const DocenteVisualizarHorario = () => {
 
   const mudarPagina = (direcao) => {
     setPaginaIndex((prev) => prev + direcao);
+  };
+
+  
+  const handleLogout = () => {
+   
+    navigate("/Registo"); 
   };
 
   return (
@@ -68,7 +75,7 @@ const DocenteVisualizarHorario = () => {
             <li>Gerar Horário</li>
           </ul>
         </nav>
-        <button className="logout">SAIR</button>
+        <button onClick={handleLogout} className="logout">SAIR</button>
       </aside>
 
       <main className="horario-content">
@@ -88,7 +95,7 @@ const DocenteVisualizarHorario = () => {
               <tr>
                 <th>Docentes</th>
                 {dias.map((dia) => <th key={dia}>{dia}</th>)}
-                <th>Aprovação</th> {/* Nova coluna Aprovação */}
+                <th>Aprovação</th> 
               </tr>
             </thead>
             <tbody>

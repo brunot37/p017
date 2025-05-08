@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils import timezone
 
-
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, nome=None, tipo_conta="docente", **extra_fields):
         if not email:
@@ -34,7 +33,7 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    objects = CustomUserManager() 
+    objects = CustomUserManager()
 
     def __str__(self):
         return self.email

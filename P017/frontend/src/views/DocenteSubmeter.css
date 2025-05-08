@@ -97,33 +97,21 @@ html, body {
 }
 
 .dias-selector {
-  display: flex;
-  justify-content: flex-start;
-  gap: 20px;
-  flex-wrap: wrap;
   margin-top: 20px;
-}
-
-.dias-selector label {
-  width: auto;
-  margin-bottom: 5px;
-  display: flex;
-  align-items: center;
 }
 
 .horas-selector {
-  display: flex;
-  justify-content: flex-start;
-  gap: 30px;
-  flex-wrap: wrap;
-  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 colunas para os 5 dias */
+  gap: 20px;
+  margin-top: 10px;
 }
 
-.horas-dia {
+.dias-label {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 120px;
+  align-items: flex-start;
 }
 
 .horas-dia p {
@@ -133,6 +121,7 @@ html, body {
 
 .hora-label {
   font-size: 14px;
+  margin-bottom: 10px; /* Mais espaço entre os horários */
 }
 
 .submeter-container {
@@ -158,14 +147,8 @@ html, body {
 }
 
 @media (max-width: 768px) {
-  .dias-selector {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .horas-selector {
-    flex-direction: column;
-    align-items: flex-start;
+    grid-template-columns: 1fr 1fr; /* 2 colunas para telas pequenas */
   }
 
   .submeter-container {
