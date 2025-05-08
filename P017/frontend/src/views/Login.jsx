@@ -28,7 +28,7 @@ const Login = () => {
         if (data.tipo_conta === "docente" || data.tipo_conta === "coordenador") {
           setTipoConta(data.tipo_conta);
           setPopupSucesso(true);
-          localStorage.setItem("token", data.token); // Salva o token no localStorage
+          localStorage.setItem("token", data.token); 
         } else {
           setPopupErro({ visivel: true, mensagem: "Tipo de conta não reconhecido." });
         }

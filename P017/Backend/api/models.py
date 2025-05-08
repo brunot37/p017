@@ -54,6 +54,8 @@ class Horario(models.Model):
     dia = models.DateField(default=timezone.now)
     hora_inicio = models.TimeField()
     hora_fim = models.TimeField()
+    semestre = models.CharField(max_length=20, null=True, blank=True) 
+    unidade_curricular = models.CharField(max_length=255, null=True, blank=True)  
 
     def __str__(self):
         return f"{self.utilizador.email} - {self.dia}"

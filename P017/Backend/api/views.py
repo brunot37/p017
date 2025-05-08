@@ -1,12 +1,14 @@
 import re
+from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate, login, get_user_model
-from django.contrib.auth.models import AnonymousUser
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 from .models import Horario, Disponibilidade
 from .serializers import HorarioSerializer, DisponibilidadeSerializer
-from rest_framework.permissions import IsAuthenticated
+
 User = get_user_model()
 
 class RegistoView(APIView):
@@ -14,7 +16,7 @@ class RegistoView(APIView):
         tipo_conta = request.data.get('tipo_conta')
         nome = request.data.get('nome')
         email = request.data.get('email')
-        password = request.data.get('senha')  
+        password = request.data.get('senha')
 
         if not tipo_conta or not nome or not email or not password:
             return Response({"message": "Todos os campos são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
@@ -52,41 +54,43 @@ class LoginView(APIView):
         if not email or not senha:
             return Response({"message": "Todos os campos são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({"message": "Email não registado"}, status=status.HTTP_400_BAD_REQUEST)
-
         user = authenticate(request, email=email, password=senha)
 
         if user is not None:
-            login(request, user)
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+
             return Response({
                 "message": f"Login de {user.tipo_conta} com sucesso",
                 "tipo_conta": user.tipo_conta,
-                "nome": user.nome
+                "nome": user.nome,
+                "token": access_token  
             }, status=status.HTTP_200_OK)
         else:
-            return Response({"message": "Palavra-passe incorreta"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Credenciais inválidas"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SubmeterHorarioView(APIView):
-    permission_classes = [IsAuthenticated] 
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         user = request.user
 
-       
         if isinstance(user, AnonymousUser):
             return Response({"message": "Usuário não autenticado!"}, status=status.HTTP_401_UNAUTHORIZED)
 
         horarios = request.data.get('horarios', [])
 
-        
         for horario_data in horarios:
+            semestre = horario_data.get("semestre") 
+            unidade_curricular = horario_data.get("unidade_curricular") 
+
+            horario_data['semestre'] = semestre
+            horario_data['unidade_curricular'] = unidade_curricular
+
             serializer = HorarioSerializer(data=horario_data)
             if serializer.is_valid():
-                serializer.save(utilizador=user) 
+                serializer.save(utilizador=user)  
             else:
                 return Response({"message": "Erro ao submeter horário."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -97,3 +101,21 @@ class SubmeterHorarioView(APIView):
         horarios = Horario.objects.filter(utilizador=user)
         serializer = HorarioSerializer(horarios, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ListarDocentesComHorarioView(APIView):
+    def get(self, request):
+       
+        docentes_com_horarios = User.objects.filter(horario__isnull=False).distinct()
+
+        docentes_data = []
+        for docente in docentes_com_horarios:
+           
+            horarios = Horario.objects.filter(utilizador=docente)
+            horarios_data = HorarioSerializer(horarios, many=True).data
+            docentes_data.append({
+                "id": docente.id,
+                "nome": docente.nome,
+                "disponibilidade": horarios_data,  
+            })
+
+        return Response(docentes_data)

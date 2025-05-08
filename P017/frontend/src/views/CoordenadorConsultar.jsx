@@ -9,11 +9,11 @@ const DocenteVisualizarHorario = () => {
   const navigate = useNavigate(); 
   const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 
- 
+  
   const fetchDocentes = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/docentes");
+      const response = await fetch("/api/docentes/com-horarios"); 
       const data = await response.json();
       setDocentes(data);
     } catch (error) {
@@ -23,46 +23,21 @@ const DocenteVisualizarHorario = () => {
     }
   };
 
-  
   useEffect(() => {
     fetchDocentes();
   }, []);
-
 
   const docentesPorPagina = 10;
   const inicio = (paginaIndex - 1) * docentesPorPagina;
   const fim = inicio + docentesPorPagina;
   const docentesPaginaAtual = docentes.slice(inicio, fim);
 
-  
-  const atualizarAprovacao = async (docenteId, aprovacao) => {
-    try {
-      const response = await fetch(`/api/docentes/${docenteId}/aprovacao`, {
-        method: "PUT", 
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ aprovacao }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao atualizar a aprovação");
-      }
-
-      
-      fetchDocentes();
-    } catch (error) {
-      console.error("Erro ao atualizar aprovação:", error);
-    }
-  };
-
   const mudarPagina = (direcao) => {
     setPaginaIndex((prev) => prev + direcao);
   };
 
-  
   const handleLogout = () => {
-   
+    localStorage.removeItem("token"); 
     navigate("/Registo"); 
   };
 
@@ -95,7 +70,7 @@ const DocenteVisualizarHorario = () => {
               <tr>
                 <th>Docentes</th>
                 {dias.map((dia) => <th key={dia}>{dia}</th>)}
-                <th>Aprovação</th> 
+                <th>Aprovação</th>
               </tr>
             </thead>
             <tbody>
@@ -112,7 +87,7 @@ const DocenteVisualizarHorario = () => {
                   <tr key={docente.id}>
                     <td className="hora-coluna">{docente.nome}</td>
                     {dias.map((dia) => {
-                      const disponibilidade = docente.disponibilidade.includes(dia) ? "Disponível" : "-";
+                      const disponibilidade = docente.disponibilidade.some(horario => horario.dia === dia) ? "Disponível" : "-";
                       return (
                         <td key={`${docente.id}-${dia}`} className="horario-celula">{disponibilidade}</td>
                       );

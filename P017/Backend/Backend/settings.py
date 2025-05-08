@@ -1,12 +1,13 @@
-from pathlib import Path
-import os
-from dotenv import load_dotenv
 import ldap
 from django_auth_ldap.config import LDAPSearch
+from pathlib import Path  
+import os
+from dotenv import load_dotenv
+from datetime import timedelta
 
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent 
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'chave-secreta-padrao')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
@@ -15,14 +16,14 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.contenttypes',  
+    'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'rest_framework',
     'corsheaders',
     'api', 
+    'rest_framework_simplejwt',  
 ]
 
 MIDDLEWARE = [
@@ -59,11 +60,11 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'P017',  
+        'NAME': 'P017',
         'USER': 'bruno',
         'PASSWORD': '123',
-        'HOST': 'localhost',  
-        'PORT': '5432',       
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -91,21 +92,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'api.User'
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173', 
+    'http://localhost:5173',
     'http://127.0.0.1:5173',
 ]
 CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication', 
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
 }
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+}
 
 AUTH_LDAP_SERVER_URI = os.getenv("LDAP_SERVER_URI", "ldap://127.0.0.1")
 AUTH_LDAP_BIND_DN = os.getenv("LDAP_BIND_DN", "")
@@ -113,10 +121,10 @@ AUTH_LDAP_BIND_PASSWORD = os.getenv("LDAP_BIND_PASSWORD", "")
 AUTH_LDAP_USER_SEARCH = LDAPSearch(
     os.getenv("LDAP_BASE_DN", "dc=exemplo,dc=pt"),
     ldap.SCOPE_SUBTREE,
-    "(mail=%(user)s)"  
+    "(mail=%(user)s)"
 )
 
 AUTHENTICATION_BACKENDS = [
-    'django_auth_ldap.backend.LDAPBackend',
-    'django.contrib.auth.backends.ModelBackend',
-]  
+    'django_auth_ldap.backend.LDAPBackend',  
+    'django.contrib.auth.backends.ModelBackend',  
+]

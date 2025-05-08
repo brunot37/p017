@@ -67,10 +67,12 @@ const DocenteSubmeter = () => {
           dia: new Date().toISOString().split('T')[0], 
           hora_inicio: hora,
           hora_fim: hora,
+          semestre: semestre,  // Inclui o semestre
+          unidade_curricular: unidadeCurricular,  // Inclui a unidade curricular
         });
       });
     });
-
+  
     fetch("http://localhost:8000/api/submeter-horario", {
       method: "POST",
       headers: {
@@ -88,7 +90,7 @@ const DocenteSubmeter = () => {
         console.error("Error:", error);
         alert("Erro ao submeter horários.");
       });
-  };
+  };  
 
   const handleVisualizarHorario = () => {
     navigate('/DocenteVisualizarHorario');
