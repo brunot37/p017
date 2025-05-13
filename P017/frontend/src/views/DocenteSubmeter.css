@@ -92,8 +92,9 @@ html, body {
   background-color: #f9fbff;
 }
 
-.semestre-selector, .unidade-curricular-selector {
-  margin-bottom: 20px; 
+.ano-letivo-selector,
+.semestre-selector {
+  margin-bottom: 40px; /* Aumenta o espaço entre 'Escolha o ano letivo' e 'Escolha o semestre' */
 }
 
 .dias-selector {

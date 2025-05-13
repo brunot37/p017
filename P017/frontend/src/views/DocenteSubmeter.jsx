@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./DocenteSubmeter.css";
 
@@ -6,25 +6,26 @@ const DocenteSubmeter = () => {
   const navigate = useNavigate();
 
   const [semestre, setSemestre] = useState("1");
-  const [unidadeCurricular, setUnidadeCurricular] = useState(""); 
   const [horasSelecionadas, setHorasSelecionadas] = useState({});
+  const [anoLetivo, setAnoLetivo] = useState("2024/2025");
   const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 
   const unidadesCurriculares1Semestre = [
-    "Sistemas Distribuídos", 
-    "Cibersegurança", 
-    "Internet das Coisas", 
-    "Inteligência Artificial"
+    "Sistemas Distribuídos",
+    "Cibersegurança",
+    "Internet das Coisas",
+    "Inteligência Artificial",
   ];
 
   const unidadesCurriculares2Semestre = [
     "Análise Matemática",
     "Sistemas Embebidos",
     "POO",
-    "Sistemas Digitais"
+    "Sistemas Digitais",
   ];
 
-  const unidadesCurriculares = semestre === "1" ? unidadesCurriculares1Semestre : unidadesCurriculares2Semestre;
+  const unidadesCurriculares =
+    semestre === "1" ? unidadesCurriculares1Semestre : unidadesCurriculares2Semestre;
 
   const unidadesOrdenadas = unidadesCurriculares.sort();
 
@@ -64,15 +65,15 @@ const DocenteSubmeter = () => {
     Object.keys(horasSelecionadas).forEach((dia) => {
       horasSelecionadas[dia].forEach((hora) => {
         horarios.push({
-          dia: new Date().toISOString().split('T')[0], 
+          dia: new Date().toISOString().split('T')[0],
           hora_inicio: hora,
           hora_fim: hora,
-          semestre: semestre,  // Inclui o semestre
-          unidade_curricular: unidadeCurricular,  // Inclui a unidade curricular
+          semestre: semestre,
+          ano_letivo: anoLetivo,  // Inclui o ano letivo
         });
       });
     });
-  
+
     fetch("http://localhost:8000/api/submeter-horario", {
       method: "POST",
       headers: {
@@ -81,25 +82,33 @@ const DocenteSubmeter = () => {
       },
       body: JSON.stringify({ horarios }),
     })
-      .then(response => response.json())
-      .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         console.log(data);
         alert("Horários submetidos com sucesso!");
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error:", error);
         alert("Erro ao submeter horários.");
       });
-  };  
+  };
 
   const handleVisualizarHorario = () => {
     navigate('/DocenteVisualizarHorario');
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); 
-    navigate("/Registo"); 
+    localStorage.removeItem("token");
+    navigate("/Registo");
   };
+
+  useEffect(() => {
+    const currentDate = new Date();
+    const isAfterSeptember = currentDate.getMonth() >= 8; // Verifica se já passou setembro (mês 9)
+    if (isAfterSeptember) {
+      setAnoLetivo("2025/2026"); // Altera para o próximo ano letivo
+    }
+  }, []);
 
   return (
     <div className="horario-container fade-in">
@@ -123,6 +132,18 @@ const DocenteSubmeter = () => {
         </div>
 
         <div className="disponibilidade-form">
+          <div className="ano-letivo-selector">
+            <label>Escolha o ano letivo:</label>
+            <select
+              value={anoLetivo}
+              onChange={(e) => setAnoLetivo(e.target.value)}
+              className="ano-letivo-select"
+            >
+              <option value="2024/2025">2024/2025</option>
+              <option value="2025/2026">2025/2026</option>
+            </select>
+          </div>
+
           <div className="semestre-selector">
             <label>Escolha o semestre:</label>
             <select
@@ -132,22 +153,6 @@ const DocenteSubmeter = () => {
             >
               <option value="1">1º Semestre</option>
               <option value="2">2º Semestre</option>
-            </select>
-          </div>
-
-          <div className="unidade-curricular-selector">
-            <label>Escolha a unidade curricular:</label>
-            <select
-              value={unidadeCurricular}
-              onChange={(e) => setUnidadeCurricular(e.target.value)}
-              className="unidade-curricular-select"
-            >
-              <option value="">Selecione a Unidade Curricular</option>
-              {unidadesOrdenadas.map((uc) => (
-                <option key={uc} value={uc}>
-                  {uc}
-                </option>
-              ))}
             </select>
           </div>
 
