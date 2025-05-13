@@ -26,9 +26,6 @@ const RecuperarPassword = () => {
           </div>
           <button type="submit" className="register-button">Recuperar →</button>
         </form>
-        <p className="help-section">
-          <Link to="/ajuda" className="help-link">Precisas de ajuda?</Link>
-        </p>
       </div>
     </div>
   );

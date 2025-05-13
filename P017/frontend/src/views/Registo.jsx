@@ -4,14 +4,13 @@ import { Link } from "react-router-dom";
 import "./Registo.css";
 
 const Registo = () => {
-  const [tipoConta, setTipoConta] = useState("docente");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);  
   const [popupSucesso, setPopupSucesso] = useState(false);
   const [popupErro, setPopupErro] = useState({ visivel: false, mensagem: "" });
-  const [tipoContaCriada, setTipoContaCriada] = useState("");
+  const [tipoContaCriada] = useState("docente");  // Definir tipo de conta como 'docente' fixo
   const navigate = useNavigate();  
 
   const handleSubmit = async (event) => {
@@ -32,7 +31,7 @@ const Registo = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          tipo_conta: tipoConta,
+          tipo_conta: tipoContaCriada,  // Sempre 'docente'
           nome: nome,
           email: email,
           senha: password,
@@ -43,7 +42,6 @@ const Registo = () => {
       console.log("Resposta do backend:", data);
 
       if (response.ok) {
-        setTipoContaCriada(data.tipo_conta);
         setPopupSucesso(true);
       } else {
         setPopupErro({ visivel: true, mensagem: data.message || "Erro ao registar conta." });
@@ -78,27 +76,8 @@ const Registo = () => {
         <h2 className="registration-title">Cria a tua conta</h2>
         <p className="registration-description">Começa agora a gerir a tua disponibilidade</p>
         <form onSubmit={handleSubmit}>
-          <div className="role-select">
-            <label>
-              <input
-                type="radio"
-                value="docente"
-                checked={tipoConta === "docente"}
-                onChange={() => setTipoConta("docente")}
-              />
-              Docente
-            </label>
-            <label>
-              <input
-                type="radio"
-                value="coordenador"
-                checked={tipoConta === "coordenador"}
-                onChange={() => setTipoConta("coordenador")}
-              />
-              Coordenador
-            </label>
-          </div>
-
+          {/* Removida a opção para 'Docente' pois já é fixo */}
+          
           <div className="input-field user">
             <input
               type="text"
@@ -131,10 +110,6 @@ const Registo = () => {
             {loading ? "Aguarde..." : "Registar →"}
           </button>
         </form>
-
-        <p className="help-section">
-          <Link to="/ajuda" className="help-link">Precisas de ajuda?</Link>
-        </p>
       </div>
 
       {popupSucesso && (
@@ -147,7 +122,6 @@ const Registo = () => {
     </div>
   );
 };
-
 
 const PopupSucesso = ({ tipoConta, onClose }) => {
   if (!tipoConta) return null;
@@ -164,8 +138,6 @@ const PopupSucesso = ({ tipoConta, onClose }) => {
     </div>
   );
 };
-
-
 
 const PopupErro = ({ mensagem, onClose }) => (
   <div className="popup-overlay">

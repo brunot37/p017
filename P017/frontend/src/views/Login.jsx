@@ -94,9 +94,6 @@ const Login = () => {
           </div>
           <button type="submit" className="register-button">Login →</button>
         </form>
-        <p className="help-section">
-          <Link to="/ajuda" className="help-link">Precisas de ajuda?</Link>
-        </p>
       </div>
 
       {popupErro.visivel && (

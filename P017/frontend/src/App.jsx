@@ -20,9 +20,6 @@ const App = () => {
           <button className="btn" onClick={() => navigate("/Login")}>Login <span className="arrow">→</span></button>
           <button className="btn" onClick={() => navigate("/Registo")}>Registar <span className="arrow">→</span></button>
         </div>
-        <footer className="footer">
-          <span className="help">Precisas de ajuda?</span>
-        </footer>
       </div>
     </div>
   );
