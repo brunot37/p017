@@ -129,18 +129,19 @@ html, body {
   display: flex;
   justify-content: center;
   margin-top: 30px;
+  padding: 20px 0;
 }
 
 .semana-atual-btn {
   background-color: #112D4E;
   color: white;
   border: none;
-  padding: 12px 20px;
-  border-radius: 6px;
-  font-weight: 500;
+  padding: 16px 32px; /* Aumenta o tamanho do botão */
+  border-radius: 8px; /* Dá bordas mais arredondadas ao botão */
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 16px;
+  font-size: 18px; /* Aumenta o tamanho da fonte do botão */
 }
 
 .semana-atual-btn:hover {

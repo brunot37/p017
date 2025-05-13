@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import "./DocenteSubmeter.css";
 
 const DocenteSubmeter = () => {
@@ -7,70 +9,35 @@ const DocenteSubmeter = () => {
 
   const [semestre, setSemestre] = useState("1");
   const [horasSelecionadas, setHorasSelecionadas] = useState({});
-  const [anoLetivo, setAnoLetivo] = useState("2024/2025");
+  const [anoLetivo, setAnoLetivo] = useState(""); 
+  const [selectedDate, setSelectedDate] = useState(null); 
+  const [selectedTime, setSelectedTime] = useState("");
+
   const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
-
-  const unidadesCurriculares1Semestre = [
-    "Sistemas Distribuídos",
-    "Cibersegurança",
-    "Internet das Coisas",
-    "Inteligência Artificial",
+  
+  const horas = [
+    "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", 
+    "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+    "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00"
   ];
 
-  const unidadesCurriculares2Semestre = [
-    "Análise Matemática",
-    "Sistemas Embebidos",
-    "POO",
-    "Sistemas Digitais",
-  ];
-
-  const unidadesCurriculares =
-    semestre === "1" ? unidadesCurriculares1Semestre : unidadesCurriculares2Semestre;
-
-  const unidadesOrdenadas = unidadesCurriculares.sort();
-
-  const gerarHoras = () => {
-    const horas = [];
-    let hora = 8;
-    let minuto = 0;
-    while (hora < 20 || (hora === 20 && minuto === 0)) {
-      const h = hora.toString().padStart(2, '0');
-      const m = minuto.toString().padStart(2, '0');
-      horas.push(`${h}:${m}`);
-      minuto += 30;
-      if (minuto === 60) {
-        minuto = 0;
-        hora += 1;
-      }
-    }
-    return horas;
-  };
-
-  const horas = gerarHoras();
-
-  const handleHoraChange = (dia, hora) => {
-    setHorasSelecionadas((prev) => {
-      const updated = { ...prev };
-      if (updated[dia]?.includes(hora)) {
-        updated[dia] = updated[dia].filter((h) => h !== hora);
-      } else {
-        updated[dia] = [...(updated[dia] || []), hora];
-      }
-      return updated;
-    });
+  const handleHoraChange = (hora) => {
+    setSelectedTime(hora);
+    setHorasSelecionadas((prev) => ({
+      ...prev,
+      [selectedDate]: hora
+    }));
   };
 
   const submeterDisponibilidade = () => {
     const horarios = [];
-    Object.keys(horasSelecionadas).forEach((dia) => {
-      horasSelecionadas[dia].forEach((hora) => {
-        horarios.push({
-          dia: new Date().toISOString().split('T')[0],
-          hora_inicio: hora,
-          hora_fim: hora,
-          semestre: semestre,
-          ano_letivo: anoLetivo,  // Inclui o ano letivo
-        });
+    Object.keys(horasSelecionadas).forEach((data) => {
+      horarios.push({
+        dia: data,
+        hora_inicio: horasSelecionadas[data],
+        hora_fim: horasSelecionadas[data],
+        semestre: semestre,
+        ano_letivo: anoLetivo, 
       });
     });
 
@@ -99,28 +66,28 @@ const DocenteSubmeter = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/Registo");
+    navigate("/App");
   };
 
-  useEffect(() => {
-    const currentDate = new Date();
-    const isAfterSeptember = currentDate.getMonth() >= 8; // Verifica se já passou setembro (mês 9)
-    if (isAfterSeptember) {
-      setAnoLetivo("2025/2026"); // Altera para o próximo ano letivo
-    }
-  }, []);
+  const handleConsultarSubmissoes = () => {
+    navigate('/DocenteConsultarSubmissoes');
+  };
+
+  const handleYearSelect = (date) => {
+    const selectedYear = date.getFullYear();
+    const nextYear = selectedYear + 1;
+    setAnoLetivo(`${selectedYear}/${nextYear}`);
+    setSelectedDate(date); 
+  };
 
   return (
     <div className="horario-container fade-in">
       <aside className="horario-sidebar">
-        <div className="user-info">
-          <p className="user-name">Nome do Utilizador</p>
-        </div>
         <nav className="menu">
           <ul>
             <li onClick={handleVisualizarHorario}>Visualizar Horário</li>
             <li className="active">Submeter Disponibilidade</li>
-            <li>Consultar Submissões</li>
+            <li onClick={handleConsultarSubmissoes}>Consultar Submissões</li>
           </ul>
         </nav>
         <button onClick={handleLogout} className="logout">SAIR</button>
@@ -134,14 +101,21 @@ const DocenteSubmeter = () => {
         <div className="disponibilidade-form">
           <div className="ano-letivo-selector">
             <label>Escolha o ano letivo:</label>
-            <select
-              value={anoLetivo}
-              onChange={(e) => setAnoLetivo(e.target.value)}
-              className="ano-letivo-select"
-            >
-              <option value="2024/2025">2024/2025</option>
-              <option value="2025/2026">2025/2026</option>
-            </select>
+            <DatePicker
+              selected={selectedDate}
+              onChange={handleYearSelect}
+              showYearPicker
+              dateFormat="yyyy"
+              className="ano-picker" 
+              popperPlacement="bottom"
+            />
+            <input 
+              type="text" 
+              value={anoLetivo} 
+              readOnly
+              className="ano-input" 
+              placeholder="Escolha o ano letivo" 
+            />
           </div>
 
           <div className="semestre-selector">
@@ -156,24 +130,30 @@ const DocenteSubmeter = () => {
             </select>
           </div>
 
-          <div className="dias-selector">
-            <p>Selecione os dias da semana:</p>
-            <div className="horas-selector">
-              {dias.map((dia) => (
-                <div key={dia} className="dias-label">
-                  <p>{dia}</p>
-                  {horas.map((hora) => (
-                    <label key={hora} className="hora-label">
-                      <input
-                        type="checkbox"
-                        checked={horasSelecionadas[dia]?.includes(hora)}
-                        onChange={() => handleHoraChange(dia, hora)}
-                      />
-                      {hora}
-                    </label>
-                  ))}
-                </div>
-              ))}
+          <div className="horarios-selector">
+            <p>Escolha a data e o horário:</p>
+            <DatePicker
+              selected={selectedDate}
+              onChange={handleYearSelect}
+              className="calendar-selector"
+              dateFormat="dd/MM/yyyy"
+              placeholderText="Escolha a data"
+            />
+
+            <div className="hora-selector">
+              <label>Escolha o horário:</label>
+              <select 
+                value={selectedTime} 
+                onChange={(e) => handleHoraChange(e.target.value)} 
+                className="hora-select"
+              >
+                <option value="">Selecione o horário</option>
+                {horas.map((hora, index) => (
+                  <option key={index} value={hora}>
+                    {hora}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

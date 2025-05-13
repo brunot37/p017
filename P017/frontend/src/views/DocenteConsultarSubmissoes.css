@@ -109,11 +109,12 @@ html, body {
   gap: 10px;
 }
 
+
 .semana-navegacao {
   display: flex;
   gap: 10px;
-  margin-left: auto; /* Alinha os botões à direita */
-  justify-content: flex-end; /* Garante que os botões fiquem alinhados à direita */
+  margin-left: auto; 
+  justify-content: flex-end; 
 }
 
 .semana-navegacao button {
@@ -162,7 +163,7 @@ html, body {
   color: white;
 }
 
-.horario-celula {
+.horario-celula { 
   background-color: #eaf3ff;
   height: 40px;
 }

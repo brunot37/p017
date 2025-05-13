@@ -56,9 +56,12 @@ const DocenteVisualizarHorario = () => {
     navigate('/DocenteSubmeter');
   };
 
-  
+  const handleConsultarSubmissoes = () => {
+    navigate('/DocenteConsultarSubmissoes'); 
+  };
+
   const handleLogout = () => {
-    navigate("/Registo"); 
+    navigate("/App"); 
   };
 
   return (
@@ -68,7 +71,7 @@ const DocenteVisualizarHorario = () => {
           <ul>
             <li className="active">Visualizar Horário</li>
             <li onClick={handleSubmeterDisponibilidade}>Submeter Disponibilidade</li>
-            <li>Consultar Submissões</li>
+            <li onClick={handleConsultarSubmissoes}>Consultar Submissões</li>
           </ul>
         </nav>
         <button onClick={handleLogout} className="logout">SAIR</button> 

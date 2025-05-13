@@ -6,12 +6,12 @@ const DocenteVisualizarHorario = () => {
   const navigate = useNavigate();
 
   const [submissoes, setSubmissoes] = useState([]);
-  const [pagina, setPagina] = useState(1); // Controle da página de submissões
-  const [carregando, setCarregando] = useState(true); // Controle de carregamento dos dados
-  const [paginaAtiva, setPaginaAtiva] = useState('consultarSubmissoes'); // Página ativa é "Consultar Submissões"
+  const [pagina, setPagina] = useState(1); 
+  const [carregando, setCarregando] = useState(true); 
+  const [paginaAtiva, setPaginaAtiva] = useState('consultarSubmissoes'); 
 
   const fetchData = async () => {
-    // Simulação de fetch para pegar dados da base de dados
+    
     const data = [
       { dataSubmissao: "12/05/2025 10:30:00", estado: "Pendente" },
       { dataSubmissao: "13/05/2025 14:45:00", estado: "Aprovado" },
@@ -27,7 +27,7 @@ const DocenteVisualizarHorario = () => {
       { dataSubmissao: "23/05/2025 17:15:00", estado: "Rejeitado" }
     ];
     setSubmissoes(data);
-    setCarregando(false); // Dados carregados
+    setCarregando(false); 
   };
 
   useEffect(() => {
@@ -41,11 +41,16 @@ const DocenteVisualizarHorario = () => {
 
   const handleConsultarSubmissoes = () => {
     setPaginaAtiva('consultarSubmissoes');
-    navigate('/ConsultarSubmissoes'); // Página de consulta de submissões
+    
+  };
+
+  const handleVisualizarHorario = () => {
+    setPaginaAtiva('visualizarHorario');
+    navigate('/DocenteVisualizarHorario');o
   };
 
   const handleLogout = () => {
-    navigate("/Registo"); 
+    navigate("/App"); 
   };
 
   const paginasPorMostrar = 10;
@@ -68,9 +73,9 @@ const DocenteVisualizarHorario = () => {
       <aside className="horario-sidebar">
         <nav className="menu">
           <ul>
-            <li className={paginaAtiva === 'visualizarHorario' ? 'active' : ''}>Visualizar Horário</li>
+            <li onClick={handleVisualizarHorario} className={paginaAtiva === 'visualizarHorario' ? 'active' : ''}>Visualizar Horário</li>
             <li onClick={handleSubmeterDisponibilidade}>Submeter Disponibilidade</li>
-            <li className={paginaAtiva === 'consultarSubmissoes' ? 'active' : ''} onClick={handleConsultarSubmissoes}>Consultar Submissões</li>
+            <li onClick={handleConsultarSubmissoes} className={paginaAtiva === 'consultarSubmissoes' ? 'active' : ''}>Consultar Submissões</li>
           </ul>
         </nav>
         <button onClick={handleLogout} className="logout">SAIR</button> 
@@ -85,7 +90,7 @@ const DocenteVisualizarHorario = () => {
         </div>
 
         {!carregando && submissoes.length === 0 && (
-          <p>Ainda não há submissões para exibir.</p> // Mensagem para quando não houver dados
+          <p>Ainda não há submissões para exibir.</p> 
         )}
 
         {!carregando && submissoes.length > 0 && (
@@ -109,7 +114,7 @@ const DocenteVisualizarHorario = () => {
           </div>
         )}
 
-        {carregando && <p>Carregando dados...</p>} {/* Mensagem enquanto não recebe dados */}
+        {carregando && <p>Carregando dados...</p>} 
       </main>
     </div>
   );
