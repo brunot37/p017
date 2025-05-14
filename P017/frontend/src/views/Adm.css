@@ -1,0 +1,192 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f0f2f5;
+}
+
+.horario-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.horario-sidebar {
+  width: 240px;
+  background-color: #000000; /* Alterado para preto */
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.menu {
+  width: 100%;
+}
+
+.menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.menu li {
+  padding: 12px 16px;
+  cursor: pointer;
+  text-align: left;
+  color: white;
+  transition: background-color 0.3s, transform 0.2s;
+  border-radius: 8px;
+  position: relative; 
+}
+
+.menu li.active {
+  background-color: #3282B8;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.menu li:hover {
+  background-color: #3282B8; 
+  color: white;
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.menu li.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background-color: #3282B8;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.logout {
+  margin-top: auto;
+  background: none;
+  border: none;
+  color: #3282B8; 
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.2s ease;
+  font-weight: 500;
+  width: 100%; /* Faz o botão ocupar toda a largura */
+  text-align: center; /* Centraliza o texto dentro do botão */
+}
+
+.logout:hover {
+  color: #0e233c; 
+  transform: scale(1.05); 
+}
+
+.horario-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: #f9fbff;
+}
+
+.horario-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.semana-navegacao {
+  display: flex;
+  gap: 10px;
+  margin-left: auto; 
+  justify-content: flex-end; 
+}
+
+.semana-navegacao button {
+  background-color: #000000; /* Alterado para preto */
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  margin: 0 5px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.semana-navegacao button:hover {
+  background-color: #0e233c;
+}
+
+.horario-tabela-wrapper {
+  flex: 1;
+  overflow-x: auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.horario-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  table-layout: fixed;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.horario-tabela th,
+.horario-tabela td {
+  padding: 10px;
+  border: 1px solid #ccc;
+  transition: background-color 0.2s;
+}
+
+.horario-tabela th {
+  background-color: #000000; /* Alterado para preto */
+  color: white;
+}
+
+.horario-celula { 
+  background-color: #eaf3ff;
+  height: 40px;
+}
+
+.horario-celula:hover {
+  background-color: #d0e5ff;
+  cursor: pointer;
+}
+
+select {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 14px;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeInUp 0.6s ease-out;
+}

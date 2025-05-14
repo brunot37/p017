@@ -10,7 +10,7 @@ import DocenteVisualizarHorario from './views/DocenteVisualizarHorario.jsx';
 import DocenteSubmeter from './views/DocenteSubmeter.jsx';
 import DocenteConsultarSubmissoes from './views/DocenteConsultarSubmissoes.jsx';
 import CoordenadorConsultar from './views/CoordenadorConsultar.jsx';
-
+import Adm from './views/Adm.jsx';
 
 const router = createBrowserRouter([
   {
@@ -44,6 +44,10 @@ const router = createBrowserRouter([
   {
     path: "/CoordenadorConsultar",
     element: <CoordenadorConsultar />,
+  },
+  {
+    path: "/Adm",
+    element: <Adm />,
   },
 ]);
 
