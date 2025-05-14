@@ -1,0 +1,40 @@
+.pending-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  align-items: stretch;
+  background-color: #ffffff;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.pending-illustration {
+  width: 45%;
+  background-color: #dceefd; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pending-illustration img {
+  max-width: 80%;
+  height: auto;
+  transition: transform 0.4s ease;
+}
+
+.pending-illustration img:hover {
+  transform: scale(1.05);
+}
+
+.pending-content {
+  width: 55%;
+  background-color: #ffffff; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.waiting-text {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #041c42;
+}

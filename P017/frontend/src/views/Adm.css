@@ -21,7 +21,7 @@ html, body {
 
 .horario-sidebar {
   width: 240px;
-  background-color: #000000; /* Alterado para preto */
+  background-color: #112D4E;
   color: white;
   display: flex;
   flex-direction: column;
@@ -56,11 +56,9 @@ html, body {
   border-radius: 8px;
 }
 
-.menu li:hover {
-  background-color: #3282B8; 
-  color: white;
-  transform: scale(1.02);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+.menu li.gerir-utilizadores {
+  background-color: #3282B8 !important;
+  font-weight: bold;
 }
 
 .menu li.active::after {
@@ -75,6 +73,13 @@ html, body {
   border-bottom-left-radius: 8px;
 }
 
+.menu li:hover {
+  background-color: #3282B8; 
+  color: white;
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
 .logout {
   margin-top: auto;
   background: none;
@@ -84,8 +89,8 @@ html, body {
   cursor: pointer;
   transition: color 0.3s ease, transform 0.2s ease;
   font-weight: 500;
-  width: 100%; /* Faz o botão ocupar toda a largura */
-  text-align: center; /* Centraliza o texto dentro do botão */
+  width: 100%;
+  text-align: center;
 }
 
 .logout:hover {
@@ -114,12 +119,11 @@ html, body {
 .semana-navegacao {
   display: flex;
   gap: 10px;
-  margin-left: auto; 
-  justify-content: flex-end; 
+  margin-bottom: 10px;
 }
 
 .semana-navegacao button {
-  background-color: #000000; /* Alterado para preto */
+  background-color: #112D4E;
   color: white;
   border: none;
   padding: 10px 16px;
@@ -160,11 +164,11 @@ html, body {
 }
 
 .horario-tabela th {
-  background-color: #000000; /* Alterado para preto */
+  background-color: #112D4E;
   color: white;
 }
 
-.horario-celula { 
+.horario-celula {
   background-color: #eaf3ff;
   height: 40px;
 }
@@ -174,14 +178,6 @@ html, body {
   cursor: pointer;
 }
 
-select {
-  padding: 6px 12px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  font-size: 14px;
-}
-
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
@@ -189,4 +185,39 @@ select {
 
 .fade-in {
   animation: fadeInUp 0.6s ease-out;
+}
+
+select {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 2px solid #3282B8;
+  background-color: #f9fbff;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+select:focus {
+  outline: none;
+  border-color: #0e233c;
+  box-shadow: 0 0 8px rgba(0, 56, 92, 0.6);
+  background-color: #ffffff;
+}
+
+select option {
+  padding: 10px;
+  font-size: 14px;
+  background-color: #ffffff;
+  color: #333;
+}
+
+select:hover {
+  border-color: #0e233c;
+}
+
+select option:hover {
+  background-color: #3282B8;
+  color: white;
 }

@@ -11,6 +11,8 @@ import DocenteSubmeter from './views/DocenteSubmeter.jsx';
 import DocenteConsultarSubmissoes from './views/DocenteConsultarSubmissoes.jsx';
 import CoordenadorConsultar from './views/CoordenadorConsultar.jsx';
 import Adm from './views/Adm.jsx';
+import Pendente from './views/Pendente.jsx';
+
 
 const router = createBrowserRouter([
   {
@@ -48,6 +50,10 @@ const router = createBrowserRouter([
   {
     path: "/Adm",
     element: <Adm />,
+  },
+  {
+    path: "/Pendente",
+    element: <Pendente />,
   },
 ]);
 
