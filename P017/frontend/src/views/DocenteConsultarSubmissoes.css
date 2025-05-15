@@ -47,7 +47,7 @@ html, body {
   color: white;
   transition: background-color 0.3s, transform 0.2s;
   border-radius: 8px;
-  position: relative; 
+  position: relative;
 }
 
 .menu li.active {
@@ -57,7 +57,7 @@ html, body {
 }
 
 .menu li:hover {
-  background-color: #3282B8; 
+  background-color: #3282B8;
   color: white;
   transform: scale(1.02);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -79,7 +79,7 @@ html, body {
   margin-top: auto;
   background: none;
   border: none;
-  color: #3282B8; 
+  color: #3282B8;
   font-size: 14px;
   cursor: pointer;
   transition: color 0.3s ease, transform 0.2s ease;
@@ -87,8 +87,8 @@ html, body {
 }
 
 .logout:hover {
-  color: #0e233c; 
-  transform: scale(1.05); 
+  color: #0e233c;
+  transform: scale(1.05);
 }
 
 .horario-content {
@@ -109,28 +109,53 @@ html, body {
   gap: 10px;
 }
 
-
 .semana-navegacao {
   display: flex;
   gap: 10px;
-  margin-left: auto; 
-  justify-content: flex-end; 
+  margin-left: auto;
+  justify-content: flex-end;
+  position: relative; /* Para posicionar tooltips */
 }
 
 .semana-navegacao button {
-  background-color: #112D4E;
-  color: white;
+  background: none;
   border: none;
-  padding: 10px 16px;
-  margin: 0 5px;
-  border-radius: 6px;
+  font-size: 24px;
+  color: #112D4E;
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  position: relative; /* Para tooltip */
 }
 
-.semana-navegacao button:hover {
+.semana-navegacao button:hover:not(:disabled) {
   background-color: #0e233c;
+  color: white;
+}
+
+.semana-navegacao button:disabled {
+  cursor: not-allowed;
+  color: #999;
+}
+
+/* Tooltip customizado */
+.semana-navegacao button[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 40px; /* Aparece acima da seta */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #112D4E;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 1;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .horario-tabela-wrapper {
@@ -163,7 +188,7 @@ html, body {
   color: white;
 }
 
-.horario-celula { 
+.horario-celula {
   background-color: #eaf3ff;
   height: 40px;
 }

@@ -1,0 +1,191 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: "Poppins", sans-serif;
+  background-color: #f0f2f5;
+}
+
+.horario-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.horario-sidebar {
+  width: 240px;
+  background-color: #112d4e;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.user-greeting {
+  width: 100%;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #3282b8;
+  margin-bottom: 20px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-greeting p {
+  margin: 0;
+}
+
+.btn-gerir-perfil {
+  display: block;
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  text-align: left;
+}
+
+.btn-gerir-perfil:hover {
+  background-color: #3282b8;
+  color: white;
+}
+
+.menu {
+  width: 100%;
+}
+
+.menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.menu li {
+  padding: 12px 16px;
+  cursor: pointer;
+  text-align: left;
+  color: white;
+  transition: background-color 0.3s, transform 0.2s;
+  border-radius: 8px;
+  position: relative;
+}
+
+.menu li:hover {
+  background-color: #3282b8;
+  color: white;
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.logout {
+  margin-top: auto;
+  background: none;
+  border: none;
+  color: #3282b8;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.2s ease;
+  font-weight: 500;
+}
+
+.logout:hover {
+  color: #0e233c;
+  transform: scale(1.05);
+}
+
+.horario-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: #f9fbff;
+}
+
+.horario-titulo {
+  font-size: 28px;
+  font-weight: 700;
+  color: #112d4e;
+}
+
+/* Formulário Alterar Nome e Password */
+.form-section {
+  margin-top: 30px;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-section h3 {
+  color: #112d4e;
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.input-text {
+  padding: 10px 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1.8px solid #3282b8;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.input-text:focus {
+  border-color: #112d4e;
+}
+
+.action-btn {
+  max-width: 220px;
+  padding: 14px 20px;
+  font-weight: 600;
+  font-size: 18px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background-color: #112d4e;
+  color: white;
+  box-shadow: 0 6px 10px rgba(17, 45, 78, 0.4);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.action-btn:hover {
+  background-color: #3282b8;
+  box-shadow: 0 8px 14px rgba(50, 130, 184, 0.6);
+}
+
+/* Animação fade-in */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeInUp 0.6s ease-out;
+}

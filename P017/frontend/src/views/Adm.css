@@ -1,3 +1,5 @@
+/* Adm.css */
+
 * {
   margin: 0;
   padding: 0;
@@ -12,14 +14,14 @@ html, body {
   background-color: #f0f2f5;
 }
 
-.horario-container {
+.adm-container {
   display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
 }
 
-.horario-sidebar {
+.adm-sidebar {
   width: 240px;
   background-color: #112D4E;
   color: white;
@@ -29,18 +31,18 @@ html, body {
   padding: 20px;
 }
 
-.menu {
+.adm-menu {
   width: 100%;
 }
 
-.menu ul {
+.adm-menu ul {
   list-style: none;
   padding: 0;
   margin: 0;
   width: 100%;
 }
 
-.menu li {
+.adm-menu li {
   padding: 12px 16px;
   cursor: pointer;
   text-align: left;
@@ -50,18 +52,18 @@ html, body {
   position: relative; 
 }
 
-.menu li.active {
+.adm-menu li.active {
   background-color: #3282B8;
   font-weight: bold;
   border-radius: 8px;
 }
 
-.menu li.gerir-utilizadores {
+.adm-menu li.adm-gerir-utilizadores {
   background-color: #3282B8 !important;
   font-weight: bold;
 }
 
-.menu li.active::after {
+.adm-menu li.active::after {
   content: '';
   position: absolute;
   top: 0;
@@ -73,14 +75,14 @@ html, body {
   border-bottom-left-radius: 8px;
 }
 
-.menu li:hover {
+.adm-menu li:hover {
   background-color: #3282B8; 
   color: white;
   transform: scale(1.02);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.logout {
+.adm-logout {
   margin-top: auto;
   background: none;
   border: none;
@@ -93,12 +95,12 @@ html, body {
   text-align: center;
 }
 
-.logout:hover {
+.adm-logout:hover {
   color: #0e233c; 
   transform: scale(1.05); 
 }
 
-.horario-content {
+.adm-content {
   flex: 1;
   padding: 40px;
   overflow-y: auto;
@@ -108,7 +110,7 @@ html, body {
   background-color: #f9fbff;
 }
 
-.horario-header {
+.adm-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -116,15 +118,17 @@ html, body {
   gap: 10px;
 }
 
-.semana-navegacao {
+.adm-semana-navegacao {
   display: flex;
   gap: 10px;
   margin-bottom: 10px;
+  justify-content: flex-end;
+  position: relative; /* Para posicionar tooltips */
 }
 
-.semana-navegacao button {
-  background-color: #112D4E;
-  color: white;
+.adm-semana-navegacao button {
+  background-color: transparent;
+  color: #112D4E;
   border: none;
   padding: 10px 16px;
   margin: 0 5px;
@@ -132,13 +136,45 @@ html, body {
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s ease;
+  position: relative; /* Para tooltip */
+  font-size: 16px;
 }
 
-.semana-navegacao button:hover {
+.adm-semana-navegacao button.adm-btn-seta {
+  background: none;
+  color: #112D4E;
+  font-size: 24px;
+  padding: 8px 12px;
+  font-weight: normal;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.adm-semana-navegacao button.adm-btn-seta:hover,
+.adm-semana-navegacao button:hover {
   background-color: #0e233c;
+  color: white;
 }
 
-.horario-tabela-wrapper {
+.adm-semana-navegacao button[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #112D4E;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 1;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.adm-tabela-wrapper {
   flex: 1;
   overflow-x: auto;
   background-color: white;
@@ -147,7 +183,7 @@ html, body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-.horario-tabela {
+.adm-tabela {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
@@ -156,24 +192,24 @@ html, body {
   overflow: hidden;
 }
 
-.horario-tabela th,
-.horario-tabela td {
+.adm-tabela th,
+.adm-tabela td {
   padding: 10px;
   border: 1px solid #ccc;
   transition: background-color 0.2s;
 }
 
-.horario-tabela th {
+.adm-tabela th {
   background-color: #112D4E;
   color: white;
 }
 
-.horario-celula {
+.adm-celula {
   background-color: #eaf3ff;
   height: 40px;
 }
 
-.horario-celula:hover {
+.adm-celula:hover {
   background-color: #d0e5ff;
   cursor: pointer;
 }
@@ -183,11 +219,11 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.fade-in {
+.adm-fade-in {
   animation: fadeInUp 0.6s ease-out;
 }
 
-select {
+.adm-select {
   padding: 10px 16px;
   border-radius: 8px;
   border: 2px solid #3282B8;
@@ -199,25 +235,25 @@ select {
   transition: all 0.3s ease;
 }
 
-select:focus {
+.adm-select:focus {
   outline: none;
   border-color: #0e233c;
   box-shadow: 0 0 8px rgba(0, 56, 92, 0.6);
   background-color: #ffffff;
 }
 
-select option {
+.adm-select option {
   padding: 10px;
   font-size: 14px;
   background-color: #ffffff;
   color: #333;
 }
 
-select:hover {
+.adm-select:hover {
   border-color: #0e233c;
 }
 
-select option:hover {
+.adm-select option:hover {
   background-color: #3282B8;
   color: white;
 }

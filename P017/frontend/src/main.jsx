@@ -12,7 +12,10 @@ import DocenteConsultarSubmissoes from './views/DocenteConsultarSubmissoes.jsx';
 import CoordenadorConsultar from './views/CoordenadorConsultar.jsx';
 import Adm from './views/Adm.jsx';
 import Pendente from './views/Pendente.jsx';
-
+import GerirCoordenadores from './views/GerirCoordenadores.jsx';
+import GerirDepartamento from './views/GerirDepartamento.jsx';
+import GerirDocentes from './views/GerirDocentes.jsx';
+import GerirPerfilDocente from './views/GerirPerfilDocente.jsx';
 
 const router = createBrowserRouter([
   {
@@ -54,6 +57,22 @@ const router = createBrowserRouter([
   {
     path: "/Pendente",
     element: <Pendente />,
+  },
+   {
+    path: "/GerirCoordenadores",
+    element: <GerirCoordenadores />,
+  },
+  {
+    path: "/GerirDepartamento",
+    element: <GerirDepartamento />,
+  },
+   {
+    path: "/GerirDocentes",
+    element: <GerirDocentes />,
+  },
+   {
+    path: "/GerirPerfilDocente",
+    element: <GerirPerfilDocente />,
   },
 ]);
 

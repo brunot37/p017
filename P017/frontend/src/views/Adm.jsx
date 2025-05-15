@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Adm.css";
 
-const DocenteVisualizarHorario = () => {
+const Adm = () => {
   const navigate = useNavigate();
 
   const [submissoes, setSubmissoes] = useState([]);
@@ -25,6 +25,7 @@ const DocenteVisualizarHorario = () => {
     setPaginaAtiva("gerirUtilizadores");
     navigate("/GerirUtilizadores");
   };
+  
 
   const handleLogout = () => {
     navigate("/App");
@@ -71,6 +72,33 @@ const DocenteVisualizarHorario = () => {
             >
               Gerir Utilizadores
             </li>
+            <li
+              onClick={() => {
+                setPaginaAtiva("gerirDepartamento");
+                navigate("/GerirDepartamento");
+              }}
+              className={paginaAtiva === "gerirDepartamento" ? "active" : ""}
+            >
+              Gerir Departamento
+            </li>
+            <li
+              onClick={() => {
+                setPaginaAtiva("gerirCoordenadores");
+                navigate("/GerirCoordenadores");
+              }}
+              className={paginaAtiva === "gerirCoordenadores" ? "active" : ""}
+            >
+              Gerir Coordenadores
+            </li>
+            <li
+              onClick={() => {
+                setPaginaAtiva("gerirDocentes");
+                navigate("/GerirDocentes");
+              }}
+              className={paginaAtiva === "gerirDocentes" ? "active" : ""}
+            >
+              Gerir Docentes
+            </li>
           </ul>
         </nav>
         <button onClick={handleLogout} className="logout">
@@ -80,15 +108,22 @@ const DocenteVisualizarHorario = () => {
 
       <main className="horario-content">
         <div className="horario-header">
-          <div className="semana-navegacao" style={{ marginLeft: "auto" }}>
-            <button onClick={irParaPaginaAnterior} disabled={pagina === 1}>
-              &larr; Anterior
+          <div className="semana-navegacao">
+            <button
+              onClick={irParaPaginaAnterior}
+              disabled={pagina === 1}
+              className="btn-seta"
+              aria-label="Anterior"
+            >
+              ‹
             </button>
             <button
               onClick={irParaProximaPagina}
               disabled={pagina === totalPaginas || totalPaginas === 0}
+              className="btn-seta"
+              aria-label="Próxima"
             >
-              Próxima &rarr;
+              ›
             </button>
           </div>
         </div>
@@ -138,4 +173,4 @@ const DocenteVisualizarHorario = () => {
   );
 };
 
-export default DocenteVisualizarHorario;
+export default Adm;

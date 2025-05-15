@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./DocenteVisualizarHorario.css";
+import "./DocenteConsultarSubmissoes.css";
 
-const DocenteVisualizarHorario = () => {
+const DocenteConsultarSubmissoes = () => {
   const navigate = useNavigate();
 
   const [submissoes, setSubmissoes] = useState([]);
-  const [pagina, setPagina] = useState(1); 
-  const [carregando, setCarregando] = useState(true); 
-  const [paginaAtiva, setPaginaAtiva] = useState('consultarSubmissoes'); 
+  const [pagina, setPagina] = useState(1);
+  const [carregando, setCarregando] = useState(true);
+  const [paginaAtiva, setPaginaAtiva] = useState("consultarSubmissoes");
+
+  const [nomeUtilizador, setNomeUtilizador] = useState("");
+
+  useEffect(() => {
+    setNomeUtilizador("Bruno Cunha");
+  }, []);
 
   const fetchData = async () => {
-    
     const data = [
       { dataSubmissao: "12/05/2025 10:30:00", estado: "Pendente" },
       { dataSubmissao: "13/05/2025 14:45:00", estado: "Aprovado" },
@@ -24,10 +29,10 @@ const DocenteVisualizarHorario = () => {
       { dataSubmissao: "20/05/2025 14:00:00", estado: "Rejeitado" },
       { dataSubmissao: "21/05/2025 15:30:00", estado: "Pendente" },
       { dataSubmissao: "22/05/2025 16:00:00", estado: "Aprovado" },
-      { dataSubmissao: "23/05/2025 17:15:00", estado: "Rejeitado" }
+      { dataSubmissao: "23/05/2025 17:15:00", estado: "Rejeitado" },
     ];
     setSubmissoes(data);
-    setCarregando(false); 
+    setCarregando(false);
   };
 
   useEffect(() => {
@@ -35,26 +40,32 @@ const DocenteVisualizarHorario = () => {
   }, []);
 
   const handleSubmeterDisponibilidade = () => {
-    setPaginaAtiva('submeterDisponibilidade');
-    navigate('/DocenteSubmeter');
+    setPaginaAtiva("submeterDisponibilidade");
+    navigate("/DocenteSubmeter");
   };
 
   const handleConsultarSubmissoes = () => {
-    setPaginaAtiva('consultarSubmissoes');
-    
+    setPaginaAtiva("consultarSubmissoes");
   };
 
   const handleVisualizarHorario = () => {
-    setPaginaAtiva('visualizarHorario');
-    navigate('/DocenteVisualizarHorario');o
+    setPaginaAtiva("visualizarHorario");
+    navigate("/DocenteVisualizarHorario");
   };
 
   const handleLogout = () => {
-    navigate("/App"); 
+    navigate("/App");
+  };
+
+  const handleGerirPerfil = () => {
+    navigate("/GerirPerfilDocente");
   };
 
   const paginasPorMostrar = 10;
-  const paginacaoSubmissoes = submissoes.slice((pagina - 1) * paginasPorMostrar, pagina * paginasPorMostrar);
+  const paginacaoSubmissoes = submissoes.slice(
+    (pagina - 1) * paginasPorMostrar,
+    pagina * paginasPorMostrar
+  );
 
   const irParaPaginaAnterior = () => {
     if (pagina > 1) {
@@ -71,27 +82,61 @@ const DocenteVisualizarHorario = () => {
   return (
     <div className="horario-container fade-in">
       <aside className="horario-sidebar">
+        <div className="user-greeting">
+          <p>
+            Olá, <strong>{nomeUtilizador || "Utilizador"}</strong>
+          </p>
+          <button className="btn-gerir-perfil" onClick={handleGerirPerfil}>
+            Gerir Perfil
+          </button>
+        </div>
+
         <nav className="menu">
           <ul>
-            <li onClick={handleVisualizarHorario} className={paginaAtiva === 'visualizarHorario' ? 'active' : ''}>Visualizar Horário</li>
+            <li
+              onClick={handleVisualizarHorario}
+              className={paginaAtiva === "visualizarHorario" ? "active" : ""}
+            >
+              Visualizar Horário
+            </li>
             <li onClick={handleSubmeterDisponibilidade}>Submeter Disponibilidade</li>
-            <li onClick={handleConsultarSubmissoes} className={paginaAtiva === 'consultarSubmissoes' ? 'active' : ''}>Consultar Submissões</li>
+            <li
+              onClick={handleConsultarSubmissoes}
+              className={paginaAtiva === "consultarSubmissoes" ? "active" : ""}
+            >
+              Consultar Submissões
+            </li>
           </ul>
         </nav>
-        <button onClick={handleLogout} className="logout">SAIR</button> 
+
+        <button onClick={handleLogout} className="logout">
+          SAIR
+        </button>
       </aside>
 
       <main className="horario-content">
         <div className="horario-header">
           <div className="semana-navegacao">
-            <button onClick={irParaPaginaAnterior}>&larr; Anterior</button>
-            <button onClick={irParaProximaPagina}>Próxima &rarr;</button>
+            <button
+              onClick={irParaPaginaAnterior}
+              className="btn-seta"
+              title="Anterior"
+              disabled={pagina === 1}
+            >
+              &#x276E;
+            </button>
+            <button
+              onClick={irParaProximaPagina}
+              className="btn-seta"
+              title="Próximo"
+              disabled={pagina === Math.ceil(submissoes.length / paginasPorMostrar)}
+            >
+              &#x276F;
+            </button>
           </div>
         </div>
 
-        {!carregando && submissoes.length === 0 && (
-          <p>Ainda não há submissões para exibir.</p> 
-        )}
+        {!carregando && submissoes.length === 0 && <p>Ainda não há submissões para exibir.</p>}
 
         {!carregando && submissoes.length > 0 && (
           <div className="horario-tabela-wrapper">
@@ -114,10 +159,10 @@ const DocenteVisualizarHorario = () => {
           </div>
         )}
 
-        {carregando && <p>Carregando dados...</p>} 
+        {carregando && <p>Carregando dados...</p>}
       </main>
     </div>
   );
 };
 
-export default DocenteVisualizarHorario;
+export default DocenteConsultarSubmissoes;
