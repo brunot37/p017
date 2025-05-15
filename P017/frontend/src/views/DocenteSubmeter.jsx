@@ -118,7 +118,7 @@ const DocenteSubmeter = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/App");
+    navigate("/");
   };
 
   const handleConsultarSubmissoes = () => {

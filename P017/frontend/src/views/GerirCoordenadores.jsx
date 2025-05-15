@@ -55,7 +55,7 @@ const GerirCoordenadores = () => {
   };
 
   const handleLogout = () => {
-    navigate("/App");
+    navigate("/");
   };
 
   return (

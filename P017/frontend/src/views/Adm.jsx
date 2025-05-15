@@ -10,33 +10,51 @@ const Adm = () => {
   const [carregando, setCarregando] = useState(true);
   const [paginaAtiva, setPaginaAtiva] = useState("gerirUtilizadores");
 
+  const paginasPorMostrar = 8;
+
+  // Garantir que submissoes é array para evitar erro slice
+  const safeSubmissoes = Array.isArray(submissoes) ? submissoes : [];
+
+  const totalPaginas = Math.ceil(safeSubmissoes.length / paginasPorMostrar);
+  const paginacaoSubmissoes = safeSubmissoes.slice(
+    (pagina - 1) * paginasPorMostrar,
+    pagina * paginasPorMostrar
+  );
+
   useEffect(() => {
     setCarregando(true);
-    const timer = setTimeout(() => {
-      // Adiciona 1 utilizador simulado "User00"
-      setSubmissoes([{ utilizador: "User00", cargo: "Pendente" }]);
-      setCarregando(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
+    fetch("http://127.0.0.1:8000/api/users/", {
+      headers: {
+        "Content-Type": "application/json",
+        // Se usares autenticação JWT:
+        // "Authorization": `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setSubmissoes(data);
+        } else {
+          setSubmissoes([]);
+          console.error("Resposta do backend inesperada:", data);
+        }
+        setCarregando(false);
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar utilizadores:", err);
+        setSubmissoes([]);
+        setCarregando(false);
+      });
   }, []);
 
   const handleGerirUtilizadores = () => {
     setPaginaAtiva("gerirUtilizadores");
     navigate("/GerirUtilizadores");
   };
-  
 
   const handleLogout = () => {
-    navigate("/App");
+    navigate("/");
   };
-
-  const paginasPorMostrar = 8;
-  const totalPaginas = Math.ceil(submissoes.length / paginasPorMostrar);
-  const paginacaoSubmissoes = submissoes.slice(
-    (pagina - 1) * paginasPorMostrar,
-    pagina * paginasPorMostrar
-  );
 
   const irParaPaginaAnterior = () => {
     if (pagina > 1) {
@@ -51,10 +69,29 @@ const Adm = () => {
   };
 
   const handleAlterarCargo = (index, novoCargo) => {
-    const novaLista = [...submissoes];
     const indiceGlobal = (pagina - 1) * paginasPorMostrar + index;
-    novaLista[indiceGlobal].cargo = novoCargo;
-    setSubmissoes(novaLista);
+    const user = safeSubmissoes[indiceGlobal];
+
+    fetch(`http://127.0.0.1:8000/api/user/${user.id}/tipo-conta/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        // "Authorization": `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ tipo_conta: novoCargo.toLowerCase() }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao alterar cargo");
+        return res.json();
+      })
+      .then(() => {
+        const novaLista = [...safeSubmissoes];
+        novaLista[indiceGlobal].cargo = novoCargo.toLowerCase();
+        setSubmissoes(novaLista);
+      })
+      .catch((error) => {
+        alert("Erro ao alterar cargo: " + error.message);
+      });
   };
 
   return (
@@ -128,11 +165,11 @@ const Adm = () => {
           </div>
         </div>
 
-        {!carregando && submissoes.length === 0 && (
+        {!carregando && safeSubmissoes.length === 0 && (
           <p>Ainda não há utilizadores para exibir.</p>
         )}
 
-        {!carregando && submissoes.length > 0 && (
+        {!carregando && safeSubmissoes.length > 0 && (
           <div className="horario-tabela-wrapper">
             <table className="horario-tabela">
               <thead>
@@ -144,15 +181,16 @@ const Adm = () => {
               </thead>
               <tbody>
                 {paginacaoSubmissoes.map((submissao, index) => (
-                  <tr key={index}>
+                  <tr key={submissao.id}>
                     <td className="horario-celula">{submissao.utilizador}</td>
                     <td className="horario-celula">{submissao.cargo}</td>
                     <td className="horario-celula">
                       <select
-                        value={submissao.cargo}
-                        onChange={(e) =>
-                          handleAlterarCargo(index, e.target.value)
+                        value={
+                          submissao.cargo.charAt(0).toUpperCase() +
+                          submissao.cargo.slice(1)
                         }
+                        onChange={(e) => handleAlterarCargo(index, e.target.value)}
                       >
                         <option value="Pendente">Pendente</option>
                         <option value="Docente">Docente</option>

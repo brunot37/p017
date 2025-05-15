@@ -29,7 +29,7 @@ const GerirPerfilDocente = () => {
   };
 
   const handleLogout = () => {
-    navigate("/App");
+    navigate("/");
   };
 
   const handleGerirPerfil = () => {

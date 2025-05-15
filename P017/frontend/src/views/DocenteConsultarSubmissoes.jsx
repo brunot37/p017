@@ -54,7 +54,7 @@ const DocenteConsultarSubmissoes = () => {
   };
 
   const handleLogout = () => {
-    navigate("/App");
+    navigate("/");
   };
 
   const handleGerirPerfil = () => {

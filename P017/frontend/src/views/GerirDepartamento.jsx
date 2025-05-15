@@ -56,7 +56,7 @@ const GerirDepartamento = () => {
   const handleGerirDepartamento = () => navigate("/GerirDepartamento");
   const handleGerirCoordenadores = () => navigate("/GerirCoordenadores");
   const handleGerirDocentes = () => navigate("/GerirDocentes");
-  const handleLogout = () => navigate("/App");
+  const handleLogout = () => navigate("/");
 
   // Adicionar departamento simulado
   const handleSubmit = (e) => {

@@ -56,7 +56,7 @@ const GerirDocentes = () => {
   };
 
   const handleLogout = () => {
-    navigate("/App");
+    navigate("/");
   };
 
   return (

@@ -3,11 +3,16 @@ from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.contrib.auth import authenticate, login, get_user_model
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, permissions
 from .models import Horario, Disponibilidade
-from .serializers import HorarioSerializer, DisponibilidadeSerializer
+from .serializers import (
+    HorarioSerializer,
+    DisponibilidadeSerializer,
+    UserTipoContaUpdateSerializer,
+)
 
 User = get_user_model()
 
@@ -35,11 +40,11 @@ class RegistoView(APIView):
                 email=email,
                 password=password,
                 nome=nome,
-                tipo_conta=tipo_conta
+                tipo_conta='pendente'
             )
             return Response({
-                "message": f"Conta {tipo_conta} criada com sucesso!",
-                "tipo_conta": tipo_conta
+                "message": "Conta criada com sucesso!",
+                "tipo_conta": user.tipo_conta
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
@@ -64,10 +69,25 @@ class LoginView(APIView):
                 "message": f"Login de {user.tipo_conta} com sucesso",
                 "tipo_conta": user.tipo_conta,
                 "nome": user.nome,
-                "token": access_token  
+                "token": access_token
             }, status=status.HTTP_200_OK)
         else:
             return Response({"message": "Credenciais inválidas"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserTipoContaView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({"tipo_conta": user.tipo_conta})
+
+
+class UserTipoContaUpdateView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserTipoContaUpdateSerializer
+    permission_classes = [permissions.IsAdminUser]
+    lookup_field = 'id'
 
 
 class SubmeterHorarioView(APIView):
@@ -82,15 +102,15 @@ class SubmeterHorarioView(APIView):
         horarios = request.data.get('horarios', [])
 
         for horario_data in horarios:
-            semestre = horario_data.get("semestre") 
-            unidade_curricular = horario_data.get("unidade_curricular") 
+            semestre = horario_data.get("semestre")
+            unidade_curricular = horario_data.get("unidade_curricular")
 
             horario_data['semestre'] = semestre
             horario_data['unidade_curricular'] = unidade_curricular
 
             serializer = HorarioSerializer(data=horario_data)
             if serializer.is_valid():
-                serializer.save(utilizador=user)  
+                serializer.save(utilizador=user)
             else:
                 return Response({"message": "Erro ao submeter horário."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -102,20 +122,36 @@ class SubmeterHorarioView(APIView):
         serializer = HorarioSerializer(horarios, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class ListarDocentesComHorarioView(APIView):
     def get(self, request):
-       
         docentes_com_horarios = User.objects.filter(horario__isnull=False).distinct()
 
         docentes_data = []
         for docente in docentes_com_horarios:
-           
             horarios = Horario.objects.filter(utilizador=docente)
             horarios_data = HorarioSerializer(horarios, many=True).data
             docentes_data.append({
                 "id": docente.id,
                 "nome": docente.nome,
-                "disponibilidade": horarios_data,  
+                "disponibilidade": horarios_data,
             })
 
         return Response(docentes_data)
+
+
+# NOVO: Endpoint para listar todos os utilizadores (para o Adm.jsx)
+class ListUsersView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request):
+        users = User.objects.all()
+        data = []
+        for u in users:
+            data.append({
+                "id": u.id,
+                "utilizador": u.nome,
+                "cargo": u.tipo_conta,
+                "email": u.email
+            })
+        return Response(data, status=status.HTTP_200_OK)

@@ -25,7 +25,11 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        if (data.tipo_conta === "docente" || data.tipo_conta === "coordenador") {
+        if (
+          data.tipo_conta === "docente" ||
+          data.tipo_conta === "coordenador" ||
+          data.tipo_conta === "adm"
+        ) {
           setTipoConta(data.tipo_conta);
           setPopupSucesso(true);
           localStorage.setItem("token", data.token); 
@@ -47,12 +51,16 @@ const Login = () => {
   };
 
   const fecharPopupSucesso = () => {
-    if (tipoConta === "docente") {
-      navigate("/DocenteVisualizarHorario");
-    } else if (tipoConta === "coordenador") {
-      navigate("/CoordenadorConsultar");
-    }
-  };
+  setPopupSucesso(false); // FECHAR o popup antes de navegar
+  if (tipoConta === "docente") {
+    navigate("/DocenteVisualizarHorario");
+  } else if (tipoConta === "coordenador") {
+    navigate("/CoordenadorConsultar");
+  } else if (tipoConta === "adm") {
+    navigate("/Adm");
+  }
+};
+
 
   return (
     <div className="registration-container fade-in">
@@ -119,7 +127,11 @@ const PopupErroLogin = ({ mensagem, onClose }) => (
 );
 
 const PopupSucessoLogin = ({ tipoConta, onClose }) => {
-  const tipoFormatado = tipoConta === "docente" ? "Docente" : "Coordenador";
+  let tipoFormatado;
+  if (tipoConta === "docente") tipoFormatado = "Docente";
+  else if (tipoConta === "coordenador") tipoFormatado = "Coordenador";
+  else if (tipoConta === "adm") tipoFormatado = "Administrador";
+  else tipoFormatado = tipoConta;
 
   return (
     <div className="popup-overlay">

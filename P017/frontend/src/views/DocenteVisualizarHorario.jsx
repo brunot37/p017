@@ -2,16 +2,30 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./DocenteVisualizarHorario.css";
 
+function getUserFromToken() {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
 const DocenteVisualizarHorario = () => {
   const navigate = useNavigate();
 
-  // Estado para guardar o nome do utilizador
   const [nomeUtilizador, setNomeUtilizador] = useState("");
 
   useEffect(() => {
-    // Simula fetch do nome do utilizador
-    setNomeUtilizador("Bruno Cunha");
-  }, []);
+    const user = getUserFromToken();
+    if (user && user.nome) {
+      setNomeUtilizador(user.nome);
+    } else {
+      navigate("/Login");
+    }
+  }, [navigate]);
 
   const baseDate = new Date("2025-09-14"); // Data base para cálculo das semanas
 
@@ -83,7 +97,9 @@ const DocenteVisualizarHorario = () => {
   };
 
   const handleLogout = () => {
-    navigate("/App");
+    // Opcional: limpar token ao fazer logout
+    localStorage.removeItem("token");
+    navigate("/");
   };
 
   const handleGerirPerfil = () => {

@@ -10,7 +10,6 @@ const Registo = () => {
   const [loading, setLoading] = useState(false);  
   const [popupSucesso, setPopupSucesso] = useState(false);
   const [popupErro, setPopupErro] = useState({ visivel: false, mensagem: "" });
-  const [tipoContaCriada] = useState("docente");  // Definir tipo de conta como 'docente' fixo
   const navigate = useNavigate();  
 
   const handleSubmit = async (event) => {
@@ -31,7 +30,7 @@ const Registo = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          tipo_conta: tipoContaCriada,  // Sempre 'docente'
+          tipo_conta: "docente",  // será ignorado no backend
           nome: nome,
           email: email,
           senha: password,
@@ -76,8 +75,6 @@ const Registo = () => {
         <h2 className="registration-title">Cria a tua conta</h2>
         <p className="registration-description">Começa agora a gerir a tua disponibilidade</p>
         <form onSubmit={handleSubmit}>
-          {/* Removida a opção para 'Docente' pois já é fixo */}
-          
           <div className="input-field user">
             <input
               type="text"
@@ -113,7 +110,7 @@ const Registo = () => {
       </div>
 
       {popupSucesso && (
-        <PopupSucesso tipoConta={tipoContaCriada} onClose={fecharPopupSucesso} />
+        <PopupSucesso onClose={fecharPopupSucesso} />
       )}
 
       {popupErro.visivel && (
@@ -123,16 +120,12 @@ const Registo = () => {
   );
 };
 
-const PopupSucesso = ({ tipoConta, onClose }) => {
-  if (!tipoConta) return null;
-
-  const tipoFormatado = tipoConta.charAt(0).toUpperCase() + tipoConta.slice(1);
-
+const PopupSucesso = ({ onClose }) => {
   return (
     <div className="popup-overlay">
       <div className="popup-box">
         <h3>Conta criada com sucesso!</h3>
-        <p>O tipo de conta <strong>{tipoFormatado}</strong> foi criado com sucesso.</p>
+        <p>Por favor, aguarde a atribuição do seu cargo pelo administrador.</p>
         <button onClick={onClose} className="popup-button">OK</button>
       </div>
     </div>

@@ -38,7 +38,7 @@ const DocenteVisualizarHorario = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token"); 
-    navigate("/Registo"); 
+    navigate("/"); 
   };
 
   return (
