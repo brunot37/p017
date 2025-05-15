@@ -8,7 +8,8 @@ function getUserFromToken() {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
     return payload;
-  } catch {
+  } catch (e) {
+    console.error("Erro a ler token JWT:", e);
     return null;
   }
 }
@@ -20,6 +21,7 @@ const DocenteVisualizarHorario = () => {
 
   useEffect(() => {
     const user = getUserFromToken();
+    console.log("User from token:", user); // DEBUG: confirmar token lido
     if (user && user.nome) {
       setNomeUtilizador(user.nome);
     } else {
@@ -97,7 +99,6 @@ const DocenteVisualizarHorario = () => {
   };
 
   const handleLogout = () => {
-    // Opcional: limpar token ao fazer logout
     localStorage.removeItem("token");
     navigate("/");
   };

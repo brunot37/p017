@@ -98,7 +98,7 @@ const GerirCoordenadores = () => {
         <table className="tabela-coordenadores">
           <thead>
             <tr>
-              <th>Utilizador</th>
+              <th>Coordenador</th>
               <th>Cargo</th>
               <th>Alterar Departamento</th>
             </tr>

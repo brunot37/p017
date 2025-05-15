@@ -4,7 +4,6 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./DocenteSubmeter.css";
 
-// Input customizado para mostrar ano letivo no formato "YYYY/YYYY+1"
 const CustomYearInput = forwardRef(({ value, onClick }, ref) => (
   <button
     className="custom-year-input"
@@ -16,7 +15,6 @@ const CustomYearInput = forwardRef(({ value, onClick }, ref) => (
   </button>
 ));
 
-// Componente Modal simples embutido
 const Modal = ({ message, onClose }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -40,10 +38,10 @@ const DocenteSubmeter = () => {
   const [semestre, setSemestre] = useState("1");
   const [anoLetivo, setAnoLetivo] = useState("");
   const [selectedYearDate, setSelectedYearDate] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
+
+  const [selectedWeekDay, setSelectedWeekDay] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
 
-  // Estado do modal
   const [modalMessage, setModalMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -54,12 +52,15 @@ const DocenteSubmeter = () => {
     setSelectedYearDate(date);
   };
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-  };
-
-  const handleTimeChange = (e) => {
-    setSelectedTime(e.target.value);
+  const getNextDateOfWeekday = (weekday) => {
+    // weekday: 1=segunda, 2=terça ... 5=sexta
+    const today = new Date();
+    const todayDay = today.getDay(); // domingo=0, segunda=1,... sábado=6
+    let diff = weekday - todayDay;
+    if (diff <= 0) diff += 7;
+    const nextDate = new Date(today);
+    nextDate.setDate(today.getDate() + diff);
+    return nextDate;
   };
 
   const openModal = (msg) => {
@@ -72,12 +73,27 @@ const DocenteSubmeter = () => {
   };
 
   const submeterDisponibilidade = () => {
-    if (!selectedDate || !selectedTime) {
-      openModal("Por favor, selecione data e hora.");
+    if (!selectedWeekDay || !selectedTime) {
+      openModal("Por favor, selecione dia da semana e hora.");
       return;
     }
 
-    const dia = selectedDate.toISOString().split("T")[0];
+    const weekDayMap = {
+      Segunda: 1,
+      Terça: 2,
+      Quarta: 3,
+      Quinta: 4,
+      Sexta: 5,
+    };
+
+    const weekdayNum = weekDayMap[selectedWeekDay];
+    if (!weekdayNum) {
+      openModal("Dia da semana inválido.");
+      return;
+    }
+
+    const dateObj = getNextDateOfWeekday(weekdayNum);
+    const dia = dateObj.toISOString().split("T")[0];
     const hora_inicio = selectedTime;
 
     const horarios = [
@@ -188,16 +204,19 @@ const DocenteSubmeter = () => {
             </div>
 
             <div className="horarios-selector">
-              <label>Escolha a data:</label>
-              <DatePicker
-                selected={selectedDate}
-                onChange={handleDateChange}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="Escolha a data"
-                minDate={new Date()}
-                className="calendar-selector"
-                popperPlacement="bottom"
-              />
+              <label>Escolha o dia da semana:</label>
+              <select
+                className="semestre-select"
+                value={selectedWeekDay}
+                onChange={(e) => setSelectedWeekDay(e.target.value)}
+              >
+                <option value="">-- Selecionar dia --</option>
+                <option value="Segunda">Segunda-feira</option>
+                <option value="Terça">Terça-feira</option>
+                <option value="Quarta">Quarta-feira</option>
+                <option value="Quinta">Quinta-feira</option>
+                <option value="Sexta">Sexta-feira</option>
+              </select>
             </div>
 
             <div className="horarios-selector">
@@ -206,7 +225,7 @@ const DocenteSubmeter = () => {
                 type="time"
                 step="1800"
                 value={selectedTime}
-                onChange={handleTimeChange}
+                onChange={(e) => setSelectedTime(e.target.value)}
                 className="hora-input"
                 placeholder="HH:mm"
               />

@@ -54,12 +54,12 @@ class RegistoView(APIView):
 class LoginView(APIView):
     def post(self, request):
         email = request.data.get("email")
-        senha = request.data.get("senha")
+        password = request.data.get("password")  # Aqui espera campo "password"
 
-        if not email or not senha:
+        if not email or not password:
             return Response({"message": "Todos os campos são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = authenticate(request, email=email, password=senha)
+        user = authenticate(request, email=email, password=password)
 
         if user is not None:
             refresh = RefreshToken.for_user(user)
@@ -140,7 +140,7 @@ class ListarDocentesComHorarioView(APIView):
         return Response(docentes_data)
 
 
-# NOVO: Endpoint para listar todos os utilizadores (para o Adm.jsx)
+# Endpoint para listar todos os utilizadores (para o Adm.jsx)
 class ListUsersView(APIView):
     permission_classes = [permissions.IsAdminUser]
 

@@ -4,14 +4,13 @@ import "./Login.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState(""); 
+  const [senha, setSenha] = useState("");
   const [popupErro, setPopupErro] = useState({ visivel: false, mensagem: "" });
-  const [popupSucesso, setPopupSucesso] = useState(false);
-  const [tipoConta, setTipoConta] = useState("");
-  const navigate = useNavigate(); 
+  const [popupSucesso, setPopupSucesso] = useState({ visivel: false, tipoConta: "" });
+  const navigate = useNavigate();
 
   const handleLogin = async (event) => {
-    event.preventDefault(); 
+    event.preventDefault();
 
     try {
       const response = await fetch("http://127.0.0.1:8000/api/login", {
@@ -19,7 +18,8 @@ const Login = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, senha }), 
+       
+        body: JSON.stringify({ email, password: senha }),
       });
 
       const data = await response.json();
@@ -30,18 +30,15 @@ const Login = () => {
           data.tipo_conta === "coordenador" ||
           data.tipo_conta === "adm"
         ) {
-          setTipoConta(data.tipo_conta);
-          setPopupSucesso(true);
-          localStorage.setItem("token", data.token); 
+          localStorage.setItem("token", data.token);
+          setPopupSucesso({ visivel: true, tipoConta: data.tipo_conta });
         } else {
           setPopupErro({ visivel: true, mensagem: "Tipo de conta não reconhecido." });
         }
       } else {
-        console.log("Mensagem de erro do backend:", data.message);
         setPopupErro({ visivel: true, mensagem: data.message || "Erro ao fazer login." });
-      } 
+      }
     } catch (err) {
-      console.error("Erro de rede ou servidor:", err);
       setPopupErro({ visivel: true, mensagem: "Erro ao comunicar com o servidor." });
     }
   };
@@ -50,17 +47,16 @@ const Login = () => {
     setPopupErro({ visivel: false, mensagem: "" });
   };
 
-  const fecharPopupSucesso = () => {
-  setPopupSucesso(false); // FECHAR o popup antes de navegar
-  if (tipoConta === "docente") {
-    navigate("/DocenteVisualizarHorario");
-  } else if (tipoConta === "coordenador") {
-    navigate("/CoordenadorConsultar");
-  } else if (tipoConta === "adm") {
-    navigate("/Adm");
-  }
-};
-
+  const fecharPopupSucesso = (tipoContaLocal) => {
+    setPopupSucesso({ visivel: false, tipoConta: "" });
+    if (tipoContaLocal === "docente") {
+      navigate("/DocenteVisualizarHorario");
+    } else if (tipoContaLocal === "coordenador") {
+      navigate("/CoordenadorConsultar");
+    } else if (tipoContaLocal === "adm") {
+      navigate("/Adm");
+    }
+  };
 
   return (
     <div className="registration-container fade-in">
@@ -72,11 +68,11 @@ const Login = () => {
         />
       </div>
       <div className="registration-form">
-        <Link to="/" className="back-to-home-link">← Voltar</Link>
+        <Link to="/" className="back-to-home-link">
+          ← Voltar
+        </Link>
         <h2 className="registration-title">Inicia Sessão</h2>
-        <p className="registration-description">
-          Insere os teus dados para continuar
-        </p>
+        <p className="registration-description">Insere os teus dados para continuar</p>
         <form onSubmit={handleLogin}>
           <div className="input-field email">
             <input
@@ -91,8 +87,8 @@ const Login = () => {
             <input
               type="password"
               placeholder="Palavra-passe"
-              value={senha}  
-              onChange={(e) => setSenha(e.target.value)} 
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
               required
             />
           </div>
@@ -100,7 +96,9 @@ const Login = () => {
           <div className="forgot-password-link">
             <Link to="/RecuperarPassword">Esqueceste-te da palavra-passe?</Link>
           </div>
-          <button type="submit" className="register-button">Login →</button>
+          <button type="submit" className="register-button">
+            Login →
+          </button>
         </form>
       </div>
 
@@ -108,8 +106,8 @@ const Login = () => {
         <PopupErroLogin mensagem={popupErro.mensagem} onClose={fecharPopupErro} />
       )}
 
-      {popupSucesso && (
-        <PopupSucessoLogin tipoConta={tipoConta} onClose={fecharPopupSucesso} />
+      {popupSucesso.visivel && (
+        <PopupSucessoLogin tipoConta={popupSucesso.tipoConta} onClose={fecharPopupSucesso} />
       )}
     </div>
   );
@@ -120,8 +118,12 @@ const PopupErroLogin = ({ mensagem, onClose }) => (
     <div className="popup-box">
       <h3 style={{ color: "#cc0000" }}>Erro</h3>
       <p>{mensagem}</p>
-      <button onClick={onClose} className="popup-button">Fechar</button>
-      <Link to="/Registo" className="popup-link">Não tens conta? Criar conta</Link>
+      <button onClick={onClose} className="popup-button">
+        Fechar
+      </button>
+      <Link to="/Registo" className="popup-link">
+        Não tens conta? Criar conta
+      </Link>
     </div>
   </div>
 );
@@ -137,8 +139,12 @@ const PopupSucessoLogin = ({ tipoConta, onClose }) => {
     <div className="popup-overlay">
       <div className="popup-box">
         <h3 style={{ color: "#008000" }}>Login efetuado com sucesso</h3>
-        <p>Login de <strong>{tipoFormatado}</strong> com sucesso.</p>
-        <button onClick={onClose} className="popup-button">Continuar</button>
+        <p>
+          Login de <strong>{tipoFormatado}</strong> com sucesso.
+        </p>
+        <button onClick={() => onClose(tipoConta)} className="popup-button">
+          Continuar
+        </button>
       </div>
     </div>
   );

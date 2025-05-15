@@ -13,7 +13,7 @@ const App = () => {
       <div className="content-section">
         <h1 className="modern-title">Gestão de Disponibilidade de Horários</h1>
         <p className="modern-subtitle">
-          ENCONTRE O HORÁRIO IDEAL PARA TODOS OS DOCENTES COM BASE NA SUA
+          ENCONTRE O HORÁRIO IDEAL COM BASE NA SUA
           DISPONIBILIDADE
         </p>
         <div className="buttons">
