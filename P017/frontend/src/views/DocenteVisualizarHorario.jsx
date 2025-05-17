@@ -21,15 +21,14 @@ const DocenteVisualizarHorario = () => {
 
   useEffect(() => {
     const user = getUserFromToken();
-    console.log("User from token:", user); // DEBUG: confirmar token lido
     if (user && user.nome) {
       setNomeUtilizador(user.nome);
     } else {
-      navigate("/Login");
+      setNomeUtilizador("Docente");
     }
   }, [navigate]);
 
-  const baseDate = new Date("2025-09-14"); // Data base para cálculo das semanas
+  const baseDate = new Date("2025-09-14");
 
   const calcularSemanaAtual = () => {
     const hoje = new Date();
@@ -108,7 +107,7 @@ const DocenteVisualizarHorario = () => {
   };
 
   return (
-    <div className="horario-container fade-in">
+    <div className="docente-horario-container fade-in">
       <aside className="horario-sidebar">
         <div className="user-greeting">
           <p>
@@ -121,9 +120,9 @@ const DocenteVisualizarHorario = () => {
 
         <nav className="menu">
           <ul>
-            <li className="active">Visualizar Horário</li>
             <li onClick={handleSubmeterDisponibilidade}>Submeter Disponibilidade</li>
             <li onClick={handleConsultarSubmissoes}>Consultar Submissões</li>
+            <li className="active">Visualizar Horário</li>
           </ul>
         </nav>
 
@@ -132,48 +131,24 @@ const DocenteVisualizarHorario = () => {
         </button>
       </aside>
 
-      <main className="horario-content">
-        <div
-          className="horario-header"
-          style={{ alignItems: "flex-start", gap: "12px", flexWrap: "wrap" }}
-        >
+      <main className="docente-horario-content">
+        <div className="docente-horario-header">
           <input
             type="date"
             value={selectedDate || ""}
             onChange={handleDateChange}
-            className="date-picker"
+            className="docente-date-picker"
             title="Selecionar data"
             max="2100-12-31"
             min="2000-01-01"
-            style={{
-              padding: "6px 10px",
-              borderRadius: "6px",
-              border: "1px solid #ccc",
-              cursor: "pointer",
-            }}
           />
-          <h2 className="horario-titulo" style={{ marginTop: "6px", color: "#112D4E" }}>
+          <h2 className="docente-horario-titulo">
             Semana {formatarData(dataInicio)} - {formatarData(dataFim)}
           </h2>
-
-          <div
-            className="semana-navegacao"
-            style={{ marginLeft: "auto", alignSelf: "center" }}
-          >
-            <button onClick={() => mudarSemana(-1)} className="btn-seta" title="Anterior">
-              &#x276E;
-            </button>
-
-            <button onClick={voltarHoje}>Semana Atual</button>
-
-            <button onClick={() => mudarSemana(1)} className="btn-seta" title="Próxima">
-              &#x276F;
-            </button>
-          </div>
         </div>
 
-        <div className="horario-tabela-wrapper">
-          <table className="horario-tabela">
+        <div className="docente-horario-tabela-wrapper">
+          <table className="docente-horario-tabela">
             <thead>
               <tr>
                 <th>Hora</th>
@@ -185,11 +160,11 @@ const DocenteVisualizarHorario = () => {
             <tbody>
               {horas.map((hora) => (
                 <tr key={hora}>
-                  <td className="hora-coluna">{hora}</td>
+                  <td className="docente-hora-coluna">{hora}</td>
                   {dias.map((dia) => {
                     const cellId = `${dia}-${hora.replace(":", "")}`;
                     return (
-                      <td key={cellId} id={cellId} className="horario-celula">
+                      <td key={cellId} id={cellId} className="docente-horario-celula">
                         -
                       </td>
                     );
@@ -198,6 +173,28 @@ const DocenteVisualizarHorario = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        <div className="docente-semana-navegacao-rodape">
+          <button
+            onClick={() => mudarSemana(-1)}
+            className="docente-btn-seta"
+            title="Semana Anterior"
+          >
+            &#x276E;
+          </button>
+
+          <button onClick={voltarHoje} className="docente-btn-semana-atual">
+            Semana Atual
+          </button>
+
+          <button
+            onClick={() => mudarSemana(1)}
+            className="docente-btn-seta"
+            title="Próxima Semana"
+          >
+            &#x276F;
+          </button>
         </div>
       </main>
     </div>

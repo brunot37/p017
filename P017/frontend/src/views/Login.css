@@ -262,3 +262,10 @@
     transform: translateY(0);
   }
 }
+.validation-error {
+  color: #d93025;
+  font-size: 0.9rem;
+  margin: 8px 0 12px 0;
+  text-align: left;
+  padding-left: 4px;
+}

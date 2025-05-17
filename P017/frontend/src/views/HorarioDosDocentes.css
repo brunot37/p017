@@ -12,7 +12,7 @@ html, body {
   background-color: #f0f2f5;
 }
 
-.docente-horario-container {
+.hd-container {
   display: flex;
   height: 100vh;
   width: 100vw;
@@ -20,7 +20,7 @@ html, body {
 }
 
 
-.horario-sidebar {
+.hd-sidebar {
   width: 240px;
   background-color: #112D4E;
   color: white;
@@ -30,18 +30,56 @@ html, body {
   padding: 20px;
 }
 
-.menu {
+.hd-user-greeting {
+  width: 100%;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 16px;
+  color: white;
+  font-weight: 500;
+}
+
+.hd-gerir-perfil-btn {
+  padding: 12px 16px;
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.hd-gerir-perfil-btn:hover {
+  background-color: #3282B8;
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.hd-divider {
+  width: 100%;
+  border: none;
+  border-top: 1px solid #3282B8;
+  margin-top: 16px;
+}
+
+/* Menu */
+.hd-menu {
   width: 100%;
 }
 
-.menu ul {
+.hd-menu ul {
   list-style: none;
   padding: 0;
   margin: 0;
   width: 100%;
 }
 
-.menu li {
+.hd-menu li {
   padding: 12px 16px;
   cursor: pointer;
   text-align: left;
@@ -51,21 +89,21 @@ html, body {
   position: relative;
 }
 
-.menu li.active {
+.hd-menu li.active {
   background-color: #3282B8;
   font-weight: bold;
   border-radius: 8px;
 }
 
-.menu li:hover {
-  background-color: #3282B8;
+.hd-menu li:hover {
+  background-color: #3282B8; 
   color: white;
   transform: scale(1.02);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Logout */
-.logout {
+
+.hd-logout {
   margin-top: auto;
   background: none;
   border: none;
@@ -76,33 +114,13 @@ html, body {
   font-weight: 500;
 }
 
-.logout:hover {
+.hd-logout:hover {
   color: #0e233c;
   transform: scale(1.05);
 }
 
-.user-greeting p {
-  margin-bottom: 12px;
-  font-size: 16px;
-}
-
-.btn-gerir-perfil {
-  background: none;
-  border: none;
-  color: #3282B8;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  padding: 6px 0;
-  transition: color 0.3s ease;
-}
-
-.btn-gerir-perfil:hover {
-  color: #0e233c;
-}
-
-/* Conteúdo principal */
-.docente-horario-content {
+/* Conteúdo */
+.hd-content {
   flex: 1;
   padding: 40px;
   overflow-y: auto;
@@ -112,7 +130,13 @@ html, body {
   background-color: #f9fbff;
 }
 
-.docente-horario-header {
+.hd-welcome {
+  font-size: 24px;
+  color: #112D4E;
+  margin-bottom: 20px;
+}
+
+.hd-header {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -120,14 +144,14 @@ html, body {
   flex-wrap: wrap;
 }
 
-.docente-date-picker {
+.hd-date-picker {
   padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
   cursor: pointer;
 }
 
-.docente-horario-titulo {
+.hd-titulo {
   margin-top: 6px;
   color: #112D4E;
   font-size: 20px;
@@ -135,7 +159,7 @@ html, body {
 }
 
 /* Tabela */
-.docente-horario-tabela-wrapper {
+.hd-tabela-wrapper {
   flex: 1;
   overflow-x: auto;
   background-color: white;
@@ -144,7 +168,7 @@ html, body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-.docente-horario-tabela {
+.hd-tabela {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
@@ -153,35 +177,35 @@ html, body {
   overflow: hidden;
 }
 
-.docente-horario-tabela th,
-.docente-horario-tabela td {
+.hd-tabela th,
+.hd-tabela td {
   padding: 10px;
   border: 1px solid #ccc;
   transition: background-color 0.2s;
 }
 
-.docente-horario-tabela th {
+.hd-tabela th {
   background-color: #112D4E;
   color: white;
 }
 
-.docente-horario-celula {
+.hd-horario-celula {
   background-color: #eaf3ff;
   height: 40px;
 }
 
-.docente-horario-celula:hover {
+.hd-horario-celula:hover {
   background-color: #d0e5ff;
   cursor: pointer;
 }
 
-.docente-hora-coluna {
+.hd-hora-coluna {
   font-weight: bold;
   background-color: #d9e8f6;
 }
 
-/* Navegação rodapé semana */
-.docente-semana-navegacao-rodape {
+/* Navegação de semanas */
+.hd-navegacao {
   margin-top: 20px;
   display: flex;
   justify-content: center;
@@ -189,7 +213,7 @@ html, body {
   gap: 16px;
 }
 
-.docente-btn-seta {
+.hd-btn-seta {
   background-color: #112D4E;
   color: white;
   border: none;
@@ -202,11 +226,11 @@ html, body {
   transition: background-color 0.3s ease;
 }
 
-.docente-btn-seta:hover {
+.hd-btn-seta:hover {
   background-color: #0e233c;
 }
 
-.docente-btn-semana-atual {
+.hd-btn-semana-atual {
   background-color: #3282B8;
   color: white;
   border: none;
@@ -219,10 +243,11 @@ html, body {
   transition: background-color 0.3s ease;
 }
 
-.docente-btn-semana-atual:hover {
+.hd-btn-semana-atual:hover {
   background-color: #246092;
 }
 
+/* Animação */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
@@ -230,4 +255,32 @@ html, body {
 
 .fade-in {
   animation: fadeInUp 0.6s ease-out;
+}
+.hd-select-docente {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  background-color: white;
+}
+
+.hd-select-docente:hover {
+  border-color: #3282B8;
+}
+
+.hd-select-docente:focus {
+  outline: none;
+  border-color: #226293;
+  box-shadow: 0 0 5px rgba(34, 98, 147, 0.5);
+}
+.hd-aviso {
+  font-size: 16px;
+  color: #444;
+  background-color: #fff5cc;
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 20px;
+  border-left: 6px solid #f0c419;
 }

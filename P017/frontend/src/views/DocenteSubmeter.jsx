@@ -4,14 +4,14 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./DocenteSubmeter.css";
 
-const CustomYearInput = forwardRef(({ value, onClick }, ref) => (
+const CustomYearInput = forwardRef(({ label, onClick }, ref) => (
   <button
     className="custom-year-input"
     onClick={onClick}
     ref={ref}
     type="button"
   >
-    {value || "Escolha o ano letivo"}
+    {label || "Escolha o ano letivo"}
   </button>
 ));
 
@@ -19,7 +19,9 @@ const Modal = ({ message, onClose }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <p>{message}</p>
+        {message.split("\n").map((line, i) => (
+          <p key={i}>{line}</p>
+        ))}
         <button onClick={onClose}>OK</button>
       </div>
     </div>
@@ -53,9 +55,8 @@ const DocenteSubmeter = () => {
   };
 
   const getNextDateOfWeekday = (weekday) => {
-    // weekday: 1=segunda, 2=terça ... 5=sexta
     const today = new Date();
-    const todayDay = today.getDay(); // domingo=0, segunda=1,... sábado=6
+    const todayDay = today.getDay();
     let diff = weekday - todayDay;
     if (diff <= 0) diff += 7;
     const nextDate = new Date(today);
@@ -72,9 +73,31 @@ const DocenteSubmeter = () => {
     setIsModalOpen(false);
   };
 
+  const criarMensagemSucesso = () => {
+    return (
+      `Disponibilidade submetida com sucesso.\n` +
+      `Ano letivo: ${anoLetivo}\n` +
+      `Semestre: ${semestre === "1" ? "1º Semestre" : "2º Semestre"}\n` +
+      `Dia da semana: ${selectedWeekDay}\n` +
+      `Horário: ${selectedTime}`
+    );
+  };
+
   const submeterDisponibilidade = () => {
-    if (!selectedWeekDay || !selectedTime) {
-      openModal("Por favor, selecione dia da semana e hora.");
+    if (!anoLetivo) {
+      openModal("Por favor, selecione o ano letivo.");
+      return;
+    }
+    if (!semestre) {
+      openModal("Por favor, selecione o semestre.");
+      return;
+    }
+    if (!selectedWeekDay) {
+      openModal("Por favor, selecione o dia da semana.");
+      return;
+    }
+    if (!selectedTime) {
+      openModal("Por favor, selecione o horário.");
       return;
     }
 
@@ -115,13 +138,13 @@ const DocenteSubmeter = () => {
       body: JSON.stringify({ horarios }),
     })
       .then(async (response) => {
-        const data = await response.json();
-
         if (!response.ok) {
+          // tenta ler a mensagem de erro
+          const data = await response.json().catch(() => ({}));
           throw new Error(data.message || "Erro ao submeter horários.");
         }
-
-        openModal(data.message || "Horários submetidos com sucesso!");
+        // se correr bem
+        openModal(criarMensagemSucesso());
       })
       .catch((error) => {
         openModal(error.message || "Erro ao submeter horários.");
@@ -160,9 +183,9 @@ const DocenteSubmeter = () => {
 
           <nav className="menu">
             <ul>
-              <li onClick={handleVisualizarHorario}>Visualizar Horário</li>
               <li className="active">Submeter Disponibilidade</li>
               <li onClick={handleConsultarSubmissoes}>Consultar Submissões</li>
+              <li onClick={handleVisualizarHorario}>Visualizar Horário</li>
             </ul>
           </nav>
 
@@ -186,7 +209,7 @@ const DocenteSubmeter = () => {
                 dateFormat="yyyy"
                 maxDate={new Date(new Date().getFullYear() + 5, 11, 31)}
                 minDate={new Date(2000, 0, 1)}
-                customInput={<CustomYearInput value={anoLetivo} />}
+                customInput={<CustomYearInput label={anoLetivo} />}
                 popperPlacement="bottom"
               />
             </div>

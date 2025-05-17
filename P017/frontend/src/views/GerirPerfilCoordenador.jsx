@@ -2,28 +2,24 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./GerirPerfilDocente.css";
+import "./GerirPerfilCoordenador.css";
 
-const GerirPerfilDocente = () => {
+const GerirPerfilCoordenador = () => {
   const navigate = useNavigate();
 
   const [nomeUtilizador, setNomeUtilizador] = useState("");
   const [novoNome, setNovoNome] = useState("");
 
   useEffect(() => {
-    setNomeUtilizador("Docente");
+    setNomeUtilizador("Coordenador");
   }, []);
 
-  const handleSubmeterDisponibilidade = () => {
-    navigate("/DocenteSubmeter");
+  const handleDisponibilidades = () => {
+    navigate("/CoordenadorConsultar");
   };
 
-  const handleConsultarSubmissoes = () => {
-    navigate("/DocenteConsultarSubmissoes");
-  };
-
-  const handleVisualizarHorario = () => {
-    navigate("/DocenteVisualizarHorario");
+  const handleHorarioDocentes = () => {
+    navigate("/HorarioDosDocentes");
   };
 
   const handleLogout = () => {
@@ -31,7 +27,7 @@ const GerirPerfilDocente = () => {
   };
 
   const handleGerirPerfil = () => {
-    // Estamos nesta página
+    // Página atual
   };
 
   const handleAlterarNome = async () => {
@@ -63,8 +59,8 @@ const GerirPerfilDocente = () => {
   };
 
   return (
-    <div className="horario-container fade-in">
-      <aside className="horario-sidebar">
+    <div className="coordenador-container fade-in">
+      <aside className="coordenador-sidebar">
         <div className="user-greeting">
           <p>Olá, <strong>{nomeUtilizador || "Utilizador"}</strong></p>
           <button className="btn-gerir-perfil" onClick={handleGerirPerfil}>
@@ -74,10 +70,8 @@ const GerirPerfilDocente = () => {
 
         <nav className="menu">
           <ul>
-            
-            <li onClick={handleSubmeterDisponibilidade}>Submeter Disponibilidade</li>
-            <li onClick={handleConsultarSubmissoes}>Consultar Submissões</li>
-            <li onClick={handleVisualizarHorario}>Visualizar Horário</li>
+            <li onClick={handleDisponibilidades}>Disponibilidades dos Docentes</li>
+            <li onClick={handleHorarioDocentes}>Horário dos Docentes</li>
           </ul>
         </nav>
 
@@ -86,10 +80,10 @@ const GerirPerfilDocente = () => {
         </button>
       </aside>
 
-      <main className="horario-content">
-        <h2 className="horario-titulo">Gerir Perfil</h2>
+      <main className="coordenador-content">
+        <h2 className="coordenador-titulo">Gerir Perfil</h2>
 
-        <div className="form-section">
+        <div className="coordenador-form-section">
           <h3>Alterar Nome</h3>
           <input
             type="text"
@@ -119,4 +113,4 @@ const GerirPerfilDocente = () => {
   );
 };
 
-export default GerirPerfilDocente;
+export default GerirPerfilCoordenador;

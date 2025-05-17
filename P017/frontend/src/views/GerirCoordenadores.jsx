@@ -9,14 +9,30 @@ const GerirCoordenadores = () => {
   const [coordenadores, setCoordenadores] = useState([]);
   const [departamentos, setDepartamentos] = useState([]);
 
+  const [alteracoes, setAlteracoes] = useState({});
+
+  const [popup, setPopup] = useState({
+    aberto: false,
+    mensagem: "",
+  });
+
+  
+  const [pagina, setPagina] = useState(1);
+  const itensPorPagina = 5;
+
   useEffect(() => {
-    // Simulação: dados de coordenadores da API
-    setCoordenadores([
+    
+    const todosCoordenadores = [
       { id: 1, nome: "User00", cargo: "Pendente", departamentoId: 1 },
       { id: 2, nome: "User01", cargo: "Ativo", departamentoId: 2 },
-    ]);
+      { id: 3, nome: "User02", cargo: "Ativo", departamentoId: 1 },
+      { id: 4, nome: "User03", cargo: "Pendente", departamentoId: 3 },
+      { id: 5, nome: "User04", cargo: "Ativo", departamentoId: 2 },
+      { id: 6, nome: "User05", cargo: "Ativo", departamentoId: 3 },
+      { id: 7, nome: "User06", cargo: "Pendente", departamentoId: 1 },
+    ];
+    setCoordenadores(todosCoordenadores);
 
-    // Simulação: departamentos da API
     setDepartamentos([
       { id: 1, nome: "Departamento A" },
       { id: 2, nome: "Departamento B" },
@@ -24,36 +40,88 @@ const GerirCoordenadores = () => {
     ]);
   }, []);
 
+  const totalPaginas = Math.ceil(coordenadores.length / itensPorPagina);
+
+  const coordenadoresPagina = coordenadores.slice(
+    (pagina - 1) * itensPorPagina,
+    pagina * itensPorPagina
+  );
+
   const handleDepartamentoChange = (idCoord, novoDepId) => {
-    setCoordenadores((prev) =>
-      prev.map((c) =>
-        c.id === idCoord ? { ...c, departamentoId: Number(novoDepId) } : c
-      )
-    );
-    // Aqui podes fazer PUT para a API para guardar alteração
+    setAlteracoes((prev) => ({
+      ...prev,
+      [idCoord]: Number(novoDepId),
+    }));
   };
 
-  // Handlers sidebar
+  const confirmarAlteracao = (idCoord) => {
+    const novoDepId = alteracoes[idCoord];
+    if (novoDepId === undefined) {
+      abrirPopup("Por favor, selecione um departamento antes de confirmar.");
+      return;
+    }
+
+    setCoordenadores((prev) =>
+      prev.map((c) =>
+        c.id === idCoord ? { ...c, departamentoId: novoDepId } : c
+      )
+    );
+
+    const coordenador = coordenadores.find((c) => c.id === idCoord);
+    const departamento = departamentos.find((d) => d.id === novoDepId);
+
+    abrirPopup(
+      `Departamento "${departamento?.nome}" atribuído ao coordenador "${coordenador?.nome}".`
+    );
+
+    setAlteracoes((prev) => {
+      const copy = { ...prev };
+      delete copy[idCoord];
+      return copy;
+    });
+
+    
+  };
+
+  const abrirPopup = (msg) => {
+    setPopup({
+      aberto: true,
+      mensagem: msg,
+    });
+  };
+
+  const fecharPopup = () => {
+    setPopup({
+      aberto: false,
+      mensagem: "",
+    });
+  };
+
+  
+  const paginaAnterior = () => {
+    if (pagina > 1) setPagina(pagina - 1);
+  };
+  const paginaSeguinte = () => {
+    if (pagina < totalPaginas) setPagina(pagina + 1);
+  };
+
+  
   const handleGerirUtilizadores = () => {
     setPaginaAtiva("gerirUtilizadores");
     navigate("/Adm");
   };
-
   const handleGerirDepartamento = () => {
     setPaginaAtiva("gerirDepartamento");
     navigate("/GerirDepartamento");
   };
-
   const handleGerirCoordenadores = () => {
     setPaginaAtiva("gerirCoordenadores");
     navigate("/GerirCoordenadores");
   };
-
   const handleGerirDocentes = () => {
     setPaginaAtiva("gerirDocentes");
     navigate("/GerirDocentes");
   };
-
   const handleLogout = () => {
     navigate("/");
   };
@@ -65,7 +133,11 @@ const GerirCoordenadores = () => {
           <ul>
             <li
               onClick={handleGerirUtilizadores}
-              className={paginaAtiva === "gerirUtilizadores" ? "active gerir-utilizadores" : ""}
+              className={
+                paginaAtiva === "gerirUtilizadores"
+                  ? "active gerir-utilizadores"
+                  : ""
+              }
             >
               Gerir Utilizadores
             </li>
@@ -104,7 +176,7 @@ const GerirCoordenadores = () => {
             </tr>
           </thead>
           <tbody>
-            {coordenadores.length === 0 && (
+            {coordenadoresPagina.length === 0 && (
               <tr>
                 <td colSpan={3} style={{ textAlign: "center" }}>
                   Nenhum coordenador encontrado
@@ -112,14 +184,19 @@ const GerirCoordenadores = () => {
               </tr>
             )}
 
-            {coordenadores.map(({ id, nome, cargo, departamentoId }) => (
+            {coordenadoresPagina.map(({ id, nome, cargo, departamentoId }) => (
               <tr key={id}>
                 <td>{nome}</td>
                 <td>{cargo}</td>
-                <td>
+                <td className="td-alterar-departamento">
                   <select
-                    value={departamentoId || ""}
+                    value={
+                      alteracoes[id] !== undefined
+                        ? alteracoes[id]
+                        : departamentoId || ""
+                    }
                     onChange={(e) => handleDepartamentoChange(id, e.target.value)}
+                    className="select-departamento"
                   >
                     <option value="">Selecionar Departamento</option>
                     {departamentos.map((d) => (
@@ -128,12 +205,57 @@ const GerirCoordenadores = () => {
                       </option>
                     ))}
                   </select>
+                  <button
+                    className="btn-confirmar"
+                    onClick={() => confirmarAlteracao(id)}
+                    type="button"
+                  >
+                    Confirmar
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        
+        <div className="tabela-navegacao">
+          <button
+            className="btn-seta"
+            onClick={paginaAnterior}
+            disabled={pagina === 1}
+            title="Página anterior"
+          >
+            &#x276E;
+            <span className="tooltip">Página anterior</span>
+          </button>
+
+          <span className="pagina-atual">
+            Página {pagina} de {totalPaginas}
+          </span>
+
+          <button
+            className="btn-seta"
+            onClick={paginaSeguinte}
+            disabled={pagina === totalPaginas}
+            title="Próxima página"
+          >
+            &#x276F;
+            <span className="tooltip">Próxima página</span>
+          </button>
+        </div>
       </main>
+
+      {popup.aberto && (
+        <div className="popup-overlay" onClick={fecharPopup}>
+          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+            <p>{popup.mensagem}</p>
+            <button className="btn-fechar-popup" onClick={fecharPopup}>
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

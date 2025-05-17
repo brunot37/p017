@@ -4,8 +4,7 @@
   box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
@@ -13,14 +12,14 @@ body {
   background-color: #f0f2f5;
 }
 
-.horario-container {
+.coordenador-container {
   display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
 }
 
-.horario-sidebar {
+.coordenador-sidebar {
   width: 240px;
   background-color: #112d4e;
   color: white;
@@ -110,7 +109,7 @@ body {
   transform: scale(1.05);
 }
 
-.horario-content {
+.coordenador-content {
   flex: 1;
   padding: 40px;
   overflow-y: auto;
@@ -120,14 +119,13 @@ body {
   background-color: #f9fbff;
 }
 
-.horario-titulo {
+.coordenador-titulo {
   font-size: 28px;
   font-weight: 700;
   color: #112d4e;
 }
 
-
-.form-section {
+.coordenador-form-section {
   margin-top: 30px;
   max-width: 400px;
   display: flex;
@@ -135,7 +133,7 @@ body {
   gap: 12px;
 }
 
-.form-section h3 {
+.coordenador-form-section h3 {
   color: #112d4e;
   font-weight: 700;
   font-size: 20px;
@@ -173,7 +171,6 @@ body {
   background-color: #3282b8;
   box-shadow: 0 8px 14px rgba(50, 130, 184, 0.6);
 }
-
 
 @keyframes fadeInUp {
   from {

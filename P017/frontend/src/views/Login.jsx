@@ -1,16 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import "./Login.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [senhaError, setSenhaError] = useState("");
   const [popupErro, setPopupErro] = useState({ visivel: false, mensagem: "" });
   const [popupSucesso, setPopupSucesso] = useState({ visivel: false, tipoConta: "" });
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (senha.length > 0 && senha.length < 6) {
+      setSenhaError("A senha deve ter pelo menos 6 caracteres.");
+    } else {
+      setSenhaError("");
+    }
+  }, [senha]);
+
   const handleLogin = async (event) => {
     event.preventDefault();
+
+    if (!email.trim()) {
+      setPopupErro({ visivel: true, mensagem: "Por favor, insira o email." });
+      return;
+    }
+    if (!senha.trim()) {
+      setPopupErro({ visivel: true, mensagem: "Por favor, insira a palavra-passe." });
+      return;
+    }
+    if (senhaError) {
+      setPopupErro({ visivel: true, mensagem: senhaError });
+      return;
+    }
 
     try {
       const response = await fetch("http://127.0.0.1:8000/api/login", {
@@ -18,7 +42,6 @@ const Login = () => {
         headers: {
           "Content-Type": "application/json",
         },
-       
         body: JSON.stringify({ email, password: senha }),
       });
 
@@ -72,7 +95,7 @@ const Login = () => {
           ← Voltar
         </Link>
         <h2 className="registration-title">Inicia Sessão</h2>
-        <p className="registration-description">Insere os teus dados para continuar</p>
+        <p className="registration-description">Insira os seus dados para continuar!</p>
         <form onSubmit={handleLogin}>
           <div className="input-field email">
             <input
@@ -83,15 +106,26 @@ const Login = () => {
               required
             />
           </div>
-          <div className="input-field password">
+          <div className="input-field password password-field">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Palavra-passe"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required
+              autoComplete="current-password"
             />
+            <button
+              type="button"
+              className="show-hide-btn"
+              onClick={() => setShowPassword((prev) => !prev)}
+              tabIndex={-1}
+              aria-label={showPassword ? "Esconder palavra-passe" : "Mostrar palavra-passe"}
+            >
+              {showPassword ? <AiOutlineEyeInvisible size={22} /> : <AiOutlineEye size={22} />}
+            </button>
           </div>
+          {senhaError && <p className="validation-error">{senhaError}</p>}
 
           <div className="forgot-password-link">
             <Link to="/RecuperarPassword">Esqueceste-te da palavra-passe?</Link>
