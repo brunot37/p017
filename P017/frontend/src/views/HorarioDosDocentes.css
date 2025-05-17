@@ -67,7 +67,7 @@ html, body {
   margin-top: 16px;
 }
 
-/* Menu */
+
 .hd-menu {
   width: 100%;
 }
@@ -119,7 +119,7 @@ html, body {
   transform: scale(1.05);
 }
 
-/* Conteúdo */
+
 .hd-content {
   flex: 1;
   padding: 40px;
@@ -158,7 +158,7 @@ html, body {
   font-weight: 600;
 }
 
-/* Tabela */
+
 .hd-tabela-wrapper {
   flex: 1;
   overflow-x: auto;

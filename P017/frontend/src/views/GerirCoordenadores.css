@@ -19,7 +19,6 @@ body {
   overflow: hidden;
 }
 
-
 .horario-sidebar {
   width: 240px;
   background-color: #112d4e;
@@ -76,7 +75,6 @@ body {
   border-bottom-left-radius: 8px;
 }
 
-
 .logout {
   margin-top: auto;
   background: none;
@@ -95,7 +93,6 @@ body {
   transform: scale(1.05);
 }
 
-
 .horario-content {
   flex: 1;
   padding: 40px;
@@ -105,11 +102,10 @@ body {
   gap: 10px;
 }
 
-
 .tabela-coordenadores {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 10px; 
+  border-spacing: 0 8px;
   background: transparent;
   overflow: visible;
 }
@@ -123,10 +119,15 @@ body {
   display: table;
   width: 100%;
   table-layout: fixed;
+  margin-bottom: 0;
+}
+
+.tabela-coordenadores tbody {
+  margin-top: 0;
 }
 
 .tabela-coordenadores thead th {
-  padding: 12px 20px;
+  padding: 14px 20px;
   border-right: 1px solid #204c71;
 }
 
@@ -134,33 +135,29 @@ body {
   border-right: none;
 }
 
-
 .tabela-coordenadores tbody tr {
   background-color: #d4e3f5;
-  border-radius: 0 0 10px 10px;
+  border-radius: 10px;
   display: table;
   width: 100%;
   table-layout: fixed;
   box-shadow: 0 1px 5px rgb(0 0 0 / 0.1);
 }
 
-
 .tabela-coordenadores tbody td {
-  padding: 12px 20px;
+  padding: 14px 20px;
   border-right: 1px solid #a5badf;
 }
-
 
 .tabela-coordenadores tbody tr td:first-child {
   border-radius: 0 0 0 10px;
 }
 
 .tabela-coordenadores tbody tr td:last-child {
-  padding-right: 40px; 
+  padding-right: 40px;
   border-radius: 0 0 10px 0;
   border-right: none;
 }
-
 
 .td-alterar-departamento {
   display: flex;
@@ -169,39 +166,36 @@ body {
   justify-content: flex-end;
 }
 
-
 .select-departamento {
   flex-grow: 1;
-  min-width: 0; 
+  min-width: 0;
   max-width: none;
-  padding: 6px 8px;
+  padding: 8px 10px;
   border-radius: 6px;
   border: 1px solid #3282b8;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
   background-color: white;
   color: #112d4e;
 }
 
-
 .btn-confirmar {
   background-color: #3282b8;
   border: none;
   color: white;
-  padding: 6px 20px;
-  font-size: 14px;
+  padding: 8px 22px;
+  font-size: 15px;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   white-space: nowrap;
-  min-width: 90px;
+  min-width: 100px;
 }
 
 .btn-confirmar:hover {
   background-color: #286490;
 }
-
 
 .popup-overlay {
   position: fixed;
@@ -216,26 +210,24 @@ body {
   z-index: 9999;
 }
 
-
 .popup-content {
   background: white;
-  padding: 24px 32px;
+  padding: 28px 36px;
   border-radius: 10px;
-  max-width: 360px;
+  max-width: 380px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
   text-align: center;
-  font-size: 16px;
+  font-size: 17px;
   color: #112d4e;
 }
 
-
 .btn-fechar-popup {
-  margin-top: 20px;
+  margin-top: 24px;
   background-color: #3282b8;
   border: none;
   color: white;
-  padding: 8px 20px;
-  font-size: 14px;
+  padding: 10px 24px;
+  font-size: 15px;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
@@ -246,13 +238,12 @@ body {
   background-color: #286490;
 }
 
-
 .tabela-navegacao {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
-  margin-top: 12px;
+  gap: 18px;
+  margin-top: 16px;
   user-select: none;
 }
 
@@ -261,9 +252,9 @@ body {
   background-color: #112d4e;
   border: none;
   color: white;
-  font-size: 22px;
-  padding: 6px 14px;
-  border-radius: 6px;
+  font-size: 24px;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   display: flex;
@@ -281,7 +272,6 @@ body {
   background-color: #0e233c;
 }
 
-
 .btn-seta .tooltip {
   visibility: hidden;
   opacity: 0;
@@ -289,13 +279,13 @@ body {
   color: #fff;
   text-align: center;
   border-radius: 4px;
-  padding: 5px 8px;
+  padding: 6px 10px;
   position: absolute;
   bottom: 125%;
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 13px;
   pointer-events: none;
   transition: opacity 0.3s;
   z-index: 10;

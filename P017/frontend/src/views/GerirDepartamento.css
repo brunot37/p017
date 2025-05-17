@@ -36,10 +36,13 @@ html, body {
 }
 
 .dep-menu ul {
-  list-style: none;
+ list-style: none;
   padding: 0;
   margin: 0;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; 
 }
 
 .dep-menu li {
@@ -50,6 +53,7 @@ html, body {
   transition: background-color 0.3s, transform 0.2s;
   border-radius: 8px;
   position: relative;
+  user-select: none;
 }
 
 .dep-menu li.active {

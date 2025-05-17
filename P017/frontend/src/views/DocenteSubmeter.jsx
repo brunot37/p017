@@ -34,7 +34,7 @@ const DocenteSubmeter = () => {
   const [nomeUtilizador, setNomeUtilizador] = useState("");
 
   useEffect(() => {
-    setNomeUtilizador("Bruno Cunha");
+    setNomeUtilizador("Docente");
   }, []);
 
   const [semestre, setSemestre] = useState("1");

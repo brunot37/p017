@@ -107,7 +107,7 @@ const AlterarPassword = () => {
         </Link>
         <h2 className="alterar-title">Alterar Palavra-passe</h2>
         <p className="alterar-description">
-          Digite as informações abaixo para alterar a sua senha
+          Digite as informações abaixo para alterar a sua senha!
         </p>
         <form onSubmit={handleAlterarSubmit}>
           <div className="alterar-input-field password-field">

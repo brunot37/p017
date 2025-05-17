@@ -63,6 +63,7 @@ const GerirPerfilCoordenador = () => {
       <aside className="coordenador-sidebar">
         <div className="user-greeting">
           <p>Olá, <strong>{nomeUtilizador || "Utilizador"}</strong></p>
+          <div className="blue-line-top" />
           <button className="btn-gerir-perfil" onClick={handleGerirPerfil}>
             Gerir Perfil
           </button>
