@@ -23,8 +23,8 @@ const AlterarPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
 
-  const [showNewPwd, setShowNewPwd] = useState(true);        // Inicialmente visível
-  const [showConfirmPwd, setShowConfirmPwd] = useState(true); // Inicialmente visível
+  const [showNewPwd, setShowNewPwd] = useState(true);       
+  const [showConfirmPwd, setShowConfirmPwd] = useState(true); l
 
   const [newPwdError, setNewPwdError] = useState("");
   const [confirmPwdError, setConfirmPwdError] = useState("");
@@ -69,7 +69,7 @@ const AlterarPassword = () => {
       return;
     }
 
-    // Aqui podes chamar a tua API para alterar a password, exemplo fake:
+    
     const fakeSuccess = true;
 
     if (fakeSuccess) {

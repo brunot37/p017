@@ -7,7 +7,7 @@ const Registo = () => {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(true); // Password visível por defeito
+  const [showPassword, setShowPassword] = useState(true); 
   const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
   const [popupSucesso, setPopupSucesso] = useState(false);

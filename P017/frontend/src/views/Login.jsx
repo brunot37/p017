@@ -6,7 +6,7 @@ import "./Login.css";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [showPassword, setShowPassword] = useState(true); // Inicia visível
+  const [showPassword, setShowPassword] = useState(true); 
   const [senhaError, setSenhaError] = useState("");
   const [popupErro, setPopupErro] = useState({ visivel: false, mensagem: "" });
   const [popupSucesso, setPopupSucesso] = useState({ visivel: false, tipoConta: "" });
