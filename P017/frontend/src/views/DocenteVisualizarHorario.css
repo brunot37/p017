@@ -21,7 +21,7 @@ html, body {
 
 
 .horario-sidebar {
-  width: 240px;
+  width: 300px;
   background-color: #112D4E;
   color: white;
   display: flex;
@@ -230,4 +230,82 @@ html, body {
 
 .fade-in {
   animation: fadeInUp 0.6s ease-out;
+}
+.docente-export-btn {
+  background-color: #3282B8;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.docente-export-btn:hover {
+  background-color: #246092;
+}
+
+.docente-export-dropdown {
+  position: absolute;
+  right: 0;
+  top: 110%;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+.docente-export-dropdown button {
+  background: none;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+  color: #112D4E;
+  transition: background-color 0.2s ease;
+}
+
+.docente-export-dropdown button:hover {
+  background-color: #3282B8;
+  color: white;
+}
+
+/* Popup mensagem */
+.popup-msg {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  opacity: 0.95;
+  z-index: 1100;
+  user-select: none;
+  pointer-events: none;
+  animation: fadeInOut 3s forwards;
+}
+
+.popup-msg.sucesso {
+  background-color: #28a745;
+}
+
+.popup-msg.erro {
+  background-color: #dc3545;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(10px); }
+  10%, 90% { opacity: 0.95; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
 }

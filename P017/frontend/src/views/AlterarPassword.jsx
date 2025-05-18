@@ -23,13 +23,12 @@ const AlterarPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
 
-  const [showNewPwd, setShowNewPwd] = useState(false);
-  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(true);        // Inicialmente visível
+  const [showConfirmPwd, setShowConfirmPwd] = useState(true); // Inicialmente visível
 
   const [newPwdError, setNewPwdError] = useState("");
   const [confirmPwdError, setConfirmPwdError] = useState("");
 
-  
   const pwdRegex = /^.{6,}$/;
 
   useEffect(() => {
@@ -70,7 +69,7 @@ const AlterarPassword = () => {
       return;
     }
 
-   
+    // Aqui podes chamar a tua API para alterar a password, exemplo fake:
     const fakeSuccess = true;
 
     if (fakeSuccess) {
@@ -102,9 +101,7 @@ const AlterarPassword = () => {
         />
       </div>
       <div className="alterar-form">
-        <Link to="/" className="alterar-back-link">
-          ← Voltar
-        </Link>
+        <Link to="/" className="alterar-back-link">← Voltar</Link>
         <h2 className="alterar-title">Alterar Palavra-passe</h2>
         <p className="alterar-description">
           Digite as informações abaixo para alterar a sua senha!
@@ -136,15 +133,9 @@ const AlterarPassword = () => {
               className="show-hide-btn"
               onClick={() => setShowNewPwd((prev) => !prev)}
               tabIndex={-1}
-              aria-label={
-                showNewPwd ? "Esconder nova senha" : "Mostrar nova senha"
-              }
+              aria-label={showNewPwd ? "Esconder nova senha" : "Mostrar nova senha"}
             >
-              {showNewPwd ? (
-                <AiOutlineEyeInvisible size={22} />
-              ) : (
-                <AiOutlineEye size={22} />
-              )}
+              {showNewPwd ? <AiOutlineEye size={22} /> : <AiOutlineEyeInvisible size={22} />}
             </button>
           </div>
           {newPwdError && <p className="validation-error">{newPwdError}</p>}
@@ -163,26 +154,14 @@ const AlterarPassword = () => {
               className="show-hide-btn"
               onClick={() => setShowConfirmPwd((prev) => !prev)}
               tabIndex={-1}
-              aria-label={
-                showConfirmPwd
-                  ? "Esconder confirmação de senha"
-                  : "Mostrar confirmação de senha"
-              }
+              aria-label={showConfirmPwd ? "Esconder confirmação de senha" : "Mostrar confirmação de senha"}
             >
-              {showConfirmPwd ? (
-                <AiOutlineEyeInvisible size={22} />
-              ) : (
-                <AiOutlineEye size={22} />
-              )}
+              {showConfirmPwd ? <AiOutlineEye size={22} /> : <AiOutlineEyeInvisible size={22} />}
             </button>
           </div>
-          {confirmPwdError && (
-            <p className="validation-error">{confirmPwdError}</p>
-          )}
+          {confirmPwdError && <p className="validation-error">{confirmPwdError}</p>}
 
-          <button type="submit" className="alterar-button">
-            Alterar
-          </button>
+          <button type="submit" className="alterar-button">Alterar</button>
         </form>
       </div>
 

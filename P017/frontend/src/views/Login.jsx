@@ -6,7 +6,7 @@ import "./Login.css";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(true); // Inicia visível
   const [senhaError, setSenhaError] = useState("");
   const [popupErro, setPopupErro] = useState({ visivel: false, mensagem: "" });
   const [popupSucesso, setPopupSucesso] = useState({ visivel: false, tipoConta: "" });
@@ -39,9 +39,7 @@ const Login = () => {
     try {
       const response = await fetch("http://127.0.0.1:8000/api/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password: senha }),
       });
 
@@ -61,40 +59,28 @@ const Login = () => {
       } else {
         setPopupErro({ visivel: true, mensagem: data.message || "Erro ao fazer login." });
       }
-    } catch (err) {
+    } catch {
       setPopupErro({ visivel: true, mensagem: "Erro ao comunicar com o servidor." });
     }
   };
 
-  const fecharPopupErro = () => {
-    setPopupErro({ visivel: false, mensagem: "" });
-  };
+  const fecharPopupErro = () => setPopupErro({ visivel: false, mensagem: "" });
 
   const fecharPopupSucesso = (tipoContaLocal) => {
     setPopupSucesso({ visivel: false, tipoConta: "" });
-    if (tipoContaLocal === "docente") {
-      navigate("/DocenteVisualizarHorario");
-    } else if (tipoContaLocal === "coordenador") {
-      navigate("/CoordenadorConsultar");
-    } else if (tipoContaLocal === "adm") {
-      navigate("/Adm");
-    }
+    if (tipoContaLocal === "docente") navigate("/DocenteVisualizarHorario");
+    else if (tipoContaLocal === "coordenador") navigate("/CoordenadorConsultar");
+    else if (tipoContaLocal === "adm") navigate("/Adm");
   };
 
   return (
     <div className="registration-container fade-in">
       <div className="registration-illustration">
-        <img
-          src="/src/assets/LogoAgenda.png"
-          alt="Caderno"
-          className="illustration-image"
-        />
+        <img src="/src/assets/LogoAgenda.png" alt="Caderno" className="illustration-image" />
       </div>
       <div className="registration-form">
-        <Link to="/" className="back-to-home-link">
-          ← Voltar
-        </Link>
-        <h2 className="registration-title">Inicia Sessão</h2>
+        <Link to="/" className="back-to-home-link">← Voltar</Link>
+        <h2 className="registration-title">Inicie Sessão</h2>
         <p className="registration-description">Insira os seus dados para continuar!</p>
         <form onSubmit={handleLogin}>
           <div className="input-field email">
@@ -104,25 +90,27 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
+              spellCheck="false"
             />
           </div>
-          <div className="input-field password password-field">
+          <div className="input-field password">
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Palavra-passe"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required
-              autoComplete="current-password"
+              autoComplete="off"
+              spellCheck="false"
             />
             <button
               type="button"
-              className="show-hide-btn"
+              className="password-toggle"
               onClick={() => setShowPassword((prev) => !prev)}
-              tabIndex={-1}
               aria-label={showPassword ? "Esconder palavra-passe" : "Mostrar palavra-passe"}
             >
-              {showPassword ? <AiOutlineEyeInvisible size={22} /> : <AiOutlineEye size={22} />}
+              {showPassword ? <AiOutlineEye size={20} /> : <AiOutlineEyeInvisible size={20} />}
             </button>
           </div>
           {senhaError && <p className="validation-error">{senhaError}</p>}
@@ -130,9 +118,7 @@ const Login = () => {
           <div className="forgot-password-link">
             <Link to="/RecuperarPassword">Esqueceste-te da palavra-passe?</Link>
           </div>
-          <button type="submit" className="register-button">
-            Login →
-          </button>
+          <button type="submit" className="register-button">Login →</button>
         </form>
       </div>
 
@@ -152,33 +138,27 @@ const PopupErroLogin = ({ mensagem, onClose }) => (
     <div className="popup-box">
       <h3 style={{ color: "#cc0000" }}>Erro</h3>
       <p>{mensagem}</p>
-      <button onClick={onClose} className="popup-button">
-        Fechar
-      </button>
-      <Link to="/Registo" className="popup-link">
-        Não tens conta? Criar conta
-      </Link>
+      <button onClick={onClose} className="popup-button">Fechar</button>
+      <Link to="/Registo" className="popup-link">Não tens conta? Criar conta</Link>
     </div>
   </div>
 );
 
 const PopupSucessoLogin = ({ tipoConta, onClose }) => {
-  let tipoFormatado;
-  if (tipoConta === "docente") tipoFormatado = "Docente";
-  else if (tipoConta === "coordenador") tipoFormatado = "Coordenador";
-  else if (tipoConta === "adm") tipoFormatado = "Administrador";
-  else tipoFormatado = tipoConta;
+  let tipoFormatado = tipoConta === "docente"
+    ? "Docente"
+    : tipoConta === "coordenador"
+    ? "Coordenador"
+    : tipoConta === "adm"
+    ? "Administrador"
+    : tipoConta;
 
   return (
     <div className="popup-overlay">
       <div className="popup-box">
         <h3 style={{ color: "#008000" }}>Login efetuado com sucesso</h3>
-        <p>
-          Login de <strong>{tipoFormatado}</strong> com sucesso.
-        </p>
-        <button onClick={() => onClose(tipoConta)} className="popup-button">
-          Continuar
-        </button>
+        <p>Login de <strong>{tipoFormatado}</strong> com sucesso.</p>
+        <button onClick={() => onClose(tipoConta)} className="popup-button">Continuar</button>
       </div>
     </div>
   );

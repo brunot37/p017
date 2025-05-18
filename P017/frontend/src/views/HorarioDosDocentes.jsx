@@ -19,6 +19,8 @@ const HorarioDosDocentes = () => {
   const [nomeUtilizador, setNomeUtilizador] = useState("");
   const [docentes, setDocentes] = useState([]);
   const [docenteSelecionado, setDocenteSelecionado] = useState("");
+  const [mostrarDropdownExport, setMostrarDropdownExport] = useState(false);
+  const [popupMensagem, setPopupMensagem] = useState(null);
 
   useEffect(() => {
     const user = getUserFromToken();
@@ -104,6 +106,23 @@ const HorarioDosDocentes = () => {
     navigate("/CoordenadorConsultar");
   };
 
+  // Simula exportação
+  const exportarHorario = (formato) => {
+    setMostrarDropdownExport(false);
+
+    setTimeout(() => {
+      const sucesso = Math.random() > 0.2;
+
+      if (sucesso) {
+        setPopupMensagem({ tipo: "sucesso", texto: `Horário exportado com sucesso em ${formato}!` });
+      } else {
+        setPopupMensagem({ tipo: "erro", texto: `Erro ao exportar horário em ${formato}. Tente novamente.` });
+      }
+
+      setTimeout(() => setPopupMensagem(null), 3000);
+    }, 1000);
+  };
+
   return (
     <div className="hd-container fade-in">
       <aside className="hd-sidebar">
@@ -126,7 +145,17 @@ const HorarioDosDocentes = () => {
       <main className="hd-content">
         <h2 className="hd-welcome">Olá, {nomeUtilizador}</h2>
 
-        <div className="hd-header">
+        <div
+          className="hd-header"
+          style={{
+            position: "relative",
+            justifyContent: "flex-start",
+            alignItems: "center",
+            gap: "12px",
+            flexWrap: "wrap",
+            display: "flex",
+          }}
+        >
           <input
             type="date"
             value={selectedDate || ""}
@@ -150,6 +179,25 @@ const HorarioDosDocentes = () => {
               </option>
             ))}
           </select>
+
+          {docenteSelecionado && (
+            <div style={{ position: "relative", marginLeft: "auto" }}>
+              <button
+                onClick={() => setMostrarDropdownExport((prev) => !prev)}
+                className="hd-export-btn"
+                title="Exportar Horário"
+              >
+                Exportar Horário ▼
+              </button>
+
+              {mostrarDropdownExport && (
+                <div className="hd-export-dropdown">
+                  <button onClick={() => exportarHorario("Excel")}>Excel</button>
+                  <button onClick={() => exportarHorario("PDF")}>PDF</button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {docenteSelecionado ? (
@@ -205,6 +253,12 @@ const HorarioDosDocentes = () => {
           <p className="hd-aviso">Selecione um docente para visualizar o horário.</p>
         )}
       </main>
+
+      {popupMensagem && (
+        <div className={`popup-msg ${popupMensagem.tipo}`}>
+          {popupMensagem.texto}
+        </div>
+      )}
     </div>
   );
 };

@@ -18,6 +18,8 @@ const DocenteVisualizarHorario = () => {
   const navigate = useNavigate();
 
   const [nomeUtilizador, setNomeUtilizador] = useState("");
+  const [mostrarDropdownExport, setMostrarDropdownExport] = useState(false);
+  const [popupMensagem, setPopupMensagem] = useState(null); // { tipo: 'sucesso' | 'erro', texto: string }
 
   useEffect(() => {
     const user = getUserFromToken();
@@ -106,6 +108,25 @@ const DocenteVisualizarHorario = () => {
     navigate("/GerirPerfilDocente");
   };
 
+  // Simula exportação com sucesso ou erro (exemplo)
+  const exportarHorario = (formato) => {
+    setMostrarDropdownExport(false);
+
+    // Simulação async - exportação pode ser substituída pela real
+    setTimeout(() => {
+      const sucesso = Math.random() > 0.2; // 80% sucesso, 20% falha
+
+      if (sucesso) {
+        setPopupMensagem({ tipo: "sucesso", texto: `Horário exportado com sucesso em ${formato}!` });
+      } else {
+        setPopupMensagem({ tipo: "erro", texto: `Erro ao exportar horário em ${formato}. Tente novamente.` });
+      }
+
+      // Esconde popup passado 3 segundos
+      setTimeout(() => setPopupMensagem(null), 3000);
+    }, 1000);
+  };
+
   return (
     <div className="docente-horario-container fade-in">
       <aside className="horario-sidebar">
@@ -132,19 +153,41 @@ const DocenteVisualizarHorario = () => {
       </aside>
 
       <main className="docente-horario-content">
-        <div className="docente-horario-header">
-          <input
-            type="date"
-            value={selectedDate || ""}
-            onChange={handleDateChange}
-            className="docente-date-picker"
-            title="Selecionar data"
-            max="2100-12-31"
-            min="2000-01-01"
-          />
-          <h2 className="docente-horario-titulo">
-            Semana {formatarData(dataInicio)} - {formatarData(dataFim)}
-          </h2>
+        <div
+          className="docente-horario-header"
+          style={{ justifyContent: "space-between", alignItems: "center", position: "relative" }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+            <input
+              type="date"
+              value={selectedDate || ""}
+              onChange={handleDateChange}
+              className="docente-date-picker"
+              title="Selecionar data"
+              max="2100-12-31"
+              min="2000-01-01"
+            />
+            <h2 className="docente-horario-titulo">
+              Semana {formatarData(dataInicio)} - {formatarData(dataFim)}
+            </h2>
+          </div>
+
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={() => setMostrarDropdownExport((prev) => !prev)}
+              className="docente-export-btn"
+              title="Exportar Horário"
+            >
+              Exportar Horário ▼
+            </button>
+
+            {mostrarDropdownExport && (
+              <div className="docente-export-dropdown">
+                <button onClick={() => exportarHorario("Excel")}>Excel</button>
+                <button onClick={() => exportarHorario("PDF")}>PDF</button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="docente-horario-tabela-wrapper">
@@ -197,6 +240,12 @@ const DocenteVisualizarHorario = () => {
           </button>
         </div>
       </main>
+
+      {popupMensagem && (
+        <div className={`popup-msg ${popupMensagem.tipo}`}>
+          {popupMensagem.texto}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,10 +1,23 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  background-color: #ffffff;
+}
+
 .registration-container {
   display: flex;
   width: 100vw;
   height: 100vh;
   align-items: stretch;
   background-color: #ffffff;
-  animation: fadeInUp 0.6s ease-out;
 }
 
 .registration-illustration {
@@ -18,11 +31,6 @@
 .registration-illustration img {
   max-width: 80%;
   height: auto;
-  transition: transform 0.4s ease;
-}
-
-.registration-illustration img:hover {
-  transform: scale(1.05);
 }
 
 .registration-form {
@@ -70,7 +78,7 @@
 
 .registration-description {
   font-size: 1rem;
-  color: #666;
+  color: #666666;
   margin-bottom: 2rem;
 }
 
@@ -96,32 +104,36 @@
   outline: none;
 }
 
-.input-field.email::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: 14px;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  background-image: url('https://cdn-icons-png.flaticon.com/512/561/561127.png');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
+.input-field.password {
+  position: relative;
 }
 
-.input-field.password::after {
-  content: '';
+.password-toggle {
   position: absolute;
   top: 50%;
   right: 14px;
   transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  background-image: url('https://cdn-icons-png.flaticon.com/512/3064/3064155.png');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: #555555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  font-size: 1.2rem;
+  pointer-events: auto;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.password-toggle:hover,
+.password-toggle:focus {
+  color: #555555;
+  outline: none;
 }
 
 .forgot-password-link {
@@ -160,34 +172,6 @@
   transform: scale(1.03);
 }
 
-.help-section {
-  margin-top: 1.5rem;
-}
-
-.help-link {
-  text-decoration: none;
-  font-size: 0.95rem;
-  color: #003366;
-}
-
-.help-link:hover {
-  text-decoration: underline;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-in {
-  animation: fadeInUp 0.6s ease-out;
-}
 .popup-overlay {
   position: fixed;
   top: 0;
@@ -214,13 +198,12 @@
 
 .popup-box h3 {
   margin-bottom: 10px;
-  color: #cc0000;
   font-size: 1.5rem;
 }
 
 .popup-box p {
   font-size: 1rem;
-  color: #333;
+  color: #333333;
   margin-bottom: 15px;
   word-wrap: break-word;
 }
@@ -252,6 +235,29 @@
   text-decoration: underline;
 }
 
+.validation-error {
+  color: #d93025;
+  font-size: 0.9rem;
+  margin: 8px 0 12px 0;
+  text-align: left;
+  padding-left: 4px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeInUp 0.6s ease-out;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -261,11 +267,4 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-.validation-error {
-  color: #d93025;
-  font-size: 0.9rem;
-  margin: 8px 0 12px 0;
-  text-align: left;
-  padding-left: 4px;
 }
