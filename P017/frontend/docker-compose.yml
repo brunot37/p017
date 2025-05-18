@@ -1,0 +1,7 @@
+version: "3"
+services:
+  react-app:
+    build: .
+    ports:
+      - "3001:80"
+    restart: always
