@@ -16,12 +16,10 @@ const GerirCoordenadores = () => {
     mensagem: "",
   });
 
-  
   const [pagina, setPagina] = useState(1);
   const itensPorPagina = 5;
 
   useEffect(() => {
-    
     const todosCoordenadores = [
       { id: 1, nome: "User00", cargo: "Pendente", departamentoId: 1 },
       { id: 2, nome: "User01", cargo: "Ativo", departamentoId: 2 },
@@ -79,8 +77,6 @@ const GerirCoordenadores = () => {
       delete copy[idCoord];
       return copy;
     });
-
-    
   };
 
   const abrirPopup = (msg) => {
@@ -97,7 +93,6 @@ const GerirCoordenadores = () => {
     });
   };
 
-  
   const paginaAnterior = () => {
     if (pagina > 1) setPagina(pagina - 1);
   };
@@ -105,10 +100,14 @@ const GerirCoordenadores = () => {
     if (pagina < totalPaginas) setPagina(pagina + 1);
   };
 
-  
+  // Ordem corrigida dos botões no menu:
   const handleGerirUtilizadores = () => {
     setPaginaAtiva("gerirUtilizadores");
     navigate("/Adm");
+  };
+  const handleGerirEscolas = () => {
+    setPaginaAtiva("gerirEscolas");
+    navigate("/GerirEscolas");
   };
   const handleGerirDepartamento = () => {
     setPaginaAtiva("gerirDepartamento");
@@ -140,6 +139,12 @@ const GerirCoordenadores = () => {
               }
             >
               Gerir Utilizadores
+            </li>
+            <li
+              onClick={handleGerirEscolas}
+              className={paginaAtiva === "gerirEscolas" ? "active" : ""}
+            >
+              Gerir Escolas
             </li>
             <li
               onClick={handleGerirDepartamento}
@@ -218,7 +223,6 @@ const GerirCoordenadores = () => {
           </tbody>
         </table>
 
-        
         <div className="tabela-navegacao">
           <button
             className="btn-seta"

@@ -16,7 +16,11 @@ const ConfirmModal = ({ message, onConfirm, onCancel }) => (
     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
       <p>{message}</p>
       <div style={{ marginTop: "20px" }}>
-        <button className="dep-btn-save" onClick={onConfirm} style={{ marginRight: "10px" }}>
+        <button
+          className="dep-btn-save"
+          onClick={onConfirm}
+          style={{ marginRight: "10px" }}
+        >
           Sim
         </button>
         <button className="dep-btn-cancel" onClick={onCancel}>
@@ -34,18 +38,20 @@ const GerirDepartamento = () => {
 
   const [nomeDepartamento, setNomeDepartamento] = useState("");
   const [departamentos, setDepartamentos] = useState([
-    { id: 1, nome: "Departamento Simulado" },
-    
+    { id: 1, nome: "Departamento Simulado", escolaId: null },
+  ]);
+  const [escolas, setEscolas] = useState([
+    { id: 1, nome: "Escola Simulada" },
   ]);
   const [editandoId, setEditandoId] = useState(null);
   const [editandoNome, setEditandoNome] = useState("");
+  const [alteracoesEscola, setAlteracoesEscola] = useState({}); // para escolas atribuídas temporariamente
 
   const [modalMessage, setModalMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [idParaRemover, setIdParaRemover] = useState(null);
-
 
   const [pagina, setPagina] = useState(1);
   const totalPaginas = Math.ceil(departamentos.length / ITEMS_PER_PAGE);
@@ -62,11 +68,11 @@ const GerirDepartamento = () => {
   const closeModal = () => setIsModalOpen(false);
 
   const handleGerirUtilizadores = () => navigate("/ADM");
+  const handleGerirEscolas = () => navigate("/GerirEscolas");
   const handleGerirDepartamento = () => navigate("/GerirDepartamento");
   const handleGerirCoordenadores = () => navigate("/GerirCoordenadores");
   const handleGerirDocentes = () => navigate("/GerirDocentes");
   const handleLogout = () => navigate("/");
-
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -79,6 +85,7 @@ const GerirDepartamento = () => {
     const novoDepartamento = {
       id: departamentos.length > 0 ? departamentos[departamentos.length - 1].id + 1 : 1,
       nome: nomeDepartamento.trim(),
+      escolaId: null,
     };
 
     setDepartamentos([...departamentos, novoDepartamento]);
@@ -86,35 +93,13 @@ const GerirDepartamento = () => {
     openModal("Departamento guardado com sucesso!");
   };
 
-  
-  const startEdit = (id, nome) => {
-    setEditandoId(id);
-    setEditandoNome(nome);
-  };
-  const cancelEdit = () => {
-    setEditandoId(null);
-    setEditandoNome("");
-  };
-  const confirmarEdit = () => {
-    if (!editandoNome.trim()) {
-      openModal("O nome do departamento não pode estar vazio.");
-      return;
-    }
+  // ** Removei toda a lógica do editar **
 
-    setDepartamentos((prev) =>
-      prev.map((dep) => (dep.id === editandoId ? { ...dep, nome: editandoNome } : dep))
-    );
-    cancelEdit();
-    openModal("Departamento atualizado com sucesso!");
-  };
-
-  
   const pedirConfirmRemover = (id) => {
     setIdParaRemover(id);
     setConfirmModalOpen(true);
   };
 
-  
   const cancelarRemover = () => {
     setIdParaRemover(null);
     setConfirmModalOpen(false);
@@ -125,13 +110,46 @@ const GerirDepartamento = () => {
     setConfirmModalOpen(false);
     openModal("Departamento removido com sucesso!");
 
-    
     if (departamentosPagina.length === 1 && pagina > 1) {
       setPagina(pagina - 1);
     }
   };
 
-  
+  const handleEscolaChange = (idDepartamento, novaEscolaId) => {
+    setAlteracoesEscola((prev) => ({
+      ...prev,
+      [idDepartamento]: novaEscolaId === "" ? null : Number(novaEscolaId),
+    }));
+  };
+
+  const confirmarAlteracaoEscola = (idDepartamento) => {
+    if (!(idDepartamento in alteracoesEscola)) {
+      openModal("Por favor, selecione uma escola antes de confirmar.");
+      return;
+    }
+
+    const novaEscolaId = alteracoesEscola[idDepartamento];
+
+    setDepartamentos((prev) =>
+      prev.map((dep) =>
+        dep.id === idDepartamento ? { ...dep, escolaId: novaEscolaId } : dep
+      )
+    );
+
+    const departamento = departamentos.find((d) => d.id === idDepartamento);
+    const escola = escolas.find((e) => e.id === novaEscolaId);
+
+    openModal(
+      `Escola "${escola ? escola.nome : "Nenhuma"}" atribuída ao departamento "${departamento.nome}".`
+    );
+
+    setAlteracoesEscola((prev) => {
+      const copy = { ...prev };
+      delete copy[idDepartamento];
+      return copy;
+    });
+  };
+
   const irParaPaginaAnterior = () => {
     if (pagina > 1) setPagina(pagina - 1);
   };
@@ -147,6 +165,7 @@ const GerirDepartamento = () => {
           <nav className="dep-menu">
             <ul>
               <li onClick={handleGerirUtilizadores}>Gerir Utilizadores</li>
+              <li onClick={handleGerirEscolas}>Gerir Escolas</li>
               <li className="active" onClick={handleGerirDepartamento}>
                 Gerir Departamento
               </li>
@@ -181,55 +200,51 @@ const GerirDepartamento = () => {
             <thead>
               <tr>
                 <th>Nome do Departamento</th>
+                <th>Escola</th>
                 <th>Ações</th>
               </tr>
             </thead>
             <tbody>
               {departamentosPagina.map((dep) => (
                 <tr key={dep.id}>
+                  <td>{dep.nome}</td>
                   <td>
-                    {editandoId === dep.id ? (
-                      <input
-                        type="text"
-                        value={editandoNome}
-                        onChange={(e) => setEditandoNome(e.target.value)}
-                      />
-                    ) : (
-                      dep.nome
-                    )}
+                    <select
+                      value={
+                        alteracoesEscola[dep.id] !== undefined
+                          ? alteracoesEscola[dep.id] || ""
+                          : dep.escolaId || ""
+                      }
+                      onChange={(e) => handleEscolaChange(dep.id, e.target.value)}
+                    >
+                      <option value="">Selecionar Escola</option>
+                      {escolas.map((esc) => (
+                        <option key={esc.id} value={esc.id}>
+                          {esc.nome}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      className="dep-btn-save"
+                      type="button"
+                      onClick={() => confirmarAlteracaoEscola(dep.id)}
+                    >
+                      Confirmar
+                    </button>
                   </td>
                   <td>
-                    {editandoId === dep.id ? (
-                      <>
-                        <button className="dep-btn-save" onClick={confirmarEdit}>
-                          Confirmar
-                        </button>
-                        <button className="dep-btn-cancel" onClick={cancelEdit}>
-                          Cancelar
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          className="dep-btn-edit"
-                          onClick={() => startEdit(dep.id, dep.nome)}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className="dep-btn-delete"
-                          onClick={() => pedirConfirmRemover(dep.id)}
-                        >
-                          Remover
-                        </button>
-                      </>
-                    )}
+                    <button
+                      className="dep-btn-delete"
+                      onClick={() => pedirConfirmRemover(dep.id)}
+                    >
+                      Remover
+                    </button>
                   </td>
                 </tr>
               ))}
               {departamentosPagina.length === 0 && (
                 <tr>
-                  <td colSpan="2" style={{ textAlign: "center", padding: "20px" }}>
+                  <td colSpan="3" style={{ textAlign: "center", padding: "20px" }}>
                     Nenhum departamento encontrado.
                   </td>
                 </tr>
@@ -237,7 +252,6 @@ const GerirDepartamento = () => {
             </tbody>
           </table>
 
-         
           <div className="dep-paginacao">
             <button
               onClick={irParaPaginaAnterior}

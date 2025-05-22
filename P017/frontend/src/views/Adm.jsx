@@ -58,6 +58,11 @@ const Adm = () => {
     navigate("/GerirUtilizadores");
   };
 
+  const handleGerirEscolas = () => {
+    setPaginaAtiva("gerirEscolas");
+    navigate("/GerirEscolas");
+  };
+
   const handleLogout = () => {
     navigate("/");
   };
@@ -121,7 +126,12 @@ const Adm = () => {
         <nav className="adm-menu">
           <ul>
             <li
-              onClick={handleGerirUtilizadores}
+              onClick={() => {
+                if (paginaAtiva !== "gerirUtilizadores") {
+                  setPaginaAtiva("gerirUtilizadores");
+                  navigate("/GerirUtilizadores");
+                }
+              }}
               className={
                 paginaAtiva === "gerirUtilizadores"
                   ? "active adm-gerir-utilizadores"
@@ -129,6 +139,13 @@ const Adm = () => {
               }
             >
               Gerir Utilizadores
+            </li>
+
+            <li
+              onClick={handleGerirEscolas}
+              className={paginaAtiva === "gerirEscolas" ? "active" : ""}
+            >
+              Gerir Escolas
             </li>
             <li
               onClick={() => {
@@ -233,7 +250,6 @@ const Adm = () => {
               </tbody>
             </table>
 
-            
             <div className="adm-tabela-navegacao-rodape">
               <button
                 onClick={irParaPaginaAnterior}
@@ -242,8 +258,7 @@ const Adm = () => {
                 title="Página anterior"
                 aria-label="Página anterior"
               >
-                ‹
-                <span className="tooltip">Página anterior</span>
+                ‹<span className="tooltip">Página anterior</span>
               </button>
               <span className="pagina-atual">
                 Página {pagina} de {totalPaginas}
@@ -255,8 +270,7 @@ const Adm = () => {
                 title="Próxima página"
                 aria-label="Próxima página"
               >
-                ›
-                <span className="tooltip">Próxima página</span>
+                ›<span className="tooltip">Próxima página</span>
               </button>
             </div>
           </div>
