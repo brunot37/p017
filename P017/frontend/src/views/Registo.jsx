@@ -1,24 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import "./Registo.css";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import './Registo.css';
+import LogoAgenda from '../assets/LogoAgenda.png';
 
 const Registo = () => {
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(true); 
-  const [passwordError, setPasswordError] = useState("");
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
   const [popupSucesso, setPopupSucesso] = useState(false);
-  const [popupErro, setPopupErro] = useState({ visivel: false, mensagem: "" });
+  const [popupErro, setPopupErro] = useState({ visivel: false, mensagem: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
     if (password.length > 0 && password.length < 6) {
-      setPasswordError("A senha deve ter pelo menos 6 caracteres.");
+      setPasswordError('A senha deve ter pelo menos 6 caracteres.');
     } else {
-      setPasswordError("");
+      setPasswordError('');
     }
   }, [password]);
 
@@ -28,17 +30,17 @@ const Registo = () => {
 
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(email)) {
-      setPopupErro({ visivel: true, mensagem: "Email inválido. Por favor, insere um email válido." });
+      setPopupErro({ visivel: true, mensagem: 'Email inválido. Por favor, insere um email válido.' });
       setLoading(false);
       return;
     }
     if (!nome.trim()) {
-      setPopupErro({ visivel: true, mensagem: "Por favor, insere o nome de utilizador." });
+      setPopupErro({ visivel: true, mensagem: 'Por favor, insere o nome de utilizador.' });
       setLoading(false);
       return;
     }
     if (!password) {
-      setPopupErro({ visivel: true, mensagem: "Por favor, insere a palavra-passe." });
+      setPopupErro({ visivel: true, mensagem: 'Por favor, insere a palavra-passe.' });
       setLoading(false);
       return;
     }
@@ -47,29 +49,26 @@ const Registo = () => {
       setLoading(false);
       return;
     }
+    
+      console.log("aaaaaaaaaa")
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/registo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tipo_conta: "docente", // Ignorado no backend
-          nome: nome,
-          email: email,
-          senha: password,
-        }),
+      console.log("aaaaaaaaaa")
+      await axios.post('http://localhost:8000/api/registo', { 
+        tipo_conta: 'pendente',
+        nome,
+        email,
+        senha: password,
       });
 
-      const data = await response.json();
-      console.log("Resposta do backend:", data);
-
-      if (response.ok) {
-        setPopupSucesso(true);
-      } else {
-        setPopupErro({ visivel: true, mensagem: data.message || "Erro ao registar conta." });
+      setPopupSucesso(true);
+    } catch (error) {
+      console.error('Erro no registo:', error);
+      let mensagemErro = 'Erro ao registar conta.';
+      if (error.response && error.response.data && error.response.data.message) {
+        mensagemErro = error.response.data.message;
       }
-    } catch {
-      setPopupErro({ visivel: true, mensagem: "Erro ao registar conta. Tente novamente mais tarde." });
+      setPopupErro({ visivel: true, mensagem: mensagemErro });
     } finally {
       setLoading(false);
     }
@@ -77,20 +76,24 @@ const Registo = () => {
 
   const fecharPopupSucesso = () => {
     setPopupSucesso(false);
-    navigate("/Login");
+    navigate('/Login');
   };
 
-  const fecharPopupErro = () => setPopupErro({ visivel: false, mensagem: "" });
+  const fecharPopupErro = () => setPopupErro({ visivel: false, mensagem: '' });
 
   return (
     <div className="registration-container fade-in">
       <div className="registration-illustration">
-        <img src="/src/assets/LogoAgenda.png" alt="Caderno" className="illustration-image" />
+        <img src={LogoAgenda} alt="Logo Agenda" />
       </div>
       <div className="registration-form">
-        <Link to="/" className="back-to-home-link">← Voltar</Link>
+        <Link to="/" className="back-to-home-link">
+          ← Voltar
+        </Link>
         <h2 className="registration-title">Crie a sua conta</h2>
-        <p className="registration-description">Insira os seus dados para fazer o seu registo!</p>
+        <p className="registration-description">
+          Insira os seus dados para fazer o seu registo!
+        </p>
         <form onSubmit={handleSubmit}>
           <div className="input-field user">
             <input
@@ -123,11 +126,19 @@ const Registo = () => {
             <button
               type="button"
               className="show-hide-btn"
-              onClick={() => setShowPassword(prev => !prev)}
+              onClick={() => setShowPassword((prev) => !prev)}
               tabIndex={-1}
-              aria-label={showPassword ? "Esconder palavra-passe" : "Mostrar palavra-passe"}
+              aria-label={
+                showPassword
+                  ? "Esconder palavra-passe"
+                  : "Mostrar palavra-passe"
+              }
             >
-              {showPassword ? <AiOutlineEye size={22} /> : <AiOutlineEyeInvisible size={22} />}
+              {showPassword ? (
+                <AiOutlineEye size={22} />
+              ) : (
+                <AiOutlineEyeInvisible size={22} />
+              )}
             </button>
           </div>
           {passwordError && <p className="validation-error">{passwordError}</p>}
@@ -139,7 +150,9 @@ const Registo = () => {
       </div>
 
       {popupSucesso && <PopupSucesso onClose={fecharPopupSucesso} />}
-      {popupErro.visivel && <PopupErro mensagem={popupErro.mensagem} onClose={fecharPopupErro} />}
+      {popupErro.visivel && (
+        <PopupErro mensagem={popupErro.mensagem} onClose={fecharPopupErro} />
+      )}
     </div>
   );
 };
@@ -157,7 +170,7 @@ const PopupSucesso = ({ onClose }) => (
 const PopupErro = ({ mensagem, onClose }) => (
   <div className="popup-overlay">
     <div className="popup-box">
-      <h3 style={{ color: "#cc0000" }}>Erro</h3>
+      <h3 style={{ color: '#cc0000' }}>Erro</h3>
       <p>{mensagem}</p>
       <button onClick={onClose} className="popup-button">Fechar</button>
     </div>

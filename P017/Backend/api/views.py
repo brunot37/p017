@@ -1,5 +1,4 @@
 import re
-from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,18 +11,19 @@ from .serializers import (
     HorarioSerializer,
     DisponibilidadeSerializer,
     UserTipoContaUpdateSerializer,
+    UserSerializer,
 )
 
 User = get_user_model()
 
 class RegistoView(APIView):
     def post(self, request):
-        tipo_conta = request.data.get('tipo_conta')
-        nome = request.data.get('nome')
-        email = request.data.get('email')
-        password = request.data.get('senha')
+        data = request.data
+        nome = data.get('nome')
+        email = data.get('email')
+        password = data.get('senha')
 
-        if not tipo_conta or not nome or not email or not password:
+        if not nome or not email or not password:
             return Response({"message": "Todos os campos são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
 
         if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", email):
@@ -34,27 +34,31 @@ class RegistoView(APIView):
 
         if User.objects.filter(email=email).exists():
             return Response({"message": "Email já registado!"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = UserSerializer(data={
+            "email": email,
+            "nome": nome,
+            "password": password,
+            "tipo_conta": "pendente"
+        })
 
-        try:
-            user = User.objects.create_user(
-                email=email,
-                password=password,
-                nome=nome,
-                tipo_conta='pendente'
-            )
-            return Response({
-                "message": "Conta criada com sucesso!",
-                "tipo_conta": user.tipo_conta
-            }, status=status.HTTP_201_CREATED)
-
-        except Exception as e:
-            return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if serializer.is_valid():
+            try:
+                serializer.save()
+                return Response({
+                    "message": "Conta criada com sucesso!",
+                    "tipo_conta": "pendente"
+                }, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({"message": "Erro ao criar a conta."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
     def post(self, request):
         email = request.data.get("email")
-        password = request.data.get("password")  # Aqui espera campo "password"
+        password = request.data.get("password")
 
         if not email or not password:
             return Response({"message": "Todos os campos são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
@@ -95,19 +99,9 @@ class SubmeterHorarioView(APIView):
 
     def post(self, request):
         user = request.user
-
-        if isinstance(user, AnonymousUser):
-            return Response({"message": "Usuário não autenticado!"}, status=status.HTTP_401_UNAUTHORIZED)
-
         horarios = request.data.get('horarios', [])
 
         for horario_data in horarios:
-            semestre = horario_data.get("semestre")
-            unidade_curricular = horario_data.get("unidade_curricular")
-
-            horario_data['semestre'] = semestre
-            horario_data['unidade_curricular'] = unidade_curricular
-
             serializer = HorarioSerializer(data=horario_data)
             if serializer.is_valid():
                 serializer.save(utilizador=user)
@@ -140,7 +134,6 @@ class ListarDocentesComHorarioView(APIView):
         return Response(docentes_data)
 
 
-# Endpoint para listar todos os utilizadores (para o Adm.jsx)
 class ListUsersView(APIView):
     permission_classes = [permissions.IsAdminUser]
 

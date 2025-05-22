@@ -3,6 +3,7 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.utils import timezone
 
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, nome=None, tipo_conta="pendente", **extra_fields):
         if not email:
@@ -16,7 +17,12 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, email, password, nome="admin", **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser precisa de is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser precisa de is_superuser=True.")
         return self.create_user(email, password, nome, tipo_conta="coordenador", **extra_fields)
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
@@ -41,6 +47,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+
 class Disponibilidade(models.Model):
     utilizador = models.ForeignKey(User, on_delete=models.CASCADE)
     dia = models.DateField(default=timezone.now)
@@ -50,13 +57,14 @@ class Disponibilidade(models.Model):
     def __str__(self):
         return f"{self.utilizador.email} - {self.dia}"
 
+
 class Horario(models.Model):
     utilizador = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     dia = models.DateField(default=timezone.now)
     hora_inicio = models.TimeField()
     hora_fim = models.TimeField()
-    semestre = models.CharField(max_length=20, null=True, blank=True) 
-    unidade_curricular = models.CharField(max_length=255, null=True, blank=True)  
-
+    semestre = models.CharField(max_length=20, null=True, blank=True)
+    ano_letivo = models.CharField(max_length=20, null=True, blank=True)
+    
     def __str__(self):
         return f"{self.utilizador.email} - {self.dia}"

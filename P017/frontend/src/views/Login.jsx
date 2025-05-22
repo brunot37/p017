@@ -1,76 +1,91 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import "./Login.css";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import './Login.css';
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [showPassword, setShowPassword] = useState(true); 
-  const [senhaError, setSenhaError] = useState("");
-  const [popupErro, setPopupErro] = useState({ visivel: false, mensagem: "" });
-  const [popupSucesso, setPopupSucesso] = useState({ visivel: false, tipoConta: "" });
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [senhaError, setSenhaError] = useState('');
+  const [popupErro, setPopupErro] = useState({ visivel: false, mensagem: '' });
+  const [popupSucesso, setPopupSucesso] = useState({ visivel: false, tipoConta: '' });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (senha.length > 0 && senha.length < 6) {
-      setSenhaError("A senha deve ter pelo menos 6 caracteres.");
+      setSenhaError('A senha deve ter pelo menos 6 caracteres.');
     } else {
-      setSenhaError("");
+      setSenhaError('');
     }
   }, [senha]);
 
   const handleLogin = async (event) => {
     event.preventDefault();
+    setLoading(true);
 
     if (!email.trim()) {
-      setPopupErro({ visivel: true, mensagem: "Por favor, insira o email." });
+      setPopupErro({ visivel: true, mensagem: 'Por favor, insira o email.' });
+      setLoading(false);
       return;
     }
     if (!senha.trim()) {
-      setPopupErro({ visivel: true, mensagem: "Por favor, insira a palavra-passe." });
+      setPopupErro({ visivel: true, mensagem: 'Por favor, insira a palavra-passe.' });
+      setLoading(false);
       return;
     }
     if (senhaError) {
       setPopupErro({ visivel: true, mensagem: senhaError });
+      setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password: senha }),
+      const response = await axios.post('/login', {
+        email,
+        password: senha,
       });
 
-      const data = await response.json();
+      const data = response.data;
+      console.log('Resposta do login:', data);
 
-      if (response.ok) {
-        if (
-          data.tipo_conta === "docente" ||
-          data.tipo_conta === "coordenador" ||
-          data.tipo_conta === "adm"
-        ) {
-          localStorage.setItem("token", data.token);
+      if (response.status === 200) {
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userType', data.tipo_conta);
+          localStorage.setItem('userName', data.nome || '');
+        }
+
+        if (['docente', 'coordenador', 'pendente'].includes(data.tipo_conta)) {
           setPopupSucesso({ visivel: true, tipoConta: data.tipo_conta });
         } else {
-          setPopupErro({ visivel: true, mensagem: "Tipo de conta não reconhecido." });
+          setPopupErro({ visivel: true, mensagem: 'Tipo de conta não reconhecido.' });
         }
       } else {
-        setPopupErro({ visivel: true, mensagem: data.message || "Erro ao fazer login." });
+        setPopupErro({ visivel: true, mensagem: data.message || 'Erro ao fazer login.' });
       }
-    } catch {
-      setPopupErro({ visivel: true, mensagem: "Erro ao comunicar com o servidor." });
+    } catch (error) {
+      console.error('Erro no login:', error);
+      let mensagemErro = 'Erro ao comunicar com o servidor.';
+      if (error.response && error.response.data && error.response.data.message) {
+        mensagemErro = error.response.data.message;
+      }
+      setPopupErro({ visivel: true, mensagem: mensagemErro });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const fecharPopupErro = () => setPopupErro({ visivel: false, mensagem: "" });
+  const fecharPopupErro = () => setPopupErro({ visivel: false, mensagem: '' });
 
   const fecharPopupSucesso = (tipoContaLocal) => {
-    setPopupSucesso({ visivel: false, tipoConta: "" });
-    if (tipoContaLocal === "docente") navigate("/DocenteVisualizarHorario");
-    else if (tipoContaLocal === "coordenador") navigate("/CoordenadorConsultar");
-    else if (tipoContaLocal === "adm") navigate("/Adm");
+    setPopupSucesso({ visivel: false, tipoConta: '' });
+    if (tipoContaLocal === 'docente') navigate('/DocenteVisualizarHorario');
+    else if (tipoContaLocal === 'coordenador') navigate('/CoordenadorConsultar');
+    else if (tipoContaLocal === 'adm') navigate('/Adm');
+    else if (tipoContaLocal === 'pendente') navigate('/UsuarioPendente');
   };
 
   return (
@@ -96,7 +111,7 @@ const Login = () => {
           </div>
           <div className="input-field password">
             <input
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? 'text' : 'password'}
               placeholder="Palavra-passe"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
@@ -108,7 +123,7 @@ const Login = () => {
               type="button"
               className="password-toggle"
               onClick={() => setShowPassword((prev) => !prev)}
-              aria-label={showPassword ? "Esconder palavra-passe" : "Mostrar palavra-passe"}
+              aria-label={showPassword ? 'Esconder palavra-passe' : 'Mostrar palavra-passe'}
             >
               {showPassword ? <AiOutlineEye size={20} /> : <AiOutlineEyeInvisible size={20} />}
             </button>
@@ -118,17 +133,14 @@ const Login = () => {
           <div className="forgot-password-link">
             <Link to="/RecuperarPassword">Esqueceste-te da palavra-passe?</Link>
           </div>
-          <button type="submit" className="register-button">Login →</button>
+          <button type="submit" className="register-button" disabled={loading}>
+            {loading ? 'Aguarde...' : 'Login →'}
+          </button>
         </form>
       </div>
 
-      {popupErro.visivel && (
-        <PopupErroLogin mensagem={popupErro.mensagem} onClose={fecharPopupErro} />
-      )}
-
-      {popupSucesso.visivel && (
-        <PopupSucessoLogin tipoConta={popupSucesso.tipoConta} onClose={fecharPopupSucesso} />
-      )}
+      {popupErro.visivel && <PopupErroLogin mensagem={popupErro.mensagem} onClose={fecharPopupErro} />}
+      {popupSucesso.visivel && <PopupSucessoLogin tipoConta={popupSucesso.tipoConta} onClose={fecharPopupSucesso} />}
     </div>
   );
 };
@@ -136,7 +148,7 @@ const Login = () => {
 const PopupErroLogin = ({ mensagem, onClose }) => (
   <div className="popup-overlay">
     <div className="popup-box">
-      <h3 style={{ color: "#cc0000" }}>Erro</h3>
+      <h3 style={{ color: '#cc0000' }}>Erro</h3>
       <p>{mensagem}</p>
       <button onClick={onClose} className="popup-button">Fechar</button>
       <Link to="/Registo" className="popup-link">Não tens conta? Criar conta</Link>
@@ -145,20 +157,27 @@ const PopupErroLogin = ({ mensagem, onClose }) => (
 );
 
 const PopupSucessoLogin = ({ tipoConta, onClose }) => {
-  let tipoFormatado = tipoConta === "docente"
-    ? "Docente"
-    : tipoConta === "coordenador"
-    ? "Coordenador"
-    : tipoConta === "adm"
-    ? "Administrador"
-    : tipoConta;
+  let tipoFormatado =
+    tipoConta === 'docente'
+      ? 'Docente'
+      : tipoConta === 'coordenador'
+      ? 'Coordenador'
+      : tipoConta === 'adm'
+      ? 'Administrador'
+      : tipoConta === 'pendente'
+      ? 'Utilizador (Pendente Aprovação)'
+      : tipoConta;
 
   return (
     <div className="popup-overlay">
       <div className="popup-box">
-        <h3 style={{ color: "#008000" }}>Login efetuado com sucesso</h3>
-        <p>Login de <strong>{tipoFormatado}</strong> com sucesso.</p>
-        <button onClick={() => onClose(tipoConta)} className="popup-button">Continuar</button>
+        <h3 style={{ color: '#008000' }}>Login efetuado com sucesso</h3>
+        <p>
+          Login de <strong>{tipoFormatado}</strong> com sucesso.
+        </p>
+        <button onClick={() => onClose(tipoConta)} className="popup-button">
+          Continuar
+        </button>
       </div>
     </div>
   );
