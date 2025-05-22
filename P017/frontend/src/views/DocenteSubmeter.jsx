@@ -1,58 +1,40 @@
-import React, { useState, forwardRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import "./DocenteSubmeter.css";
 
-const CustomYearInput = forwardRef(({ label, onClick }, ref) => (
-  <button
-    className="custom-year-input"
-    onClick={onClick}
-    ref={ref}
-    type="button"
-  >
-    {label || "Escolha o ano letivo"}
-  </button>
-));
-
-const Modal = ({ message, onClose }) => {
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        {message.split("\n").map((line, i) => (
-          <p key={i}>{line}</p>
-        ))}
-        <button onClick={onClose}>OK</button>
-      </div>
+const Modal = ({ message, onClose }) => (
+  <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      {message.split("\n").map((line, i) => (
+        <p key={i}>{line}</p>
+      ))}
+      <button onClick={onClose}>OK</button>
     </div>
-  );
-};
+  </div>
+);
 
 const DocenteSubmeter = () => {
   const navigate = useNavigate();
 
   const [nomeUtilizador, setNomeUtilizador] = useState("");
+  const [semestre, setSemestre] = useState("1");
+  const [anoLetivo, setAnoLetivo] = useState("");
 
   useEffect(() => {
     setNomeUtilizador("Docente");
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = hoje.getMonth(); // 0=jan, 8=setembro
+
+    const anoInicio = mes >= 8 ? ano : ano - 1;
+    setAnoLetivo(`${anoInicio}/${anoInicio + 1}`);
   }, []);
 
-  const [semestre, setSemestre] = useState("1");
-  const [anoLetivo, setAnoLetivo] = useState("");
-  const [selectedYearDate, setSelectedYearDate] = useState(null);
-
   const [selectedWeekDay, setSelectedWeekDay] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
-
+  const [horaInicio, setHoraInicio] = useState("");
+  const [horaFim, setHoraFim] = useState("");
   const [modalMessage, setModalMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleYearSelect = (date) => {
-    const selectedYear = date.getFullYear();
-    const nextYear = selectedYear + 1;
-    setAnoLetivo(`${selectedYear}/${nextYear}`);
-    setSelectedYearDate(date);
-  };
 
   const getNextDateOfWeekday = (weekday) => {
     const today = new Date();
@@ -69,23 +51,32 @@ const DocenteSubmeter = () => {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const closeModal = () => setIsModalOpen(false);
+
+  const criarMensagemSucesso = () =>
+    `Disponibilidade submetida com sucesso.\n` +
+    `Ano letivo: ${anoLetivo}\n` +
+    `Semestre: ${semestre === "1" ? "1º Semestre" : "2º Semestre"}\n` +
+    `Dia da semana: ${selectedWeekDay}\n` +
+    `Horário: ${horaInicio} até ${horaFim}`;
+
+  const generateTimeOptions = () => {
+    const times = [];
+    const start = 8 * 60;
+    const end = 20 * 60;
+    for (let mins = start; mins <= end; mins += 30) {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      times.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
+    }
+    return times;
   };
 
-  const criarMensagemSucesso = () => {
-    return (
-      `Disponibilidade submetida com sucesso.\n` +
-      `Ano letivo: ${anoLetivo}\n` +
-      `Semestre: ${semestre === "1" ? "1º Semestre" : "2º Semestre"}\n` +
-      `Dia da semana: ${selectedWeekDay}\n` +
-      `Horário: ${selectedTime}`
-    );
-  };
+  const timeOptions = generateTimeOptions();
 
   const submeterDisponibilidade = () => {
     if (!anoLetivo) {
-      openModal("Por favor, selecione o ano letivo.");
+      openModal("Ano letivo inválido.");
       return;
     }
     if (!semestre) {
@@ -96,8 +87,12 @@ const DocenteSubmeter = () => {
       openModal("Por favor, selecione o dia da semana.");
       return;
     }
-    if (!selectedTime) {
-      openModal("Por favor, selecione o horário.");
+    if (!horaInicio || !horaFim) {
+      openModal("Por favor, selecione o intervalo de horário completo.");
+      return;
+    }
+    if (horaFim <= horaInicio) {
+      openModal("O horário de fim deve ser posterior ao horário de início.");
       return;
     }
 
@@ -117,13 +112,12 @@ const DocenteSubmeter = () => {
 
     const dateObj = getNextDateOfWeekday(weekdayNum);
     const dia = dateObj.toISOString().split("T")[0];
-    const hora_inicio = selectedTime;
 
     const horarios = [
       {
         dia,
-        hora_inicio,
-        hora_fim: hora_inicio,
+        hora_inicio: horaInicio,
+        hora_fim: horaFim,
         semestre,
         ano_letivo: anoLetivo,
       },
@@ -139,11 +133,9 @@ const DocenteSubmeter = () => {
     })
       .then(async (response) => {
         if (!response.ok) {
-          // tenta ler a mensagem de erro
           const data = await response.json().catch(() => ({}));
           throw new Error(data.message || "Erro ao submeter horários.");
         }
-        // se correr bem
         openModal(criarMensagemSucesso());
       })
       .catch((error) => {
@@ -151,22 +143,13 @@ const DocenteSubmeter = () => {
       });
   };
 
-  const handleVisualizarHorario = () => {
-    navigate("/DocenteVisualizarHorario");
-  };
-
+  const handleVisualizarHorario = () => navigate("/DocenteVisualizarHorario");
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
   };
-
-  const handleConsultarSubmissoes = () => {
-    navigate("/DocenteConsultarSubmissoes");
-  };
-
-  const handleGerirPerfil = () => {
-    navigate("/GerirPerfilDocente");
-  };
+  const handleConsultarSubmissoes = () => navigate("/DocenteConsultarSubmissoes");
+  const handleGerirPerfil = () => navigate("/GerirPerfilDocente");
 
   return (
     <>
@@ -201,16 +184,13 @@ const DocenteSubmeter = () => {
 
           <div className="disponibilidade-form">
             <div className="ano-letivo-selector">
-              <label>Escolha o ano letivo:</label>
-              <DatePicker
-                selected={selectedYearDate}
-                onChange={handleYearSelect}
-                showYearPicker
-                dateFormat="yyyy"
-                maxDate={new Date(new Date().getFullYear() + 5, 11, 31)}
-                minDate={new Date(2000, 0, 1)}
-                customInput={<CustomYearInput label={anoLetivo} />}
-                popperPlacement="bottom"
+              <label>Ano letivo:</label>
+              <input
+                type="text"
+                readOnly
+                value={anoLetivo}
+                className="semestre-select"
+                style={{ cursor: "default", backgroundColor: "#eee" }}
               />
             </div>
 
@@ -243,15 +223,34 @@ const DocenteSubmeter = () => {
             </div>
 
             <div className="horarios-selector">
-              <label>Escolha o horário:</label>
-              <input
-                type="time"
-                step="1800"
-                value={selectedTime}
-                onChange={(e) => setSelectedTime(e.target.value)}
-                className="hora-input"
-                placeholder="HH:mm"
-              />
+              <label>Escolha o intervalo de horário:</label>
+              <div style={{ display: "flex", gap: "16px" }}>
+                <select
+                  value={horaInicio}
+                  onChange={(e) => setHoraInicio(e.target.value)}
+                  className="hora-input"
+                >
+                  <option value="">Início</option>
+                  {generateTimeOptions().map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+                <span style={{ alignSelf: "center" }}>até</span>
+                <select
+                  value={horaFim}
+                  onChange={(e) => setHoraFim(e.target.value)}
+                  className="hora-input"
+                >
+                  <option value="">Fim</option>
+                  {generateTimeOptions().map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="submeter-container">
