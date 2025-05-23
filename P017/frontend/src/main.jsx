@@ -19,6 +19,7 @@ import GerirPerfilDocente from './views/GerirPerfilDocente.jsx';
 import GerirPerfilCoordenador from './views/GerirPerfilCoordenador.jsx';
 import HorarioDosDocentes from './views/HorarioDosDocentes.jsx';
 import AlterarPassword from './views/AlterarPassword.jsx';
+import GerirEscolas from './views/GerirEscolas.jsx'
 const router = createBrowserRouter([
   {
     path: "/",
@@ -87,6 +88,10 @@ const router = createBrowserRouter([
     {
     path: "/AlterarPassword",
     element: <AlterarPassword />,
+  },
+    {
+    path: "/GerirEscolas",
+    element: <GerirEscolas />,
   },
 ]);
 

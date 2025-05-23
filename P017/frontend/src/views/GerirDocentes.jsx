@@ -14,7 +14,6 @@ const GerirDocentes = () => {
   const [pagina, setPagina] = useState(1);
   const itensPorPagina = 5;
 
-  
   const [popup, setPopup] = useState({ aberto: false, mensagem: "" });
 
   useEffect(() => {
@@ -83,8 +82,6 @@ const GerirDocentes = () => {
       delete copy[idDocente];
       return copy;
     });
-
-
   };
 
   const irParaPaginaAnterior = () => {
@@ -95,50 +92,68 @@ const GerirDocentes = () => {
     if (pagina < totalPaginas) setPagina(pagina + 1);
   };
 
+  const handleGerirUtilizadores = () => {
+    setPaginaAtiva("gerirUtilizadores");
+    navigate("/Adm");
+  };
+  const handleGerirEscolas = () => {
+    setPaginaAtiva("gerirEscolas");
+    navigate("/GerirEscolas");
+  };
+  const handleGerirDepartamento = () => {
+    setPaginaAtiva("gerirDepartamento");
+    navigate("/GerirDepartamento");
+  };
+  const handleGerirCoordenadores = () => {
+    setPaginaAtiva("gerirCoordenadores");
+    navigate("/GerirCoordenadores");
+  };
+  const handleGerirDocentes = () => {
+    setPaginaAtiva("gerirDocentes");
+    navigate("/GerirDocentes");
+  };
+  const handleLogout = () => {
+    navigate("/");
+  };
+
   return (
     <div className="horario-container">
       <aside className="horario-sidebar">
         <nav className="menu">
           <ul>
             <li
-              onClick={() => {
-                setPaginaAtiva("gerirUtilizadores");
-                navigate("/Adm");
-              }}
+              onClick={handleGerirUtilizadores}
               className={paginaAtiva === "gerirUtilizadores" ? "active gerir-utilizadores" : ""}
             >
               Gerir Utilizadores
             </li>
             <li
-              onClick={() => {
-                setPaginaAtiva("gerirDepartamento");
-                navigate("/GerirDepartamento");
-              }}
+              onClick={handleGerirEscolas}
+              className={paginaAtiva === "gerirEscolas" ? "active" : ""}
+            >
+              Gerir Escolas
+            </li>
+            <li
+              onClick={handleGerirDepartamento}
               className={paginaAtiva === "gerirDepartamento" ? "active" : ""}
             >
               Gerir Departamento
             </li>
             <li
-              onClick={() => {
-                setPaginaAtiva("gerirCoordenadores");
-                navigate("/GerirCoordenadores");
-              }}
+              onClick={handleGerirCoordenadores}
               className={paginaAtiva === "gerirCoordenadores" ? "active" : ""}
             >
               Gerir Coordenadores
             </li>
             <li
-              onClick={() => {
-                setPaginaAtiva("gerirDocentes");
-                navigate("/GerirDocentes");
-              }}
+              onClick={handleGerirDocentes}
               className={paginaAtiva === "gerirDocentes" ? "active" : ""}
             >
               Gerir Docentes
             </li>
           </ul>
         </nav>
-        <button onClick={() => navigate("/")} className="logout">
+        <button onClick={handleLogout} className="logout">
           SAIR
         </button>
       </aside>
@@ -191,7 +206,6 @@ const GerirDocentes = () => {
           </tbody>
         </table>
 
-        
         <div className="tabela-navegacao">
           <button
             onClick={irParaPaginaAnterior}

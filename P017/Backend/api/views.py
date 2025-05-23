@@ -21,7 +21,7 @@ class RegistoView(APIView):
         data = request.data
         nome = data.get('nome')
         email = data.get('email')
-        password = data.get('senha')
+        password = data.get('password')
 
         if not nome or not email or not password:
             return Response({"message": "Todos os campos são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
@@ -34,7 +34,7 @@ class RegistoView(APIView):
 
         if User.objects.filter(email=email).exists():
             return Response({"message": "Email já registado!"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         serializer = UserSerializer(data={
             "email": email,
             "nome": nome,
@@ -49,7 +49,7 @@ class RegistoView(APIView):
                     "message": "Conta criada com sucesso!",
                     "tipo_conta": "pendente"
                 }, status=status.HTTP_201_CREATED)
-            except Exception as e:
+            except Exception:
                 return Response({"message": "Erro ao criar a conta."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             return Response({"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

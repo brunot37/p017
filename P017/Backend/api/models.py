@@ -5,9 +5,11 @@ from django.utils import timezone
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None, nome=None, tipo_conta="pendente", **extra_fields):
+    def create_user(self, email, password, nome=None, tipo_conta="pendente", **extra_fields):
         if not email:
             raise ValueError("O email é obrigatório.")
+        if not password:
+            raise ValueError("A password é obrigatória.")
         email = self.normalize_email(email)
         user = self.model(email=email, nome=nome, tipo_conta=tipo_conta, **extra_fields)
         user.set_password(password)
@@ -65,6 +67,6 @@ class Horario(models.Model):
     hora_fim = models.TimeField()
     semestre = models.CharField(max_length=20, null=True, blank=True)
     ano_letivo = models.CharField(max_length=20, null=True, blank=True)
-    
+
     def __str__(self):
         return f"{self.utilizador.email} - {self.dia}"

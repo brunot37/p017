@@ -1,79 +1,121 @@
-/* Pendente.css */
-@keyframes fadeIn {
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100vw;
+  height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.pendente-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background-color: #ffffff;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.pendente-illustration {
+  width: 45%;
+  background-color: #dceefd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pendente-illustration img {
+  max-width: 80%;
+  height: auto;
+  animation: float 3s ease-in-out infinite;
+}
+
+.pendente-content {
+  width: 55%;
+  background-color: #ffffff;
+  padding: 3rem 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  color: #041c42;
+}
+
+.pendente-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.pendente-description {
+  font-size: 1.25rem;
+  color: #333333;
+  margin-bottom: 3rem;
+  min-height: 2rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.progress-bar-fill {
+  width: 70%;
+  height: 100%;
+  background-color: #041c42;
+  border-radius: 12px;
+  animation: pulse 2.5s infinite ease-in-out;
+}
+
+.pendente-footer-text {
+  font-size: 0.9rem;
+  color: #666666;
+}
+
+/* Animations */
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scaleX(1.1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.fade-in {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.8s ease-out forwards;
-}
-
-.animate-pulse {
-  animation: pulse 2s infinite ease-in-out;
-}
-
-.animate-float {
-  animation: float 3s infinite ease-in-out;
-}
-
-.animate-spin {
-  animation: spin 2s infinite linear;
-}
-
-/* Transições suaves */
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.duration-1000 {
-  transition-duration: 1000ms;
-}
-
-.ease-out {
-  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
-}
-
-/* Estilos para o componente Pendente */
-.ring-2 {
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }

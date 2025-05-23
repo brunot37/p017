@@ -4,7 +4,7 @@ from .models import Horario, Disponibilidade, User
 class HorarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Horario
-        fields = ['id', 'dia', 'hora_inicio', 'hora_fim', 'semestre', 'unidade_curricular']
+        fields = ['id', 'dia', 'hora_inicio', 'hora_fim', 'semestre', 'ano_letivo']
 
 class DisponibilidadeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,7 +31,5 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = User.objects.create_user(**validated_data)
-        user.set_password(password)
-        user.save()
+        user = User.objects.create_user(password=password, **validated_data)
         return user

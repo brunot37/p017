@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import './Login.css';
+import LogoAgenda from '../assets/LogoAgenda.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -91,7 +92,7 @@ const Login = () => {
   return (
     <div className="registration-container fade-in">
       <div className="registration-illustration">
-        <img src="/src/assets/LogoAgenda.png" alt="Caderno" className="illustration-image" />
+      <img src={LogoAgenda} alt="Logo Agenda" />
       </div>
       <div className="registration-form">
         <Link to="/" className="back-to-home-link">← Voltar</Link>
