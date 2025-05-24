@@ -57,7 +57,7 @@ class RegistoView(APIView):
 
 class LoginView(APIView):
     def post(self, request):
-        email = request.data.get("email")
+        email = request.data.get("email") 
         password = request.data.get("password")
 
         if not email or not password:
@@ -148,3 +148,4 @@ class ListUsersView(APIView):
                 "email": u.email
             })
         return Response(data, status=status.HTTP_200_OK)
+

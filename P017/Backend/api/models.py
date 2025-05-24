@@ -55,6 +55,8 @@ class Disponibilidade(models.Model):
     dia = models.DateField(default=timezone.now)
     hora_inicio = models.TimeField()
     hora_fim = models.TimeField()
+    semestre = models.CharField(max_length=20, null=True, blank=True)
+    ano_letivo = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
         return f"{self.utilizador.email} - {self.dia}"
@@ -70,3 +72,39 @@ class Horario(models.Model):
 
     def __str__(self):
         return f"{self.utilizador.email} - {self.dia}"
+
+
+class Escola(models.Model):
+    nome = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.nome
+
+
+class Departamento(models.Model):
+    nome = models.CharField(max_length=255)
+    escola = models.ForeignKey(Escola, null=True, blank=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return self.nome
+
+
+class Coordenador(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    departamento = models.ForeignKey(Departamento, null=True, blank=True, on_delete=models.SET_NULL)
+    cargo_status = models.CharField(
+        max_length=20,
+        choices=[('Ativo', 'Ativo'), ('Pendente', 'Pendente')],
+        default='Pendente'
+    )
+
+    def __str__(self):
+        return f"{self.user.nome} - {self.departamento}"
+
+
+class Docente(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    coordenador = models.ForeignKey(Coordenador, null=True, blank=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return self.user.nome

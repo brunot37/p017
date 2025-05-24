@@ -9,7 +9,7 @@ class HorarioSerializer(serializers.ModelSerializer):
 class DisponibilidadeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Disponibilidade
-        fields = ['id', 'dia', 'hora_inicio', 'hora_fim']
+        fields = ['id', 'dia', 'hora_inicio', 'hora_fim', 'semestre', 'ano_letivo'] 
 
 class UserTipoContaUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,6 +28,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'nome', 'password', 'tipo_conta']
+
+    def validate_tipo_conta(self, value):
+        valid_types = ['pendente', 'docente', 'coordenador']
+        if value not in valid_types:
+            raise serializers.ValidationError(f"Tipo de conta deve ser um dos: {', '.join(valid_types)}")
+        return value
 
     def create(self, validated_data):
         password = validated_data.pop('password')
