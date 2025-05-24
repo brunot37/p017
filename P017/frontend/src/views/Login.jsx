@@ -161,7 +161,7 @@ const PopupSucessoLogin = ({ tipoConta, onClose }) => {
   let tipoFormatado =
     tipoConta === 'docente'
       ? 'Docente'
-      : tipoConta === 'coordenador'
+      : tipoConta === 'coordenador' 
       ? 'Coordenador'
       : tipoConta === 'adm'
       ? 'Administrador'
@@ -172,7 +172,7 @@ const PopupSucessoLogin = ({ tipoConta, onClose }) => {
   return (
     <div className="popup-overlay">
       <div className="popup-box">
-        <h3 style={{ color: '#008000' }}>Login efetuado com sucesso</h3>
+        <h3 style={{ color: '#008000' }}>Login efetuado com sucesso!</h3>
         <p>
           Login de <strong>{tipoFormatado}</strong> com sucesso.
         </p>
