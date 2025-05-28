@@ -10,6 +10,10 @@ const GerirPerfilCoordenador = () => {
   const [nomeUtilizador, setNomeUtilizador] = useState("");
   const [novoNome, setNovoNome] = useState("");
 
+  // Exemplos estáticos para departamento e escola
+  const [departamento, setDepartamento] = useState("Departamento de Engenharia Informática");
+  const [escola, setEscola] = useState("Escola Superior de Tecnologia e Gestão");
+
   useEffect(() => {
     setNomeUtilizador("Coordenador");
   }, []);
@@ -20,6 +24,10 @@ const GerirPerfilCoordenador = () => {
 
   const handleHorarioDocentes = () => {
     navigate("/HorarioDosDocentes");
+  };
+
+  const handleGerirDocentes = () => {
+    navigate("/GerirDocentes");
   };
 
   const handleLogout = () => {
@@ -71,6 +79,7 @@ const GerirPerfilCoordenador = () => {
 
         <nav className="menu">
           <ul>
+            <li onClick={handleGerirDocentes}>Gerir Docentes</li>
             <li onClick={handleDisponibilidades}>Disponibilidades dos Docentes</li>
             <li onClick={handleHorarioDocentes}>Horário dos Docentes</li>
           </ul>
@@ -97,6 +106,25 @@ const GerirPerfilCoordenador = () => {
             Fazer alteração
           </button>
         </div>
+
+       
+        <section className="perfil-info-section">
+          <h3>Informações do Perfil</h3>
+          <table className="perfil-table">
+            <thead>
+              <tr>
+                <th>Departamento</th>
+                <th>Escola</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{departamento}</td>
+                <td>{escola}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
       </main>
 
       <ToastContainer 
@@ -115,3 +143,4 @@ const GerirPerfilCoordenador = () => {
 };
 
 export default GerirPerfilCoordenador;
+

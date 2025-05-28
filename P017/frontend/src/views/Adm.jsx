@@ -2,6 +2,35 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Adm.css";
 
+const Modal = ({ message, onClose }) => (
+  <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <p>{message}</p>
+      <button onClick={onClose}>OK</button>
+    </div>
+  </div>
+);
+
+const ConfirmModal = ({ message, onConfirm, onCancel }) => (
+  <div className="modal-overlay" onClick={onCancel}>
+    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <p>{message}</p>
+      <div style={{ marginTop: "20px" }}>
+        <button
+          className="dep-btn-save"
+          onClick={onConfirm}
+          style={{ marginRight: "10px" }}
+        >
+          Sim
+        </button>
+        <button className="dep-btn-cancel" onClick={onCancel}>
+          Não
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 const cargosDisponiveis = [
   "Pendente",
   "Docente",
@@ -19,6 +48,12 @@ const Adm = () => {
 
   const [cargoExemplo, setCargoExemplo] = useState("-");
 
+  const [modalMessage, setModalMessage] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [idParaRemover, setIdParaRemover] = useState(null);
+
   const paginasPorMostrar = 8;
 
   const safeSubmissoes = Array.isArray(submissoes) ? submissoes : [];
@@ -31,27 +66,61 @@ const Adm = () => {
 
   useEffect(() => {
     setCarregando(true);
-    fetch("http://127.0.0.1:8000/api/users/", {
+    const token = localStorage.getItem('token');
+    fetch("http://127.0.0.1:8000/api/users/list", {
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => {
         if (Array.isArray(data)) {
           setSubmissoes(data);
         } else {
           setSubmissoes([]);
+          abrirModal("Resposta do backend inesperada.");
           console.error("Resposta do backend inesperada:", data);
         }
         setCarregando(false);
       })
       .catch((err) => {
-        console.error("Erro ao buscar utilizadores:", err);
         setSubmissoes([]);
         setCarregando(false);
+        abrirModal("Erro ao carregar utilizadores.");
+        console.error("Erro ao buscar utilizadores:", err);
       });
   }, []);
+
+  const abrirModal = (msg) => {
+    setModalMessage(msg);
+    setIsModalOpen(true);
+  };
+
+  const fecharModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const pedirConfirmRemover = (id) => {
+    setIdParaRemover(id);
+    setConfirmModalOpen(true);
+  };
+
+  const cancelarRemover = () => {
+    setIdParaRemover(null);
+    setConfirmModalOpen(false);
+  };
+
+  const confirmarRemover = () => {
+    // Implementar remoção se existir endpoint
+    setConfirmModalOpen(false);
+    abrirModal("Funcionalidade de remoção não implementada.");
+  };
 
   const handleGerirUtilizadores = () => {
     setPaginaAtiva("gerirUtilizadores");
@@ -80,18 +149,20 @@ const Adm = () => {
   };
 
   const handleAlterarCargo = (index, novoCargo) => {
-    if (safeSubmissoes.length === 0) {
-      setCargoExemplo(novoCargo);
+    const submissao = paginacaoSubmissoes[index];
+    const indiceGlobal = (pagina - 1) * paginasPorMostrar + index;
+    const token = localStorage.getItem('token');
+
+    if (!submissao || !submissao.id) {
+      abrirModal("Erro: submissão não efetuada.");
       return;
     }
 
-    const indiceGlobal = (pagina - 1) * paginasPorMostrar + index;
-    const user = safeSubmissoes[indiceGlobal];
-
-    fetch(`http://127.0.0.1:8000/api/user/${user.id}/tipo-conta/`, {
-      method: "PATCH",
+    fetch(`http://127.0.0.1:8000/api/user/tipo-conta/${submissao.id}/update`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({ tipo_conta: novoCargo.toLowerCase() }),
     })
@@ -100,12 +171,14 @@ const Adm = () => {
         return res.json();
       })
       .then(() => {
-        const novaLista = [...safeSubmissoes];
+        const novaLista = [...submissoes];
         novaLista[indiceGlobal].cargo = novoCargo.toLowerCase();
         setSubmissoes(novaLista);
+        abrirModal(`Cargo alterado com sucesso! Novo tipo de conta: ${novoCargo}`);
       })
       .catch((error) => {
-        alert("Erro ao alterar cargo: " + error.message);
+        console.error("Erro ao alterar cargo:", error);
+        abrirModal("Erro ao alterar cargo: " + error.message);
       });
   };
 
@@ -164,15 +237,6 @@ const Adm = () => {
               className={paginaAtiva === "gerirCoordenadores" ? "active" : ""}
             >
               Gerir Coordenadores
-            </li>
-            <li
-              onClick={() => {
-                setPaginaAtiva("gerirDocentes");
-                navigate("/GerirDocentes");
-              }}
-              className={paginaAtiva === "gerirDocentes" ? "active" : ""}
-            >
-              Gerir Docentes
             </li>
           </ul>
         </nav>
@@ -276,6 +340,16 @@ const Adm = () => {
           </div>
         )}
       </main>
+
+      {isModalOpen && <Modal message={modalMessage} onClose={fecharModal} />}
+
+      {confirmModalOpen && (
+        <ConfirmModal
+          message="Tem certeza que deseja remover este utilizador?"
+          onConfirm={confirmarRemover}
+          onCancel={cancelarRemover}
+        />
+      )}
     </div>
   );
 };

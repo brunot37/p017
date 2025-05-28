@@ -10,6 +10,10 @@ const GerirPerfilDocente = () => {
   const [nomeUtilizador, setNomeUtilizador] = useState("");
   const [novoNome, setNovoNome] = useState("");
 
+  // Exemplo estático de departamento e escola
+  const [departamento, setDepartamento] = useState("Departamento de Matemática");
+  const [escola, setEscola] = useState("Escola Superior de Ciências");
+
   useEffect(() => {
     setNomeUtilizador("Docente");
   }, []);
@@ -30,9 +34,7 @@ const GerirPerfilDocente = () => {
     navigate("/");
   };
 
-  const handleGerirPerfil = () => {
-    // Estamos nesta página
-  };
+  const handleGerirPerfil = () => {};
 
   const handleAlterarNome = async () => {
     if (novoNome.trim().length < 3) {
@@ -43,7 +45,7 @@ const GerirPerfilDocente = () => {
       const response = await fetch("/api/alterar-nome", {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ novoNome }),
       });
@@ -63,10 +65,12 @@ const GerirPerfilDocente = () => {
   };
 
   return (
-    <div className="horario-container fade-in">
-      <aside className="horario-sidebar">
+    <div className="docente-container fade-in">
+      <aside className="docente-sidebar">
         <div className="user-greeting">
-          <p>Olá, <strong>{nomeUtilizador || "Utilizador"}</strong></p>
+          <p>
+            Olá, <strong>{nomeUtilizador || "Utilizador"}</strong>
+          </p>
           <button className="btn-gerir-perfil" onClick={handleGerirPerfil}>
             Gerir Perfil
           </button>
@@ -74,7 +78,6 @@ const GerirPerfilDocente = () => {
 
         <nav className="menu">
           <ul>
-            
             <li onClick={handleSubmeterDisponibilidade}>Submeter Disponibilidade</li>
             <li onClick={handleConsultarSubmissoes}>Consultar Submissões</li>
             <li onClick={handleVisualizarHorario}>Visualizar Horário</li>
@@ -86,14 +89,14 @@ const GerirPerfilDocente = () => {
         </button>
       </aside>
 
-      <main className="horario-content">
-        <h2 className="horario-titulo">Gerir Perfil</h2>
+      <main className="docente-content">
+        <h2 className="docente-titulo">Gerir Perfil</h2>
 
-        <div className="form-section">
+        <div className="docente-form-section">
           <h3>Alterar Nome</h3>
           <input
             type="text"
-            placeholder="Digite o seu nome novo"
+            placeholder="Digite o seu novo nome"
             value={novoNome}
             onChange={(e) => setNovoNome(e.target.value)}
             className="input-text"
@@ -102,17 +105,36 @@ const GerirPerfilDocente = () => {
             Fazer alteração
           </button>
         </div>
+
+        {/* Tabela informativa */}
+        <section className="docente-info-section">
+          <h3>Informações do Perfil</h3>
+          <table className="docente-table">
+            <thead>
+              <tr>
+                <th>Departamento</th>
+                <th>Escola</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{departamento}</td>
+                <td>{escola}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
       </main>
 
-      <ToastContainer 
-        position="top-center" 
-        autoClose={3000} 
-        hideProgressBar={false} 
-        newestOnTop={false} 
-        closeOnClick 
-        rtl={false} 
-        pauseOnFocusLoss 
-        draggable 
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
         pauseOnHover
       />
     </div>
@@ -120,3 +142,4 @@ const GerirPerfilDocente = () => {
 };
 
 export default GerirPerfilDocente;
+

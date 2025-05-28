@@ -169,6 +169,7 @@ const CoordenadorConsultar = () => {
 
         <nav className="cd-menu">
           <ul>
+             <li onClick={() => navigate("/GerirDocentes")}>Gerir Docentes</li>
             <li className="active">Disponibilidades dos Docentes</li>
             <li onClick={() => navigate("/HorarioDosDocentes")}>Horário dos Docentes</li>
           </ul>
@@ -291,3 +292,4 @@ const CoordenadorConsultar = () => {
 };
 
 export default CoordenadorConsultar;
+

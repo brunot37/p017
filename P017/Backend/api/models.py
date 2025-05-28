@@ -10,20 +10,34 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("O email é obrigatório.")
         if not password:
             raise ValueError("A password é obrigatória.")
+        
         email = self.normalize_email(email)
-        user = self.model(email=email, nome=nome, tipo_conta=tipo_conta, **extra_fields)
+        if tipo_conta == 'coordenador':
+            extra_fields.setdefault("is_staff", True)
+            extra_fields.setdefault("is_superuser", False)
+        elif tipo_conta == 'adm':
+            extra_fields.setdefault("is_staff", True)
+            extra_fields.setdefault("is_superuser", True)
+        else:
+            extra_fields.setdefault("is_staff", False)
+            extra_fields.setdefault("is_superuser", False)
+        
+        user = self.model(email=email, nome=nome or email.split('@')[0], tipo_conta=tipo_conta, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password, nome="admin", **extra_fields):
+    def create_superuser(self, email, password, nome='admin', **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
+        
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Superuser precisa de is_staff=True.")
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser precisa de is_superuser=True.")
-        return self.create_user(email, password, nome, tipo_conta="coordenador", **extra_fields)
+        
+        return self.create_user(email, password, nome=nome or "Admin", tipo_conta="adm", **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -34,7 +48,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=[
             ('pendente', 'Pendente'),
             ('docente', 'Docente'),
-            ('coordenador', 'Coordenador')
+            ('coordenador', 'Coordenador'),
+            ('adm', 'Administrador')
         ],
         default='pendente'
     )
@@ -42,12 +57,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['nome']  
 
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.email
+        return f"{self.nome} ({self.email})"
 
 
 class Disponibilidade(models.Model):

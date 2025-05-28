@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import './Login.css';
 import LogoAgenda from '../assets/LogoAgenda.png';
+import apiClient from '../api/apiCliente';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -44,7 +44,7 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.post('/login', {
+      const response = await apiClient.post('/login', {
         email,
         password: senha,
       });
@@ -59,7 +59,7 @@ const Login = () => {
           localStorage.setItem('userName', data.nome || '');
         }
 
-        if (['docente', 'coordenador', 'pendente'].includes(data.tipo_conta)) {
+        if (['docente', 'coordenador', 'pendente', 'adm'].includes(data.tipo_conta)) {
           setPopupSucesso({ visivel: true, tipoConta: data.tipo_conta });
         } else {
           setPopupErro({ visivel: true, mensagem: 'Tipo de conta não reconhecido.' });
@@ -86,7 +86,7 @@ const Login = () => {
     if (tipoContaLocal === 'docente') navigate('/DocenteVisualizarHorario');
     else if (tipoContaLocal === 'coordenador') navigate('/CoordenadorConsultar');
     else if (tipoContaLocal === 'adm') navigate('/Adm');
-    else if (tipoContaLocal === 'pendente') navigate('/UsuarioPendente');
+    else if (tipoContaLocal === 'pendente') navigate('/Pendente');
   };
 
   return (
@@ -166,7 +166,7 @@ const PopupSucessoLogin = ({ tipoConta, onClose }) => {
       : tipoConta === 'adm'
       ? 'Administrador'
       : tipoConta === 'pendente'
-      ? 'Utilizador (Pendente Aprovação)'
+      ? 'Utilizador (Aguarda Atribuição de Cargo)'
       : tipoConta;
 
   return (

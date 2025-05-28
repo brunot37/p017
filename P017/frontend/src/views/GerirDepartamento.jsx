@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./GerirDepartamento.css";
 
@@ -40,12 +40,10 @@ const GerirDepartamento = () => {
   const [departamentos, setDepartamentos] = useState([
     { id: 1, nome: "Departamento Simulado", escolaId: null },
   ]);
-  const [escolas, setEscolas] = useState([
-    { id: 1, nome: "Escola Simulada" },
-  ]);
+  const [escolas, setEscolas] = useState([{ id: 1, nome: "Escola Simulada" }]);
   const [editandoId, setEditandoId] = useState(null);
   const [editandoNome, setEditandoNome] = useState("");
-  const [alteracoesEscola, setAlteracoesEscola] = useState({}); // para escolas atribuídas temporariamente
+  const [alteracoesEscola, setAlteracoesEscola] = useState({});
 
   const [modalMessage, setModalMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,8 +69,9 @@ const GerirDepartamento = () => {
   const handleGerirEscolas = () => navigate("/GerirEscolas");
   const handleGerirDepartamento = () => navigate("/GerirDepartamento");
   const handleGerirCoordenadores = () => navigate("/GerirCoordenadores");
-  const handleGerirDocentes = () => navigate("/GerirDocentes");
   const handleLogout = () => navigate("/");
+
+  const token = localStorage.getItem("token");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -82,18 +81,22 @@ const GerirDepartamento = () => {
       return;
     }
 
-    const novoDepartamento = {
-      id: departamentos.length > 0 ? departamentos[departamentos.length - 1].id + 1 : 1,
-      nome: nomeDepartamento.trim(),
-      escolaId: null,
-    };
-
-    setDepartamentos([...departamentos, novoDepartamento]);
-    setNomeDepartamento("");
-    openModal("Departamento guardado com sucesso!");
+    fetch("/api/departamentos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome: nomeDepartamento.trim() }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((novoDepartamento) => {
+        setDepartamentos((prev) => [...prev, novoDepartamento]);
+        setNomeDepartamento("");
+        openModal("Departamento guardado com sucesso!");
+      })
+      .catch(() => openModal("Erro ao criar departamento."));
   };
-
-  // ** Removei toda a lógica do editar **
 
   const pedirConfirmRemover = (id) => {
     setIdParaRemover(id);
@@ -106,13 +109,30 @@ const GerirDepartamento = () => {
   };
 
   const confirmarRemover = () => {
-    setDepartamentos((prev) => prev.filter((dep) => dep.id !== idParaRemover));
-    setConfirmModalOpen(false);
-    openModal("Departamento removido com sucesso!");
-
-    if (departamentosPagina.length === 1 && pagina > 1) {
-      setPagina(pagina - 1);
-    }
+    fetch(`/api/departamentos/${idParaRemover}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        setDepartamentos((prev) => prev.filter((dep) => dep.id !== idParaRemover));
+        setConfirmModalOpen(false);
+        openModal("Departamento removido com sucesso!");
+        if (departamentosPagina.length === 1 && pagina > 1) {
+          setPagina(pagina - 1);
+        }
+      })
+      .catch((err) => {
+        setConfirmModalOpen(false);
+        if (err.response && err.response.status === 401) {
+          openModal("Sessão expirada. Faça login novamente.");
+          navigate("/login");
+        } else {
+          openModal("Erro ao remover departamento.");
+        }
+      });
   };
 
   const handleEscolaChange = (idDepartamento, novaEscolaId) => {
@@ -158,6 +178,18 @@ const GerirDepartamento = () => {
     if (pagina < totalPaginas) setPagina(pagina + 1);
   };
 
+  useEffect(() => {
+    fetch("/api/departamentos")
+      .then((res) => res.json())
+      .then((data) => setDepartamentos(data))
+      .catch(() => openModal("Erro ao carregar departamentos."));
+
+    fetch("/api/escolas")
+      .then((res) => res.json())
+      .then((data) => setEscolas(data))
+      .catch(() => openModal("Erro ao carregar escolas."));
+  }, []);
+
   return (
     <>
       <div className="dep-container">
@@ -170,7 +202,6 @@ const GerirDepartamento = () => {
                 Gerir Departamento
               </li>
               <li onClick={handleGerirCoordenadores}>Gerir Coordenadores</li>
-              <li onClick={handleGerirDocentes}>Gerir Docentes</li>
             </ul>
           </nav>
           <button onClick={handleLogout} className="dep-logout">

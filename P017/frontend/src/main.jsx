@@ -10,11 +10,11 @@ import DocenteVisualizarHorario from './views/DocenteVisualizarHorario.jsx';
 import DocenteSubmeter from './views/DocenteSubmeter.jsx';
 import DocenteConsultarSubmissoes from './views/DocenteConsultarSubmissoes.jsx';
 import CoordenadorConsultar from './views/CoordenadorConsultar.jsx';
+import GerirDocentes from './views/GerirDocentes.jsx';
 import Adm from './views/Adm.jsx';
 import Pendente from './views/Pendente.jsx';
 import GerirCoordenadores from './views/GerirCoordenadores.jsx';
 import GerirDepartamento from './views/GerirDepartamento.jsx';
-import GerirDocentes from './views/GerirDocentes.jsx';
 import GerirPerfilDocente from './views/GerirPerfilDocente.jsx';
 import GerirPerfilCoordenador from './views/GerirPerfilCoordenador.jsx';
 import HorarioDosDocentes from './views/HorarioDosDocentes.jsx';
@@ -69,11 +69,7 @@ const router = createBrowserRouter([
     path: "/GerirDepartamento",
     element: <GerirDepartamento />,
   },
-   {
-    path: "/GerirDocentes",
-    element: <GerirDocentes />,
-  },
-   {
+  {
     path: "/GerirPerfilDocente",
     element: <GerirPerfilDocente />,
   },
@@ -92,6 +88,10 @@ const router = createBrowserRouter([
     {
     path: "/GerirEscolas",
     element: <GerirEscolas />,
+  },
+  {
+    path: "/GerirDocentes",
+    element: <GerirDocentes />,
   },
 ]);
 

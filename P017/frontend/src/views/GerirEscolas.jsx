@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./GerirEscolas.css";
 
@@ -16,7 +16,11 @@ const ConfirmModal = ({ message, onConfirm, onCancel }) => (
     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
       <p>{message}</p>
       <div style={{ marginTop: "20px" }}>
-        <button className="add-esc-btn-save" onClick={onConfirm} style={{ marginRight: "10px" }}>
+        <button
+          className="add-esc-btn-save"
+          onClick={onConfirm}
+          style={{ marginRight: "10px" }}
+        >
           Sim
         </button>
         <button className="add-esc-btn-cancel" onClick={onCancel}>
@@ -33,9 +37,7 @@ const GerirEscolas = () => {
   const navigate = useNavigate();
 
   const [nomeEscola, setNomeEscola] = useState("");
-  const [escolas, setEscolas] = useState([
-    { id: 1, nome: "Escola Simulada" },
-  ]);
+  const [escolas, setEscolas] = useState([]);
   const [editandoId, setEditandoId] = useState(null);
   const [editandoNome, setEditandoNome] = useState("");
 
@@ -63,8 +65,14 @@ const GerirEscolas = () => {
   const handleGerirEscolas = () => navigate("/GerirEscolas");
   const handleGerirDepartamento = () => navigate("/GerirDepartamento");
   const handleGerirCoordenadores = () => navigate("/GerirCoordenadores");
-  const handleGerirDocentes = () => navigate("/GerirDocentes");
   const handleLogout = () => navigate("/");
+
+  useEffect(() => {
+    fetch("/api/escolas")
+      .then((res) => res.json())
+      .then((data) => setEscolas(data))
+      .catch(() => openModal("Erro ao carregar escolas."));
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -74,14 +82,21 @@ const GerirEscolas = () => {
       return;
     }
 
-    const novaEscola = {
-      id: escolas.length > 0 ? escolas[escolas.length - 1].id + 1 : 1,
-      nome: nomeEscola.trim(),
-    };
-
-    setEscolas([...escolas, novaEscola]);
-    setNomeEscola("");
-    openModal("Escola guardada com sucesso!");
+    fetch("/api/escolas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome: nomeEscola.trim() }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((novaEscola) => {
+        setEscolas((prev) => [...prev, novaEscola]);
+        setNomeEscola("");
+        openModal("Escola guardada com sucesso!");
+      })
+      .catch(() => openModal("Erro ao criar escola."));
   };
 
   const startEdit = (id, nome) => {
@@ -97,12 +112,28 @@ const GerirEscolas = () => {
       openModal("O nome da escola não pode estar vazio.");
       return;
     }
+    const token = localStorage.getItem("token");
 
-    setEscolas((prev) =>
-      prev.map((esc) => (esc.id === editandoId ? { ...esc, nome: editandoNome } : esc))
-    );
-    cancelEdit();
-    openModal("Escola atualizada com sucesso!");
+    fetch(`/api/escolas/${editandoId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ nome: editandoNome.trim() }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((escolaAtualizada) => {
+        setEscolas((prev) =>
+          prev.map((esc) => (esc.id === editandoId ? escolaAtualizada : esc))
+        );
+        cancelEdit();
+        openModal("Escola atualizada com sucesso!");
+      })
+      .catch(() => openModal("Erro ao atualizar escola."));
   };
 
   const pedirConfirmRemover = (id) => {
@@ -116,13 +147,25 @@ const GerirEscolas = () => {
   };
 
   const confirmarRemover = () => {
-    setEscolas((prev) => prev.filter((esc) => esc.id !== idParaRemover));
-    setConfirmModalOpen(false);
-    openModal("Escola removida com sucesso!");
-
-    if (escolasPagina.length === 1 && pagina > 1) {
-      setPagina(pagina - 1);
-    }
+    fetch(`/api/escolas/${idParaRemover}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        setEscolas((prev) => prev.filter((esc) => esc.id !== idParaRemover));
+        setConfirmModalOpen(false);
+        openModal("Escola removida com sucesso!");
+        if (escolasPagina.length === 1 && pagina > 1) {
+          setPagina(pagina - 1);
+        }
+      })
+      .catch(() => {
+        setConfirmModalOpen(false);
+        openModal("Erro ao remover escola.");
+      });
   };
 
   const irParaPaginaAnterior = () => {
@@ -143,11 +186,8 @@ const GerirEscolas = () => {
               <li className="active" onClick={handleGerirEscolas}>
                 Gerir Escolas
               </li>
-              <li onClick={handleGerirDepartamento}>
-                Gerir Departamento
-              </li>
+              <li onClick={handleGerirDepartamento}>Gerir Departamento</li>
               <li onClick={handleGerirCoordenadores}>Gerir Coordenadores</li>
-              <li onClick={handleGerirDocentes}>Gerir Docentes</li>
             </ul>
           </nav>
           <button onClick={handleLogout} className="add-esc-logout">
@@ -197,10 +237,16 @@ const GerirEscolas = () => {
                   <td>
                     {editandoId === esc.id ? (
                       <>
-                        <button className="add-esc-btn-save" onClick={confirmarEdit}>
+                        <button
+                          className="add-esc-btn-save"
+                          onClick={confirmarEdit}
+                        >
                           Confirmar
                         </button>
-                        <button className="add-esc-btn-cancel" onClick={cancelEdit}>
+                        <button
+                          className="add-esc-btn-cancel"
+                          onClick={cancelEdit}
+                        >
                           Cancelar
                         </button>
                       </>

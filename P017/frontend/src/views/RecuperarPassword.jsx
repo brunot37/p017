@@ -74,7 +74,7 @@ const RecuperarPassword = () => {
       <div className="registration-form">
         <Link to="/" className="back-to-home-link">← Voltar</Link>
         <h2 className="registration-title">Recuperar Palavra-passe</h2>
-        <p className="registration-description">Verifique o seu email para redefinir a palavra-passe!</p>
+        <p className="registration-description">Digite o seu email para redefinir a palavra-passe!</p>
         <form onSubmit={handleRecuperarSubmit}>
           <div className="input-field email">
             <input
@@ -127,3 +127,4 @@ const RecuperarPassword = () => {
 };
 
 export default RecuperarPassword;
+

@@ -39,13 +39,14 @@ html, body, #root {
 .pendente-content {
   width: 55%;
   background-color: #ffffff;
-  padding: 3rem 4rem;
+  padding: 3rem;
+  position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: column; 
   justify-content: center;
-  text-align: center;
-  color: #041c42;
+  align-items: center;
 }
+
 
 .pendente-title {
   font-size: 2rem;
@@ -83,8 +84,6 @@ html, body, #root {
   color: #666666;
 }
 
-/* Animations */
-
 @keyframes pulse {
   0%, 100% {
     transform: scaleX(1);
@@ -118,4 +117,44 @@ html, body, #root {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.pendente-login-button {
+  margin-top: 1.2rem;
+  padding: 6px 14px;
+  background-color: #041c42;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pendente-login-button:hover {
+  background-color: #06306f;
+}
+.back-to-home-link {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  background-color: #ffffff;
+  color: #041c42;
+  border: 2px solid #041c42;
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.back-to-home-link:hover {
+  background-color: #041c42;
+  color: #ffffff;
 }

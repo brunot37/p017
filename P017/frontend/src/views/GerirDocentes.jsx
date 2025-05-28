@@ -5,76 +5,67 @@ import "./GerirDocentes.css";
 const GerirDocentes = () => {
   const navigate = useNavigate();
   const [paginaAtiva, setPaginaAtiva] = useState("gerirDocentes");
-
   const [docentes, setDocentes] = useState([]);
-  const [coordenadores, setCoordenadores] = useState([]);
-
   const [alteracoes, setAlteracoes] = useState({});
-
   const [pagina, setPagina] = useState(1);
   const itensPorPagina = 5;
+  const [modalMessage, setModalMessage] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [popup, setPopup] = useState({ aberto: false, mensagem: "" });
+  const departamentosEstáticos = [
+    { id: 1, nome: "Departamento A" },
+    { id: 2, nome: "Departamento B" },
+    { id: 3, nome: "Departamento C" },
+  ];
+
+  const openModal = (msg) => {
+    setModalMessage(msg);
+    setIsModalOpen(true);
+  };
+  const closeModal = () => setIsModalOpen(false);
 
   useEffect(() => {
-    setDocentes([
-      { id: 1, nome: "Docente 01", coordenadorId: 1 },
-      { id: 2, nome: "Docente 02", coordenadorId: 2 },
-      { id: 3, nome: "Docente 03", coordenadorId: null },
-      { id: 4, nome: "Docente 04", coordenadorId: 3 },
-      { id: 5, nome: "Docente 05", coordenadorId: null },
-      { id: 6, nome: "Docente 06", coordenadorId: 1 },
-      { id: 7, nome: "Docente 07", coordenadorId: 2 },
-    ]);
+    const token = localStorage.getItem("token");
 
-    setCoordenadores([
-      { id: 1, nome: "User00" },
-      { id: 2, nome: "User01" },
-      { id: 3, nome: "User02" },
-    ]);
+    fetch("/api/docentes", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setDocentes(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setDocentes([]));
   }, []);
 
   const totalPaginas = Math.ceil(docentes.length / itensPorPagina);
-
   const docentesPagina = docentes.slice(
     (pagina - 1) * itensPorPagina,
     pagina * itensPorPagina
   );
 
-  const abrirPopup = (msg) => {
-    setPopup({ aberto: true, mensagem: msg });
-  };
-
-  const fecharPopup = () => {
-    setPopup({ aberto: false, mensagem: "" });
-  };
-
-  const handleCoordenadorChange = (idDocente, novoCoordId) => {
+  const handleDepartamentoChange = (idDocente, novoDepId) => {
     setAlteracoes((prev) => ({
       ...prev,
-      [idDocente]: novoCoordId === "" ? null : Number(novoCoordId),
+      [idDocente]: novoDepId === "" ? null : Number(novoDepId),
     }));
   };
 
   const confirmarAlteracao = (idDocente) => {
     if (!(idDocente in alteracoes)) {
-      abrirPopup("Por favor, selecione um coordenador antes de confirmar.");
+      openModal("Por favor, selecione um departamento antes de confirmar.");
       return;
     }
+    const novoDepId = alteracoes[idDocente];
 
-    const novoCoordId = alteracoes[idDocente];
+    const departamento = departamentosEstáticos.find((d) => d.id === novoDepId);
 
-    setDocentes((prev) =>
-      prev.map((doc) =>
-        doc.id === idDocente ? { ...doc, coordenadorId: novoCoordId } : doc
-      )
-    );
-
-    const docente = docentes.find((d) => d.id === idDocente);
-    const coordenador = coordenadores.find((c) => c.id === novoCoordId);
-
-    abrirPopup(
-      `Coordenador "${coordenador ? coordenador.nome : "Nenhum"}" atribuído ao docente "${docente.nome}".`
+    openModal(
+      `Departamento "${
+        departamento ? departamento.nome : "Nenhum"
+      }" atribuído ao docente com ID ${idDocente}. (Simulação)`
     );
 
     setAlteracoes((prev) => {
@@ -92,110 +83,89 @@ const GerirDocentes = () => {
     if (pagina < totalPaginas) setPagina(pagina + 1);
   };
 
-  const handleGerirUtilizadores = () => {
-    setPaginaAtiva("gerirUtilizadores");
-    navigate("/Adm");
-  };
-  const handleGerirEscolas = () => {
-    setPaginaAtiva("gerirEscolas");
-    navigate("/GerirEscolas");
-  };
-  const handleGerirDepartamento = () => {
-    setPaginaAtiva("gerirDepartamento");
-    navigate("/GerirDepartamento");
-  };
-  const handleGerirCoordenadores = () => {
-    setPaginaAtiva("gerirCoordenadores");
-    navigate("/GerirCoordenadores");
-  };
-  const handleGerirDocentes = () => {
-    setPaginaAtiva("gerirDocentes");
-    navigate("/GerirDocentes");
-  };
   const handleLogout = () => {
+    localStorage.removeItem("token");
     navigate("/");
   };
 
+  const handleGerirPerfil = () => {
+    navigate("/GerirPerfilCoordenador");
+  };
+
   return (
-    <div className="horario-container">
-      <aside className="horario-sidebar">
-        <nav className="menu">
+    <div className="docentes-container">
+      <aside className="docentes-sidebar">
+        <div className="docentes-user">
+          <span>
+            Olá, <strong>Coordenador</strong>
+          </span>
+          <button className="docentes-btn-perfil" onClick={handleGerirPerfil}>
+            Gerir Perfil
+          </button>
+          <hr className="docentes-divider" />
+        </div>
+        <nav className="docentes-menu">
           <ul>
-            <li
-              onClick={handleGerirUtilizadores}
-              className={paginaAtiva === "gerirUtilizadores" ? "active gerir-utilizadores" : ""}
-            >
-              Gerir Utilizadores
-            </li>
-            <li
-              onClick={handleGerirEscolas}
-              className={paginaAtiva === "gerirEscolas" ? "active" : ""}
-            >
-              Gerir Escolas
-            </li>
-            <li
-              onClick={handleGerirDepartamento}
-              className={paginaAtiva === "gerirDepartamento" ? "active" : ""}
-            >
-              Gerir Departamento
-            </li>
-            <li
-              onClick={handleGerirCoordenadores}
-              className={paginaAtiva === "gerirCoordenadores" ? "active" : ""}
-            >
-              Gerir Coordenadores
-            </li>
-            <li
-              onClick={handleGerirDocentes}
-              className={paginaAtiva === "gerirDocentes" ? "active" : ""}
-            >
+            <li className="active" onClick={() => navigate("/GerirDocentes")}>
               Gerir Docentes
+            </li>
+            <li onClick={() => navigate("/CoordenadorConsultar")}>
+              Disponibilidades dos Docentes
+            </li>
+            <li onClick={() => navigate("/HorarioDosDocentes")}>
+              Horário dos Docentes
             </li>
           </ul>
         </nav>
-        <button onClick={handleLogout} className="logout">
+        <button className="docentes-btn-logout" onClick={handleLogout}>
           SAIR
         </button>
       </aside>
-
-      <main className="horario-content">
-        <table className="tabela-gerir-docentes">
+      <main className="docentes-content">
+        <table className="docentes-table">
           <thead>
             <tr>
-              <th style={{ width: "30%" }}>Docente</th>
-              <th style={{ textAlign: "center" }}>Alterar Coordenador</th>
+              <th>Docente</th>
+              <th style={{ textAlign: "center" }}>Adicionar Departamento</th>
             </tr>
           </thead>
           <tbody>
             {docentesPagina.length === 0 && (
               <tr>
-                <td colSpan={2} style={{ textAlign: "center" }}>
-                  Nenhum docente encontrado
+                <td colSpan={2} style={{ textAlign: "center", padding: "20px" }}>
+                  Nenhum docente encontrado.
                 </td>
               </tr>
             )}
-
-            {docentesPagina.map(({ id, nome, coordenadorId }) => (
-              <tr key={id}>
-                <td className="td-docente-nome" title={nome}>
-                  {nome}
+            {docentesPagina.map((docente) => (
+              <tr key={docente.id || docente.pk}>
+                <td className="docentes-name" title={docente.nome}>
+                  {docente.nome}
                 </td>
-                <td className="td-alterar-coordenador">
+                <td className="docentes-action-cell">
                   <select
-                    className="select-coordenador"
-                    value={alteracoes[id] !== undefined ? alteracoes[id] || "" : coordenadorId || ""}
-                    onChange={(e) => handleCoordenadorChange(id, e.target.value)}
+                    className="docentes-select"
+                    value={
+                      alteracoes[docente.id] !== undefined
+                        ? alteracoes[docente.id] === null
+                          ? ""
+                          : alteracoes[docente.id]
+                        : ""
+                    }
+                    onChange={(e) =>
+                      handleDepartamentoChange(docente.id, e.target.value)
+                    }
                   >
-                    <option value="">Selecionar Coordenador</option>
-                    {coordenadores.map((coord) => (
-                      <option key={coord.id} value={coord.id}>
-                        {coord.nome}
+                    <option value="">Nenhum</option>
+                    {departamentosEstáticos.map((dep) => (
+                      <option key={dep.id} value={dep.id}>
+                        {dep.nome}
                       </option>
                     ))}
                   </select>
                   <button
-                    className="btn-confirmar"
-                    onClick={() => confirmarAlteracao(id)}
+                    className="docentes-btn-confirm"
+                    onClick={() => confirmarAlteracao(docente.id || docente.pk)}
                     type="button"
                   >
                     Confirmar
@@ -205,12 +175,11 @@ const GerirDocentes = () => {
             ))}
           </tbody>
         </table>
-
-        <div className="tabela-navegacao">
+        <div className="docentes-pagination">
           <button
             onClick={irParaPaginaAnterior}
             disabled={pagina === 1}
-            className="btn-seta"
+            className="docentes-btn-arrow"
             title="Página anterior"
             aria-label="Página anterior"
           >
@@ -223,7 +192,7 @@ const GerirDocentes = () => {
           <button
             onClick={irParaProximaPagina}
             disabled={pagina === totalPaginas || totalPaginas === 0}
-            className="btn-seta"
+            className="docentes-btn-arrow"
             title="Próxima página"
             aria-label="Próxima página"
           >
@@ -232,13 +201,12 @@ const GerirDocentes = () => {
           </button>
         </div>
       </main>
-
-      {popup.aberto && (
-        <div className="popup-overlay" onClick={fecharPopup}>
-          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-            <p>{popup.mensagem}</p>
-            <button className="btn-fechar-popup" onClick={fecharPopup}>
-              Fechar
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <p>{modalMessage}</p>
+            <button className="modal-btn-close" onClick={closeModal}>
+              OK
             </button>
           </div>
         </div>
@@ -248,3 +216,4 @@ const GerirDocentes = () => {
 };
 
 export default GerirDocentes;
+

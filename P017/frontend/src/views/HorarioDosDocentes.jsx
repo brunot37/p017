@@ -106,7 +106,10 @@ const HorarioDosDocentes = () => {
     navigate("/CoordenadorConsultar");
   };
 
-  // Simula exportação
+  const handleIrGerirDocentes = () => {
+    navigate("/GerirDocentes");
+  };
+
   const exportarHorario = (formato) => {
     setMostrarDropdownExport(false);
 
@@ -134,6 +137,7 @@ const HorarioDosDocentes = () => {
 
         <nav className="hd-menu">
           <ul>
+            <li onClick={handleIrGerirDocentes} style={{ cursor: "pointer" }}>Gerir Docentes</li>
             <li onClick={handleIrParaDisponibilidade}>Disponibilidade dos Docentes</li>
             <li className="active">Horário dos Docentes</li>
           </ul>

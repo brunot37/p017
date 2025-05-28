@@ -6,8 +6,11 @@ from django.contrib.auth import authenticate, get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics, permissions
-from .models import Horario, Disponibilidade
+from .models import Coordenador, Departamento, Escola, Horario, Disponibilidade
 from .serializers import (
+    CoordenadorSerializer,
+    DepartamentoSerializer,
+    EscolaSerializer,
     HorarioSerializer,
     DisponibilidadeSerializer,
     UserTipoContaUpdateSerializer,
@@ -63,19 +66,26 @@ class LoginView(APIView):
         if not email or not password:
             return Response({"message": "Todos os campos são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = authenticate(request, email=email, password=password)
+        try:
+            user = User.objects.get(email=email)
+            if user.check_password(password):
+                refresh = RefreshToken.for_user(user)
+                access_token = str(refresh.access_token)
 
-        if user is not None:
-            refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
+                if user.is_superuser or user.tipo_conta == 'adm':
+                    tipo_conta = 'adm'
+                else:
+                    tipo_conta = user.tipo_conta
 
-            return Response({
-                "message": f"Login de {user.tipo_conta} com sucesso",
-                "tipo_conta": user.tipo_conta,
-                "nome": user.nome,
-                "token": access_token
-            }, status=status.HTTP_200_OK)
-        else:
+                return Response({
+                    "message": f"Login de {tipo_conta} com sucesso",
+                    "tipo_conta": tipo_conta,
+                    "nome": user.nome if hasattr(user, 'nome') and user.nome else user.username,
+                    "token": access_token
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "Credenciais inválidas"}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
             return Response({"message": "Credenciais inválidas"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -141,11 +151,112 @@ class ListUsersView(APIView):
         users = User.objects.all()
         data = []
         for u in users:
+            if u.tipo_conta in ['adm']:
+                cargo = 'administrador'
+            else:
+                cargo = u.tipo_conta
+                
             data.append({
                 "id": u.id,
                 "utilizador": u.nome,
-                "cargo": u.tipo_conta,
+                "cargo": cargo,
                 "email": u.email
             })
         return Response(data, status=status.HTTP_200_OK)
 
+
+class DepartamentoListCreateView(APIView):
+    def get(self, request):
+        departamentos = Departamento.objects.all()
+        serializer = DepartamentoSerializer(departamentos, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = DepartamentoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class DepartamentoUpdateDeleteView(generics.UpdateAPIView):
+    def delete(self, request, id):
+        try:
+            departamento = Departamento.objects.get(id=id)
+            departamento.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Departamento.DoesNotExist:
+            return Response({"detail": "Departamento não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class EscolaListCreateView(APIView):
+    def get(self, request):
+        escolas = Escola.objects.all()
+        serializer = EscolaSerializer(escolas, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = EscolaSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EscolaUpdateDeleteView(generics.UpdateAPIView):
+    queryset = Escola.objects.all()
+    serializer_class = EscolaSerializer
+    permission_classes = [permissions.IsAdminUser]
+    lookup_field = 'id'
+
+    def put(self, request, id):
+        try:
+            escola = Escola.objects.get(id=id)
+        except Escola.DoesNotExist:
+            return Response({"detail": "Escola não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = EscolaSerializer(escola, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, id):
+        try:
+            escola = Escola.objects.get(id=id)
+            escola.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Escola.DoesNotExist:
+            return Response({"detail": "Escola não encontrada."}, status=status.HTTP_404_NOT_FOUND)
+        
+        
+class CoordenadorListView(APIView):
+    def get(self, request):
+        coordenadores = User.objects.filter(tipo_conta="coordenador")
+        serializer = UserSerializer(coordenadores, many=True)
+        return Response(serializer.data)
+    
+class DocenteListView(APIView):
+    def get(self, request):
+        docentes = User.objects.filter(tipo_conta="docente")
+        serializer = UserSerializer(docentes, many=True)
+        return Response(serializer.data)
+
+
+class DocenteUpdateView(APIView):
+    def put(self, request, id):
+        try:
+            docente = User.objects.get(id=id, tipo_conta="docente")
+        except User.DoesNotExist:
+            return Response({"detail": "Docente não encontrado."}, status=404)
+        coordenador_id = request.data.get("coordenador")
+        if coordenador_id:
+            try:
+                coordenador = User.objects.get(id=coordenador_id, tipo_conta="coordenador")
+                docente.coordenador = coordenador
+            except User.DoesNotExist:
+                return Response({"detail": "Coordenador não encontrado."}, status=404)
+        else:
+            docente.coordenador = None
+        docente.save()
+        serializer = UserSerializer(docente)
+        return Response(serializer.data)
