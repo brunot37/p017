@@ -19,22 +19,79 @@ const DocenteConsultarSubmissoes = () => {
   }, []);
 
   const fetchData = async () => {
-    const data = [
-      { id: 1, dataSubmissao: "12/05/2025 10:30:00", estado: "Pendente" },
-      { id: 2, dataSubmissao: "13/05/2025 14:45:00", estado: "Aprovado" },
-      { id: 3, dataSubmissao: "14/05/2025 08:15:00", estado: "Rejeitado" },
-      { id: 4, dataSubmissao: "15/05/2025 09:20:00", estado: "Pendente" },
-      { id: 5, dataSubmissao: "16/05/2025 10:05:00", estado: "Aprovado" },
-      { id: 6, dataSubmissao: "17/05/2025 11:00:00", estado: "Rejeitado" },
-      { id: 7, dataSubmissao: "18/05/2025 12:30:00", estado: "Pendente" },
-      { id: 8, dataSubmissao: "19/05/2025 13:15:00", estado: "Aprovado" },
-      { id: 9, dataSubmissao: "20/05/2025 14:00:00", estado: "Rejeitado" },
-      { id: 10, dataSubmissao: "21/05/2025 15:30:00", estado: "Pendente" },
-      { id: 11, dataSubmissao: "22/05/2025 16:00:00", estado: "Aprovado" },
-      { id: 12, dataSubmissao: "23/05/2025 17:15:00", estado: "Rejeitado" },
-    ];
-    setSubmissoes(data);
-    setCarregando(false);
+    setCarregando(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Token não encontrado");
+        navigate("/");
+        return;
+      }
+
+      const response = await fetch("http://localhost:8000/api/submeter-disponibilidade", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        const submissoesFormatadas = data.map(item => {
+          let dataSubmissao;
+          if (item.created_at) {
+            dataSubmissao = new Date(item.created_at);
+          } else if (item.data_submissao) {
+            dataSubmissao = new Date(item.data_submissao);
+          } else {
+            dataSubmissao = new Date();
+          }
+          
+          return {
+            id: item.id,
+            dataSubmissao: formatarDataHora(dataSubmissao), 
+            estado: item.estado || "Pendente",
+            dia: item.dia,
+            hora_inicio: item.hora_inicio,
+            hora_fim: item.hora_fim,
+            semestre: item.semestre,
+            ano_letivo: item.ano_letivo
+          };
+        });
+        
+        setSubmissoes(submissoesFormatadas);
+      } else {
+        console.error("Erro ao carregar submissões:", await response.text());
+        setSubmissoes([]);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar submissões:", error);
+      setSubmissoes([]);
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const formatarDataHora = (data) => {
+    if (!(data instanceof Date) || isNaN(data.getTime())) {
+      console.warn("Data inválida fornecida:", data);
+      return "Data não disponível";
+    }
+    
+    try {
+      return data.toLocaleString('pt-BR', {
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false
+      });
+    } catch (error) {
+      console.error("Erro ao formatar data:", error);
+      return "Erro na formatação";
+    }
   };
 
   useEffect(() => {
@@ -89,17 +146,41 @@ const DocenteConsultarSubmissoes = () => {
     setSubmissaoParaApagar(null);
   };
 
-  const confirmarApagar = () => {
-    setSubmissoes((prev) => prev.filter((sub) => sub.id !== submissaoParaApagar.id));
-    setPopupAtivo(false);
-    setSubmissaoParaApagar(null);
-    setMensagemSucesso("Submissão apagada com sucesso.");
-    setTimeout(() => {
-      setMensagemSucesso("");
-      if ((pagina - 1) * paginasPorMostrar >= submissoes.length - 1 && pagina > 1) {
-        setPagina(pagina - 1);
+  const confirmarApagar = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token || !submissaoParaApagar) {
+        setPopupAtivo(false);
+        return;
       }
-    }, 3000);
+
+      const response = await fetch(`http://localhost:8000/api/submeter-disponibilidade/${submissaoParaApagar.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        setSubmissoes((prev) => prev.filter((sub) => sub.id !== submissaoParaApagar.id));
+        setMensagemSucesso("Submissão apagada com sucesso.");
+        
+        if ((pagina - 1) * paginasPorMostrar >= submissoes.length - 1 && pagina > 1) {
+          setPagina(pagina - 1);
+        }
+      } else {
+        const erro = await response.json();
+        setMensagemSucesso(`Erro ao apagar: ${erro.message || "Ocorreu um erro"}`);
+      }
+    } catch (error) {
+      setMensagemSucesso("Erro ao tentar apagar a submissão.");
+      console.error("Erro:", error);
+    } finally {
+      setPopupAtivo(false);
+      setSubmissaoParaApagar(null);
+      setTimeout(() => setMensagemSucesso(""), 3000);
+    }
   };
 
   return (
@@ -158,26 +239,51 @@ const DocenteConsultarSubmissoes = () => {
                 <thead>
                   <tr>
                     <th>Data de Submissão</th>
+                    <th>Dia da Semana</th>
+                    <th>Horário</th>
+                    <th>Semestre</th>
+                    <th>Ano Letivo</th>
                     <th>Estado</th>
-                    <th>Apagar</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {paginacaoSubmissoes.map((submissao) => (
-                    <tr key={submissao.id}>
-                      <td className="docente-submissoes-celula">{submissao.dataSubmissao}</td>
-                      <td className="docente-submissoes-celula">{submissao.estado}</td>
-                      <td className="docente-submissoes-celula">
-                        <button
-                          className="docente-submissoes-btn-apagar"
-                          onClick={() => abrirPopupApagar(submissao)}
-                          title="Apagar submissão"
-                        >
-                          Apagar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {paginacaoSubmissoes.map((submissao) => {
+                    const dataObj = submissao.dia ? new Date(submissao.dia) : null;
+                    const diaSemana = dataObj ? 
+                      ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][dataObj.getDay()] : 
+                      '—';
+                    
+                    return (
+                      <tr key={submissao.id}>
+                        <td className="docente-submissoes-celula">{submissao.dataSubmissao}</td>
+                        <td className="docente-submissoes-celula">{diaSemana}</td>
+                        <td className="docente-submissoes-celula">
+                          {submissao.hora_inicio && submissao.hora_fim 
+                            ? `${submissao.hora_inicio} às ${submissao.hora_fim}` 
+                            : '—'}
+                        </td>
+                        <td className="docente-submissoes-celula">
+                          {submissao.semestre ? `${submissao.semestre}º Semestre` : '—'}
+                        </td>
+                        <td className="docente-submissoes-celula">{submissao.ano_letivo || '—'}</td>
+                        <td className="docente-submissoes-celula">
+                          <span className={`estado-${submissao.estado.toLowerCase()}`}>
+                            {submissao.estado}
+                          </span>
+                        </td>
+                        <td className="docente-submissoes-celula">
+                          <button
+                            className="docente-submissoes-btn-apagar"
+                            onClick={() => abrirPopupApagar(submissao)}
+                            title="Apagar submissão"
+                          >
+                            Apagar
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

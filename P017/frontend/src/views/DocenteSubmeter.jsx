@@ -17,6 +17,7 @@ const DocenteSubmeter = () => {
   const navigate = useNavigate();
 
   const [nomeUtilizador, setNomeUtilizador] = useState("");
+  const [_, setSubmissoes] = useState([]);
   const [semestre, setSemestre] = useState("1");
   const [anoLetivo, setAnoLetivo] = useState("");
 
@@ -28,6 +29,29 @@ const DocenteSubmeter = () => {
 
     const anoInicio = mes >= 8 ? ano : ano - 1;
     setAnoLetivo(`${anoInicio}/${anoInicio + 1}`);
+
+    const fetchSubmissoes = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:8000/api/submeter-disponibilidade", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSubmissoes(data);
+      } else {
+        console.error("Erro ao carregar submissões:", await response.text());
+      }
+    } catch (error) {
+      console.error("Erro ao buscar submissões:", error);
+    }
+  };
+  
+  fetchSubmissoes();
   }, []);
 
   const [selectedWeekDay, setSelectedWeekDay] = useState("");
@@ -123,7 +147,7 @@ const DocenteSubmeter = () => {
       },
     ];
 
-    fetch("http://localhost:8000/api/submeter-horario", {
+    fetch("http://localhost:8000/api/submeter-disponibilidade", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -134,12 +158,15 @@ const DocenteSubmeter = () => {
       .then(async (response) => {
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
-          throw new Error(data.message || "Erro ao submeter horários.");
+          throw new Error(data.message || "Erro ao submeter disponibilidade.");
         }
+        setSelectedWeekDay("");
+        setHoraInicio("");
+        setHoraFim("");
         openModal(criarMensagemSucesso());
       })
       .catch((error) => {
-        openModal(error.message || "Erro ao submeter horários.");
+        openModal(error.message || "Erro ao submeter disponibilidade.");
       });
   };
 

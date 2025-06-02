@@ -1,3 +1,4 @@
+from datetime import datetime
 import re
 from rest_framework import status
 from rest_framework.response import Response
@@ -260,3 +261,109 @@ class DocenteUpdateView(APIView):
         docente.save()
         serializer = UserSerializer(docente)
         return Response(serializer.data)
+    
+
+class SubmeterDisponibilidadeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        horarios = request.data.get('horarios', [])
+        
+        if not horarios:
+            return Response({"message": "Nenhum horário fornecido."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        submitted_disponibilidades = []
+        
+        for horario_data in horarios:
+            try:
+                serializer = DisponibilidadeSerializer(data={
+                    'dia': horario_data.get('dia'),
+                    'hora_inicio': horario_data.get('hora_inicio'),
+                    'hora_fim': horario_data.get('hora_fim'),
+                    'semestre': horario_data.get('semestre'),
+                    'ano_letivo': horario_data.get('ano_letivo')
+                })
+                
+                if serializer.is_valid():
+                    disponibilidade = serializer.save(utilizador=user)
+                    submitted_disponibilidades.append(disponibilidade)
+                else:
+                    return Response({
+                        "message": "Erro ao submeter disponibilidade.",
+                        "errors": serializer.errors
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({
+                    "message": f"Erro ao processar disponibilidade: {str(e)}"
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = DisponibilidadeSerializer(submitted_disponibilidades, many=True)
+        return Response({
+            "message": "Disponibilidades submetidas com sucesso!",
+            "disponibilidades": serializer.data
+        }, status=status.HTTP_201_CREATED)
+
+    def get(self, request):
+        user = request.user
+        disponibilidades = Disponibilidade.objects.filter(utilizador=user)
+        
+        semestre = request.query_params.get('semestre')
+        ano_letivo = request.query_params.get('ano_letivo')
+        
+        if semestre:
+            disponibilidades = disponibilidades.filter(semestre=semestre)
+        if ano_letivo:
+            disponibilidades = disponibilidades.filter(ano_letivo=ano_letivo)
+            
+        serializer = DisponibilidadeSerializer(disponibilidades, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+def delete(self, request, id=None):
+        if not id:
+            return Response({"message": "ID da disponibilidade é obrigatório"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            disponibilidade = Disponibilidade.objects.get(id=id, utilizador=request.user)
+            disponibilidade.delete()
+            return Response({"message": "Disponibilidade removida com sucesso"}, status=status.HTTP_204_NO_CONTENT)
+        except Disponibilidade.DoesNotExist:
+            return Response({"message": "Disponibilidade não encontrada ou não pertence ao usuário"}, 
+                          status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"message": f"Erro ao excluir: {str(e)}"}, 
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class VisualizarHorarioView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        data_inicio = request.query_params.get('data_inicio')
+        data_fim = request.query_params.get('data_fim')
+        
+        if not data_inicio or not data_fim:
+            return Response(
+                {"message": "data_inicio e data_fim são parâmetros obrigatórios"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        try:
+            data_inicio_dt = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+            data_fim_dt = datetime.strptime(data_fim, '%Y-%m-%d').date()
+
+            horarios = Horario.objects.filter(
+                utilizador=user,
+                dia__gte=data_inicio_dt,
+                dia__lte=data_fim_dt
+            )
+            
+            serializer = HorarioSerializer(horarios, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {"message": f"Erro ao buscar horários: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

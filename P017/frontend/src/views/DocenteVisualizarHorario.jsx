@@ -16,11 +16,28 @@ function getUserFromToken() {
 
 const DocenteVisualizarHorario = () => {
   const navigate = useNavigate();
-
+  const baseDate = new Date("2025-09-14");
+  
+  const calcularSemanaAtual = () => {
+    const hoje = new Date();
+    const diffDias = Math.floor((hoje - baseDate) / (1000 * 60 * 60 * 24));
+    return Math.floor(diffDias / 7);
+  };
+  
+  // Declare todos os estados no início do componente
   const [nomeUtilizador, setNomeUtilizador] = useState("");
   const [mostrarDropdownExport, setMostrarDropdownExport] = useState(false);
-  const [popupMensagem, setPopupMensagem] = useState(null); // { tipo: 'sucesso' | 'erro', texto: string }
-
+  const [horarios, setHorarios] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [popupMensagem, setPopupMensagem] = useState(null);
+  const [semanaIndex, setSemanaIndex] = useState(calcularSemanaAtual());
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [gradeHorarios, setGradeHorarios] = useState({}); // 1. Primeiro, crie um estado para armazenar a grade de horários formatada
+  
+  // Restante das constantes não-estado
+  const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
+  
+  // useEffect e outras funções depois
   useEffect(() => {
     const user = getUserFromToken();
     if (user && user.nome) {
@@ -28,26 +45,23 @@ const DocenteVisualizarHorario = () => {
     } else {
       setNomeUtilizador("Docente");
     }
-  }, [navigate]);
-
-  const baseDate = new Date("2025-09-14");
-
-  const calcularSemanaAtual = () => {
-    const hoje = new Date();
-    const diffDias = Math.floor((hoje - baseDate) / (1000 * 60 * 60 * 24));
-    return Math.floor(diffDias / 7);
-  };
-
+    
+    // Calcular datas da semana atual para buscar horários
+    const dataInicio = new Date(baseDate);
+    dataInicio.setDate(baseDate.getDate() + semanaIndex * 7);
+    
+    const dataFim = new Date(dataInicio);
+    dataFim.setDate(dataInicio.getDate() + 6);
+    
+    // Buscar horários para a semana selecionada
+    buscarHorarios(dataInicio, dataFim);
+  }, [semanaIndex, navigate]);
+  
   const calcularSemanaPorData = (data) => {
     const diffDias = Math.floor((data - baseDate) / (1000 * 60 * 60 * 24));
     return Math.floor(diffDias / 7);
   };
-
-  const [semanaIndex, setSemanaIndex] = useState(calcularSemanaAtual());
-  const [selectedDate, setSelectedDate] = useState(null);
-
-  const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
-
+  
   const gerarHoras = () => {
     const horas = [];
     let hora = 8;
@@ -108,23 +122,153 @@ const DocenteVisualizarHorario = () => {
     navigate("/GerirPerfilDocente");
   };
 
-  // Simula exportação com sucesso ou erro (exemplo)
-  const exportarHorario = (formato) => {
+  const exportarHorario = async (formato) => {
     setMostrarDropdownExport(false);
+    setCarregando(true);
 
-    // Simulação async - exportação pode ser substituída pela real
-    setTimeout(() => {
-      const sucesso = Math.random() > 0.2; // 80% sucesso, 20% falha
-
-      if (sucesso) {
-        setPopupMensagem({ tipo: "sucesso", texto: `Horário exportado com sucesso em ${formato}!` });
-      } else {
-        setPopupMensagem({ tipo: "erro", texto: `Erro ao exportar horário em ${formato}. Tente novamente.` });
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token não encontrado");
       }
 
-      // Esconde popup passado 3 segundos
+      const dataInicio = new Date(baseDate);
+      dataInicio.setDate(baseDate.getDate() + semanaIndex * 7);
+      const dataFim = new Date(dataInicio);
+      dataFim.setDate(dataInicio.getDate() + 6);
+
+      const dataInicioStr = dataInicio.toISOString().split('T')[0];
+      const dataFimStr = dataFim.toISOString().split('T')[0];
+
+      const response = await fetch(
+        `http://localhost:8000/api/exportar-horario?formato=${formato}&data_inicio=${dataInicioStr}&data_fim=${dataFimStr}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro ao exportar horário");
+      }
+
+      if (formato.toLowerCase() === "pdf" || formato.toLowerCase() === "excel") {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `horario_${dataInicioStr}_${dataFimStr}.${formato.toLowerCase() === "excel" ? "xlsx" : "pdf"}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+        
+        setPopupMensagem({ 
+          tipo: "sucesso", 
+          texto: `Horário exportado com sucesso em ${formato}!` 
+        });
+      } else {
+        throw new Error(`Formato não suportado: ${formato}`);
+      }
+    } catch (error) {
+      console.error("Erro durante exportação:", error);
+      setPopupMensagem({ 
+        tipo: "erro", 
+        texto: `Erro ao exportar horário: ${error.message}` 
+      });
+    } finally {
+      setCarregando(false);
       setTimeout(() => setPopupMensagem(null), 3000);
-    }, 1000);
+    }
+  };
+
+  const buscarHorarios = async (inicio, fim) => {
+    setCarregando(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Token não encontrado");
+        navigate("/");
+        return;
+      }
+
+      const dataInicio = inicio.toISOString().split('T')[0];
+      const dataFim = fim.toISOString().split('T')[0];
+
+      const response = await fetch(
+        `http://localhost:8000/api/visualizar-horario?data_inicio=${dataInicio}&data_fim=${dataFim}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setHorarios(data);
+        
+        const novaGrade = {};
+        
+        data.forEach(horario => {
+          try {
+            const data = new Date(horario.dia);
+            const diaSemana = data.getDay(); // 0=Dom, 1=Seg, ..., 6=Sáb
+            
+            if (diaSemana >= 1 && diaSemana <= 5) {
+              const diaNome = dias[diaSemana - 1]; 
+              
+              const horaInicio = horario.hora_inicio;
+              const horaFim = horario.hora_fim;
+              
+              const horaInicioObj = parseHora(horaInicio);
+              const horaFimObj = parseHora(horaFim);
+              
+              horas.forEach(slot => {
+                const slotObj = parseHora(slot);
+
+                if (
+                  (slotObj.hora > horaInicioObj.hora || 
+                   (slotObj.hora === horaInicioObj.hora && slotObj.minuto >= horaInicioObj.minuto)) &&
+                  (slotObj.hora < horaFimObj.hora || 
+                   (slotObj.hora === horaFimObj.hora && slotObj.minuto < horaFimObj.minuto))
+                ) {
+                  const key = `${diaNome}-${slot}`;
+
+                  novaGrade[key] = {
+                    disciplina: horario.disciplina || 'Aula',
+                    sala: horario.sala || 'Sala não definida'
+                  };
+                }
+              });
+            }
+          } catch (error) {
+            console.error("Erro ao processar horário:", horario, error);
+          }
+        });
+        
+        setGradeHorarios(novaGrade);
+        
+      } else {
+        console.error("Erro ao carregar horários:", await response.text());
+        setHorarios([]);
+        setGradeHorarios({});
+      }
+    } catch (error) {
+      console.error("Erro ao buscar horários:", error);
+      setHorarios([]);
+      setGradeHorarios({});
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const parseHora = (horaString) => {
+    const [hora, minuto] = horaString.split(':').map(Number);
+    return { hora, minuto };
   };
 
   return (
@@ -191,31 +335,47 @@ const DocenteVisualizarHorario = () => {
         </div>
 
         <div className="docente-horario-tabela-wrapper">
-          <table className="docente-horario-tabela">
-            <thead>
-              <tr>
-                <th>Hora</th>
-                {dias.map((dia) => (
-                  <th key={dia}>{dia}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {horas.map((hora) => (
-                <tr key={hora}>
-                  <td className="docente-hora-coluna">{hora}</td>
-                  {dias.map((dia) => {
-                    const cellId = `${dia}-${hora.replace(":", "")}`;
-                    return (
-                      <td key={cellId} id={cellId} className="docente-horario-celula">
-                        -
-                      </td>
-                    );
-                  })}
+          {carregando ? (
+            <div className="carregando-indicador">Carregando horários...</div>
+          ) : (
+            <table className="docente-horario-tabela">
+              <thead>
+                <tr>
+                  <th>Hora</th>
+                  {dias.map((dia) => (
+                    <th key={dia}>{dia}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {horas.map((hora) => (
+                  <tr key={hora}>
+                    <td className="docente-hora-coluna">{hora}</td>
+                    {dias.map((dia) => {
+                      const key = `${dia}-${hora}`;
+                      const aulaInfo = gradeHorarios[key];
+                      
+                      return (
+                        <td 
+                          key={key} 
+                          className={`docente-horario-celula ${aulaInfo ? 'aula' : ''}`}
+                        >
+                          {aulaInfo ? (
+                            <div className="docente-aula-info">
+                              <strong>{aulaInfo.disciplina}</strong>
+                              <span>{aulaInfo.sala}</span>
+                            </div>
+                          ) : (
+                            '-'
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         <div className="docente-semana-navegacao-rodape">
