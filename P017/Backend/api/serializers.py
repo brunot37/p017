@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Coordenador, Departamento, Escola, Horario, Disponibilidade, User
+from .models import Coordenador, Departamento, Escola, Horario, Disponibilidade, User, AprovacaoDisponibilidade
 
 class HorarioSerializer(serializers.ModelSerializer):
     class Meta:
@@ -7,9 +7,16 @@ class HorarioSerializer(serializers.ModelSerializer):
         fields = ['id', 'dia', 'hora_inicio', 'hora_fim', 'semestre', 'ano_letivo']
 
 class DisponibilidadeSerializer(serializers.ModelSerializer):
+    utilizador_nome = serializers.CharField(source='utilizador.nome', read_only=True)
+    dia_semana = serializers.SerializerMethodField()
+    
     class Meta:
         model = Disponibilidade
-        fields = ['id', 'dia', 'hora_inicio', 'hora_fim', 'semestre', 'ano_letivo'] 
+        fields = ['id', 'utilizador', 'utilizador_nome', 'dia', 'dia_semana', 'hora_inicio', 'hora_fim', 'semestre', 'ano_letivo']
+    
+    def get_dia_semana(self, obj):
+        dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
+        return dias[obj.dia.weekday()]
 
 class UserTipoContaUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -56,9 +63,14 @@ class EscolaSerializer(serializers.ModelSerializer):
         model = Escola
         fields = ['id', 'nome']
 
-        from django.db import models
-
 class CoordenadorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coordenador
         fields = ['id', 'nome', 'cargo', 'departamento']
+
+class AprovacaoDisponibilidadeSerializer(serializers.ModelSerializer):
+    docente_nome = serializers.CharField(source='disponibilidade.utilizador.nome', read_only=True)
+    
+    class Meta:
+        model = AprovacaoDisponibilidade
+        fields = ['id', 'disponibilidade', 'coordenador', 'status', 'data_aprovacao', 'observacoes', 'docente_nome']

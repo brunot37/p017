@@ -2,45 +2,27 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CoordenadorConsultar.css";
 
-function getUserFromToken() {
+const getUserInfo = async () => {
   const token = localStorage.getItem("token");
   if (!token) return null;
+  
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload;
-  } catch {
+    const response = await fetch("/api/user/info", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    
+    if (response.ok) {
+      return await response.json();
+    }
+    return null;
+  } catch (error) {
+    console.error("Erro ao obter informações do usuário:", error);
     return null;
   }
-}
-
-const docentesExemplo = [
-  {
-    id: 1,
-    nome: "Ana Silva",
-    disponibilidade: [
-      { dia: "Segunda", horas: ["09:00-11:00", "14:00-16:00"] },
-      { dia: "Quarta", horas: ["10:00-12:00"] },
-      { dia: "Sexta", horas: ["08:00-09:30", "13:00-14:00"] }
-    ]
-  },
-  {
-    id: 2,
-    nome: "Bruno Costa",
-    disponibilidade: [
-      { dia: "Terça", horas: ["09:00-12:00"] },
-      { dia: "Quinta", horas: ["13:00-15:00"] }
-    ]
-  },
-  {
-    id: 3,
-    nome: "Carla Mendes",
-    disponibilidade: [
-      { dia: "Segunda", horas: ["08:00-10:00"] },
-      { dia: "Quarta", horas: ["14:00-16:00"] },
-      { dia: "Sexta", horas: ["09:00-11:00"] }
-    ]
-  }
-];
+};
 
 const ModalConfirmacao = ({ visible, onConfirm, onCancel, docenteNome, dia, hora, acao }) => {
   if (!visible) return null;
@@ -50,7 +32,7 @@ const ModalConfirmacao = ({ visible, onConfirm, onCancel, docenteNome, dia, hora
       <div className="cd-modal-content" onClick={e => e.stopPropagation()}>
         <h3>Confirmar ação</h3>
         <p>
-          Tem a certeza que deseja <strong>{acao === "aprovo" ? "aprovar" : "não aprovar"}</strong> o docente <strong>{docenteNome}</strong> para o dia <strong>{dia}</strong> na hora <strong>{hora}</strong>?
+          Tem a certeza que deseja <strong>{acao === "aprovar" ? "aprovar" : "rejeitar"}</strong> o docente <strong>{docenteNome}</strong> para o dia <strong>{dia}</strong> na hora <strong>{hora}</strong>?
         </p>
         <div className="cd-modal-buttons">
           <button className="cd-btn-aprovar" onClick={onConfirm}>Confirmar</button>
@@ -79,11 +61,13 @@ const ModalAviso = ({ visible, mensagem, onClose }) => {
 
 const CoordenadorConsultar = () => {
   const [paginaIndex, setPaginaIndex] = useState(1);
-  const [docentes, setDocentes] = useState(docentesExemplo);
-  const [loading, setLoading] = useState(false);
+  const [docentes, setDocentes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [coordenadorNome, setCoordenadorNome] = useState("");
+  const [userInfo, setUserInfo] = useState(null);
   const [diasSelecionados, setDiasSelecionados] = useState({});
   const [horasSelecionadas, setHorasSelecionadas] = useState({});
+  const [disponibilidadesSelecionadas, setDisponibilidadesSelecionadas] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [modalDocente, setModalDocente] = useState(null);
   const [modalDia, setModalDia] = useState("");
@@ -95,9 +79,72 @@ const CoordenadorConsultar = () => {
   const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 
   useEffect(() => {
-    const user = getUserFromToken();
-    setCoordenadorNome(user?.nome || "Coordenador");
-  }, []);
+    const initializeComponent = async () => {
+      try {
+        const user = await getUserInfo();
+        
+        if (!user) {
+          setAvisoMensagem("Erro ao obter informações do usuário. Faça login novamente.");
+          setAvisoVisible(true);
+          setTimeout(() => {
+            localStorage.removeItem("token");
+            navigate("/");
+          }, 2000);
+          return;
+        }
+        
+        setUserInfo(user);
+        setCoordenadorNome(user.nome || "Coordenador");
+        
+        if (!['coordenador', 'adm'].includes(user.tipo_conta)) {
+          setAvisoMensagem(`Acesso negado. Tipo de conta: ${user.tipo_conta}. Apenas coordenadores podem acessar esta área.`);
+          setAvisoVisible(true);
+          setTimeout(() => {
+            navigate("/");
+          }, 3000);
+          return;
+        }
+        
+        await carregarDisponibilidades();
+      } catch (error) {
+        console.error("Erro na inicialização:", error);
+        setAvisoMensagem("Erro ao inicializar a página.");
+        setAvisoVisible(true);
+      }
+    };
+    
+    initializeComponent();
+  }, [navigate]);
+
+  const carregarDisponibilidades = async () => {
+    const token = localStorage.getItem("token");
+    
+    try {
+      setLoading(true);
+      
+      const response = await fetch("/api/consultar-disponibilidades", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setDocentes(Array.isArray(data) ? data : []);
+      } else {
+        const errorData = await response.json();
+        setAvisoMensagem(errorData.detail || "Erro ao carregar disponibilidades.");
+        setAvisoVisible(true);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar disponibilidades:", error);
+      setAvisoMensagem("Erro ao comunicar com o servidor.");
+      setAvisoVisible(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const docentesPorPagina = 10;
   const inicio = (paginaIndex - 1) * docentesPorPagina;
@@ -120,25 +167,40 @@ const CoordenadorConsultar = () => {
   const handleDiaChange = (docenteId, dia) => {
     setDiasSelecionados(prev => ({ ...prev, [docenteId]: dia }));
     setHorasSelecionadas(prev => ({ ...prev, [docenteId]: "" }));
+    setDisponibilidadesSelecionadas(prev => ({ ...prev, [docenteId]: null }));
   };
 
   const handleHoraChange = (docenteId, hora) => {
     setHorasSelecionadas(prev => ({ ...prev, [docenteId]: hora }));
+    
+    const docente = docentes.find(d => d.id === docenteId);
+    const dia = diasSelecionados[docenteId];
+    const disponibilidadeDia = docente?.disponibilidade.find(d => d.dia === dia);
+    const disponibilidadeDetalhe = disponibilidadeDia?.detalhes?.find(d => d.hora === hora);
+    
+    if (disponibilidadeDetalhe) {
+      setDisponibilidadesSelecionadas(prev => ({ 
+        ...prev, 
+        [docenteId]: disponibilidadeDetalhe.id 
+      }));
+    }
   };
 
   const abrirModal = (docente, acao) => {
     const dia = diasSelecionados[docente.id];
     const hora = horasSelecionadas[docente.id];
+    
     if (!dia) {
-      setAvisoMensagem("Por favor, selecione o dia que quer aprovar ou não aprovar.");
+      setAvisoMensagem("Por favor, selecione o dia que quer aprovar ou rejeitar.");
       setAvisoVisible(true);
       return;
     }
     if (!hora) {
-      setAvisoMensagem("Por favor, selecione a hora que quer aprovar ou não aprovar.");
+      setAvisoMensagem("Por favor, selecione a hora que quer aprovar ou rejeitar.");
       setAvisoVisible(true);
       return;
     }
+    
     setModalDocente(docente);
     setModalDia(dia);
     setModalHora(hora);
@@ -146,10 +208,54 @@ const CoordenadorConsultar = () => {
     setModalVisible(true);
   };
 
-  const confirmarAcao = () => {
-    setModalVisible(false);
-    setAvisoMensagem(modalAcao === "aprovo" ? "Aprovação registada com sucesso!" : "Rejeição registada com sucesso!");
-    setAvisoVisible(true);
+  const confirmarAcao = async () => {
+    const token = localStorage.getItem("token");
+    const disponibilidadeId = disponibilidadesSelecionadas[modalDocente.id];
+    
+    if (!disponibilidadeId) {
+      setAvisoMensagem("Erro: Disponibilidade não encontrada.");
+      setAvisoVisible(true);
+      setModalVisible(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/gerenciar-aprovacao", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          disponibilidade_id: disponibilidadeId,
+          acao: modalAcao === "aprovar" ? "aprovar" : "rejeitar",
+          observacoes: `${modalAcao === "aprovar" ? "Aprovado" : "Rejeitado"} pelo coordenador`
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setModalVisible(false);
+        setAvisoMensagem(data.message);
+        setAvisoVisible(true);
+        
+        await carregarDisponibilidades();
+        
+        setDiasSelecionados(prev => ({ ...prev, [modalDocente.id]: "" }));
+        setHorasSelecionadas(prev => ({ ...prev, [modalDocente.id]: "" }));
+        setDisponibilidadesSelecionadas(prev => ({ ...prev, [modalDocente.id]: null }));
+      } else {
+        const errorData = await response.json();
+        setModalVisible(false);
+        setAvisoMensagem(errorData.detail || "Erro ao processar aprovação.");
+        setAvisoVisible(true);
+      }
+    } catch (error) {
+      console.error("Erro ao confirmar ação:", error);
+      setModalVisible(false);
+      setAvisoMensagem("Erro ao comunicar com o servidor.");
+      setAvisoVisible(true);
+    }
   };
 
   const fecharAviso = () => {
@@ -157,6 +263,22 @@ const CoordenadorConsultar = () => {
   };
 
   const totalPaginas = Math.ceil(docentes.length / docentesPorPagina);
+
+  if (!userInfo && !avisoVisible) {
+    return (
+      <div className="cd-container">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '18px' 
+        }}>
+          Verificando permissões...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="cd-container fade-in">
@@ -169,7 +291,7 @@ const CoordenadorConsultar = () => {
 
         <nav className="cd-menu">
           <ul>
-             <li onClick={() => navigate("/GerirDocentes")}>Gerir Docentes</li>
+            <li onClick={() => navigate("/GerirDocentes")}>Gerir Docentes</li>
             <li className="active">Disponibilidades dos Docentes</li>
             <li onClick={() => navigate("/HorarioDosDocentes")}>Horário dos Docentes</li>
           </ul>
@@ -179,7 +301,7 @@ const CoordenadorConsultar = () => {
       </aside>
 
       <main className="cd-main">
-        <h2 className="cd-titulo">Olá, {coordenadorNome}</h2>
+        <h2 className="cd-titulo">Disponibilidades dos Docentes</h2>
 
         <div className="cd-table-wrapper">
           <table className="cd-table">
@@ -192,16 +314,25 @@ const CoordenadorConsultar = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="8">Carregando...</td></tr>
+                <tr><td colSpan="7">Carregando...</td></tr>
               ) : docentesPaginaAtual.length === 0 ? (
-                <tr><td colSpan="8">Sem dados para exibir</td></tr>
+                <tr><td colSpan="7">Nenhuma disponibilidade encontrada</td></tr>
               ) : docentesPaginaAtual.map(docente => {
                 const diaSelecionado = diasSelecionados[docente.id];
                 const dispoObj = docente.disponibilidade.find(h => h.dia === diaSelecionado);
 
                 return (
                   <tr key={docente.id}>
-                    <td className="cd-col-nome">{docente.nome}</td>
+                    <td className="cd-col-nome">
+                      <div>
+                        <strong>{docente.nome}</strong>
+                        {docente.departamento && (
+                          <div style={{ fontSize: '0.8em', color: '#666' }}>
+                            {docente.departamento}
+                          </div>
+                        )}
+                      </div>
+                    </td>
                     {dias.map(dia => {
                       const dispo = docente.disponibilidade.find(h => h.dia === dia);
                       return (
@@ -240,8 +371,8 @@ const CoordenadorConsultar = () => {
                       )}
 
                       <div style={{ marginTop: "8px" }}>
-                        <button className="cd-btn-aprovar" onClick={() => abrirModal(docente, "aprovo")}>Aprovo</button>
-                        <button className="cd-btn-rejeitar" onClick={() => abrirModal(docente, "nao aprovo")} style={{ marginLeft: "6px" }}>Não aprovo</button>
+                        <button className="cd-btn-aprovar" onClick={() => abrirModal(docente, "aprovar")}>Aprovo</button>
+                        <button className="cd-btn-rejeitar" onClick={() => abrirModal(docente, "rejeitar")} style={{ marginLeft: "6px" }}>Não aprovo</button>
                       </div>
                     </td>
                   </tr>
@@ -260,11 +391,11 @@ const CoordenadorConsultar = () => {
             &#x276E;
           </button>
           <span className="cd-paginacao-texto">
-            Página {paginaIndex} de {totalPaginas}
+            Página {paginaIndex} de {totalPaginas || 1}
           </span>
           <button
             className="cd-paginacao-btn"
-            disabled={paginaIndex === totalPaginas}
+            disabled={paginaIndex === totalPaginas || totalPaginas === 0}
             onClick={() => mudarPagina(1)}
           >
             &#x276F;

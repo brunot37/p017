@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CoordenadorListView, DepartamentoListCreateView, DepartamentoUpdateDeleteView, DocenteListView, DocenteUpdateView, EscolaListCreateView, EscolaUpdateDeleteView, LoginView, RegistoView, SubmeterDisponibilidadeView, UserTipoContaView, UserTipoContaUpdateView, SubmeterHorarioView, ListarDocentesComHorarioView, ListUsersView, VisualizarHorarioView
+from .views import CoordenadorListView, DepartamentoListCreateView, DepartamentoUpdateDeleteView, DocenteListView, DocenteUpdateView, EscolaListCreateView, EscolaUpdateDeleteView, LoginView, RegistoView, SubmeterDisponibilidadeView, UserTipoContaView, UserTipoContaUpdateView, SubmeterHorarioView, ListarDocentesComHorarioView, ListUsersView, VisualizarHorarioView, ConsultarDisponibilidadesView, GerenciarAprovacaoView, UserInfoView
 
 urlpatterns = [
     path('registo', RegistoView.as_view(), name='registo'),
@@ -18,4 +18,7 @@ urlpatterns = [
     path('docentes/<int:id>', DocenteUpdateView.as_view(), name='docente-update'),
     path('submeter-disponibilidade', SubmeterDisponibilidadeView.as_view(), name='submeter-disponibilidade'),
     path('visualizar-horario', VisualizarHorarioView.as_view(), name='visualizar-horario'),
+    path('user/info', UserInfoView.as_view(), name='user-info'),
+    path('consultar-disponibilidades', ConsultarDisponibilidadesView.as_view(), name='consultar-disponibilidades'),
+    path('gerenciar-aprovacao', GerenciarAprovacaoView.as_view(), name='gerenciar-aprovacao'),
 ]

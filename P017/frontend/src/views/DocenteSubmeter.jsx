@@ -31,27 +31,27 @@ const DocenteSubmeter = () => {
     setAnoLetivo(`${anoInicio}/${anoInicio + 1}`);
 
     const fetchSubmissoes = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8000/api/submeter-disponibilidade", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setSubmissoes(data);
-      } else {
-        console.error("Erro ao carregar submissões:", await response.text());
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("/api/submeter-disponibilidade", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setSubmissoes(data);
+        } else {
+          console.error("Erro ao carregar submissões:", await response.text());
+        }
+      } catch (error) {
+        console.error("Erro ao buscar submissões:", error);
       }
-    } catch (error) {
-      console.error("Erro ao buscar submissões:", error);
-    }
-  };
-  
-  fetchSubmissoes();
+    };
+    
+    fetchSubmissoes();
   }, []);
 
   const [selectedWeekDay, setSelectedWeekDay] = useState("");
@@ -147,7 +147,7 @@ const DocenteSubmeter = () => {
       },
     ];
 
-    fetch("http://localhost:8000/api/submeter-disponibilidade", {
+    fetch("/api/submeter-disponibilidade", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -158,8 +158,11 @@ const DocenteSubmeter = () => {
       .then(async (response) => {
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
-          throw new Error(data.message || "Erro ao submeter disponibilidade.");
+          throw new Error(data.detail || "Erro ao submeter disponibilidade.");
         }
+        return response.json();
+      })
+      .then((data) => {
         setSelectedWeekDay("");
         setHoraInicio("");
         setHoraFim("");

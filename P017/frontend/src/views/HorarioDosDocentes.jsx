@@ -21,6 +21,7 @@ const HorarioDosDocentes = () => {
   const [docenteSelecionado, setDocenteSelecionado] = useState("");
   const [mostrarDropdownExport, setMostrarDropdownExport] = useState(false);
   const [popupMensagem, setPopupMensagem] = useState(null);
+  const [_, setLoading] = useState(true);
 
   useEffect(() => {
     const user = getUserFromToken();
@@ -30,11 +31,47 @@ const HorarioDosDocentes = () => {
       setNomeUtilizador("Coordenador");
     }
 
-    setDocentes([
-      { id: 1, nome: "Maria Fernandes" },
-      { id: 2, nome: "João Oliveira" },
-      { id: 3, nome: "Ana Costa" }
-    ]);
+    const fetchDocentes = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:8000/api/docentes", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const docentesFormatados = data.map(docente => ({
+            id: docente.id,
+            nome: docente.nome,
+            email: docente.email,
+            departamento: docente.departamento?.nome || "Sem departamento"
+          }));
+          setDocentes(docentesFormatados);
+        } else {
+          console.error("Erro ao buscar docentes:", response.status);
+          setDocentes([
+            { id: 1, nome: "Maria Fernandes" },
+            { id: 2, nome: "João Oliveira" },
+            { id: 3, nome: "Ana Costa" }
+          ]);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar docentes:", error);
+        setDocentes([
+          { id: 1, nome: "Maria Fernandes" },
+          { id: 2, nome: "João Oliveira" },
+          { id: 3, nome: "Ana Costa" }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDocentes();
   }, [navigate]);
 
   const baseDate = new Date("2025-09-14");

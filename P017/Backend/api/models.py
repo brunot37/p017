@@ -43,6 +43,8 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     nome = models.CharField(max_length=255)
+    departamento = models.ForeignKey('Departamento', on_delete=models.SET_NULL, null=True, blank=True, related_name='user_docentes')
+    coordenador = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='docentes_supervisionados')
     tipo_conta = models.CharField(
         max_length=20,
         choices=[
@@ -66,7 +68,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Disponibilidade(models.Model):
-    utilizador = models.ForeignKey(User, on_delete=models.CASCADE)
+    utilizador = models.ForeignKey(User, on_delete=models.CASCADE, related_name='disponibilidades')
     dia = models.DateField(default=timezone.now)
     hora_inicio = models.TimeField()
     hora_fim = models.TimeField()
@@ -78,7 +80,7 @@ class Disponibilidade(models.Model):
 
 
 class Horario(models.Model):
-    utilizador = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    utilizador = models.ForeignKey(User, on_delete=models.CASCADE, default=1, related_name='horarios')
     dia = models.DateField(default=timezone.now)
     hora_inicio = models.TimeField()
     hora_fim = models.TimeField()
@@ -98,15 +100,15 @@ class Escola(models.Model):
 
 class Departamento(models.Model):
     nome = models.CharField(max_length=255)
-    escola = models.ForeignKey(Escola, null=True, blank=True, on_delete=models.SET_NULL)
-
+    escola = models.ForeignKey('Escola', on_delete=models.CASCADE, related_name='departamentos', null=True, blank=True)
+    
     def __str__(self):
         return self.nome
 
 
 class Coordenador(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    departamento = models.ForeignKey(Departamento, null=True, blank=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='perfil_coordenador')
+    departamento = models.ForeignKey(Departamento, null=True, blank=True, on_delete=models.SET_NULL, related_name='coordenadores')
     cargo_status = models.CharField(
         max_length=20,
         choices=[('Ativo', 'Ativo'), ('Pendente', 'Pendente')],
@@ -118,8 +120,28 @@ class Coordenador(models.Model):
 
 
 class Docente(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    coordenador = models.ForeignKey(Coordenador, null=True, blank=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='perfil_docente')
+    coordenador = models.ForeignKey(Coordenador, null=True, blank=True, on_delete=models.SET_NULL, related_name='docentes_supervisionados_perfil')
 
     def __str__(self):
         return self.user.nome
+
+
+class AprovacaoDisponibilidade(models.Model):
+    STATUS_CHOICES = [
+        ('pendente', 'Pendente'),
+        ('aprovado', 'Aprovado'),
+        ('rejeitado', 'Rejeitado'),
+    ]
+    
+    disponibilidade = models.ForeignKey(Disponibilidade, on_delete=models.CASCADE, related_name='aprovacoes')
+    coordenador = models.ForeignKey(User, on_delete=models.CASCADE, related_name='aprovacoes_feitas')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendente')
+    data_aprovacao = models.DateTimeField(auto_now=True)
+    observacoes = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        unique_together = ['disponibilidade', 'coordenador']
+    
+    def __str__(self):
+        return f"{self.disponibilidade.utilizador.nome} - {self.status}"

@@ -6,17 +6,13 @@ const GerirDocentes = () => {
   const navigate = useNavigate();
   const [paginaAtiva, setPaginaAtiva] = useState("gerirDocentes");
   const [docentes, setDocentes] = useState([]);
+  const [departamentos, setDepartamentos] = useState([]);
   const [alteracoes, setAlteracoes] = useState({});
   const [pagina, setPagina] = useState(1);
   const itensPorPagina = 5;
   const [modalMessage, setModalMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const departamentosEstáticos = [
-    { id: 1, nome: "Departamento A" },
-    { id: 2, nome: "Departamento B" },
-    { id: 3, nome: "Departamento C" },
-  ];
+  const [loading, setLoading] = useState(true);
 
   const openModal = (msg) => {
     setModalMessage(msg);
@@ -26,18 +22,44 @@ const GerirDocentes = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        const docentesResponse = await fetch("/api/docentes", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (docentesResponse.ok) {
+          const docentesData = await docentesResponse.json();
+          setDocentes(Array.isArray(docentesData) ? docentesData : []);
+        }
+        
+        const departamentosResponse = await fetch("/api/departamentos", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (departamentosResponse.ok) {
+          const departamentosData = await departamentosResponse.json();
+          setDepartamentos(Array.isArray(departamentosData) ? departamentosData : []);
+        }
+        
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+        openModal("Erro ao carregar dados. Tente novamente.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    fetch("/api/docentes", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setDocentes(Array.isArray(data) ? data : []);
-      })
-      .catch(() => setDocentes([]));
+    fetchData();
   }, []);
 
   const totalPaginas = Math.ceil(docentes.length / itensPorPagina);
@@ -53,26 +75,54 @@ const GerirDocentes = () => {
     }));
   };
 
-  const confirmarAlteracao = (idDocente) => {
+  const confirmarAlteracao = async (idDocente) => {
     if (!(idDocente in alteracoes)) {
       openModal("Por favor, selecione um departamento antes de confirmar.");
       return;
     }
+    
+    const token = localStorage.getItem("token");
     const novoDepId = alteracoes[idDocente];
 
-    const departamento = departamentosEstáticos.find((d) => d.id === novoDepId);
+    try {
+      const response = await fetch(`/api/docentes/${idDocente}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          departamento_id: novoDepId,
+        }),
+      });
 
-    openModal(
-      `Departamento "${
-        departamento ? departamento.nome : "Nenhum"
-      }" atribuído ao docente com ID ${idDocente}. (Simulação)`
-    );
+      if (response.ok) {
+        const docenteAtualizado = await response.json();
+        
+        setDocentes(prev => prev.map(docente => 
+          docente.id === idDocente ? docenteAtualizado : docente
+        ));
 
-    setAlteracoes((prev) => {
-      const copy = { ...prev };
-      delete copy[idDocente];
-      return copy;
-    });
+        const departamento = departamentos.find((d) => d.id === novoDepId);
+        openModal(
+          `Departamento "${
+            departamento ? departamento.nome : "Nenhum"
+          }" atribuído ao docente ${docenteAtualizado.nome} com sucesso!`
+        );
+
+        setAlteracoes((prev) => {
+          const copy = { ...prev };
+          delete copy[idDocente];
+          return copy;
+        });
+      } else {
+        const errorData = await response.json();
+        openModal(`Erro ao atribuir departamento: ${errorData.detail || "Erro desconhecido"}`);
+      }
+    } catch (error) {
+      console.error("Erro ao confirmar alteração:", error);
+      openModal("Erro ao comunicar com o servidor. Tente novamente.");
+    }
   };
 
   const irParaPaginaAnterior = () => {
@@ -91,6 +141,22 @@ const GerirDocentes = () => {
   const handleGerirPerfil = () => {
     navigate("/GerirPerfilCoordenador");
   };
+
+  if (loading) {
+    return (
+      <div className="docentes-container">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '18px' 
+        }}>
+          Carregando...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="docentes-container">
@@ -126,21 +192,25 @@ const GerirDocentes = () => {
           <thead>
             <tr>
               <th>Docente</th>
-              <th style={{ textAlign: "center" }}>Adicionar Departamento</th>
+              <th>Departamento Atual</th>
+              <th style={{ textAlign: "center" }}>Adicionar/Alterar Departamento</th>
             </tr>
           </thead>
           <tbody>
             {docentesPagina.length === 0 && (
               <tr>
-                <td colSpan={2} style={{ textAlign: "center", padding: "20px" }}>
+                <td colSpan={3} style={{ textAlign: "center", padding: "20px" }}>
                   Nenhum docente encontrado.
                 </td>
               </tr>
             )}
             {docentesPagina.map((docente) => (
-              <tr key={docente.id || docente.pk}>
+              <tr key={docente.id}>
                 <td className="docentes-name" title={docente.nome}>
                   {docente.nome}
+                </td>
+                <td className="docentes-current-dept">
+                  {docente.departamento ? docente.departamento.nome : "Nenhum"}
                 </td>
                 <td className="docentes-action-cell">
                   <select
@@ -157,7 +227,7 @@ const GerirDocentes = () => {
                     }
                   >
                     <option value="">Nenhum</option>
-                    {departamentosEstáticos.map((dep) => (
+                    {departamentos.map((dep) => (
                       <option key={dep.id} value={dep.id}>
                         {dep.nome}
                       </option>
@@ -165,7 +235,7 @@ const GerirDocentes = () => {
                   </select>
                   <button
                     className="docentes-btn-confirm"
-                    onClick={() => confirmarAlteracao(docente.id || docente.pk)}
+                    onClick={() => confirmarAlteracao(docente.id)}
                     type="button"
                   >
                     Confirmar
