@@ -53,19 +53,9 @@ const HorarioDosDocentes = () => {
           setDocentes(docentesFormatados);
         } else {
           console.error("Erro ao buscar docentes:", response.status);
-          setDocentes([
-            { id: 1, nome: "Maria Fernandes" },
-            { id: 2, nome: "João Oliveira" },
-            { id: 3, nome: "Ana Costa" }
-          ]);
         }
       } catch (error) {
         console.error("Erro ao buscar docentes:", error);
-        setDocentes([
-          { id: 1, nome: "Maria Fernandes" },
-          { id: 2, nome: "João Oliveira" },
-          { id: 3, nome: "Ana Costa" }
-        ]);
       } finally {
         setLoading(false);
       }
