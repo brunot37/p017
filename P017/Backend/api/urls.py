@@ -1,5 +1,13 @@
 from django.urls import path
-from .views import CoordenadorListView, DepartamentoListCreateView, DepartamentoUpdateDeleteView, DocenteListView, DocenteUpdateView, EscolaListCreateView, EscolaUpdateDeleteView, LoginView, RegistoView, SubmeterDisponibilidadeView, UserTipoContaView, UserTipoContaUpdateView, SubmeterHorarioView, ListarDocentesComHorarioView, ListUsersView, VisualizarHorarioView, ConsultarDisponibilidadesView, GerenciarAprovacaoView, UserInfoView
+from .views import (
+    CoordenadorListView, DepartamentoListCreateView, DepartamentoUpdateDeleteView, 
+    DocenteListView, DocenteUpdateView, EscolaListCreateView, EscolaUpdateDeleteView, 
+    LoginView, RegistoView, SubmeterDisponibilidadeView, UserTipoContaView, 
+    UserTipoContaUpdateView, SubmeterHorarioView, ListarDocentesComHorarioView, 
+    ListUsersView, VisualizarHorarioView, ConsultarDisponibilidadesView, 
+    GerenciarAprovacaoView, UserInfoView, ExportarHorarioView, 
+    VisualizarHorarioDocenteView, ExportarHorarioDocenteView
+)
 
 urlpatterns = [
     path('registo', RegistoView.as_view(), name='registo'),
@@ -21,4 +29,7 @@ urlpatterns = [
     path('user/info', UserInfoView.as_view(), name='user-info'),
     path('consultar-disponibilidades', ConsultarDisponibilidadesView.as_view(), name='consultar-disponibilidades'),
     path('gerenciar-aprovacao', GerenciarAprovacaoView.as_view(), name='gerenciar-aprovacao'),
+    path('exportar-horario', ExportarHorarioView.as_view(), name='exportar-horario'),
+    path('visualizar-horario-docente', VisualizarHorarioDocenteView.as_view(), name='visualizar-horario-docente'),
+    path('exportar-horario-docente', ExportarHorarioDocenteView.as_view(), name='exportar-horario-docente'),
 ]

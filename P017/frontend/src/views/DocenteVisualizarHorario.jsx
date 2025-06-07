@@ -24,7 +24,6 @@ const DocenteVisualizarHorario = () => {
     return Math.floor(diffDias / 7);
   };
   
-  // Declare todos os estados no início do componente
   const [nomeUtilizador, setNomeUtilizador] = useState("");
   const [mostrarDropdownExport, setMostrarDropdownExport] = useState(false);
   const [horarios, setHorarios] = useState([]);
@@ -32,12 +31,10 @@ const DocenteVisualizarHorario = () => {
   const [popupMensagem, setPopupMensagem] = useState(null);
   const [semanaIndex, setSemanaIndex] = useState(calcularSemanaAtual());
   const [selectedDate, setSelectedDate] = useState(null);
-  const [gradeHorarios, setGradeHorarios] = useState({}); // 1. Primeiro, crie um estado para armazenar a grade de horários formatada
+  const [gradeHorarios, setGradeHorarios] = useState({});
   
-  // Restante das constantes não-estado
   const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
   
-  // useEffect e outras funções depois
   useEffect(() => {
     const user = getUserFromToken();
     if (user && user.nome) {
@@ -46,14 +43,12 @@ const DocenteVisualizarHorario = () => {
       setNomeUtilizador("Docente");
     }
     
-    // Calcular datas da semana atual para buscar horários
     const dataInicio = new Date(baseDate);
     dataInicio.setDate(baseDate.getDate() + semanaIndex * 7);
     
     const dataFim = new Date(dataInicio);
     dataFim.setDate(dataInicio.getDate() + 6);
     
-    // Buscar horários para a semana selecionada
     buscarHorarios(dataInicio, dataFim);
   }, [semanaIndex, navigate]);
   
@@ -215,8 +210,8 @@ const DocenteVisualizarHorario = () => {
         
         data.forEach(horario => {
           try {
-            const data = new Date(horario.dia);
-            const diaSemana = data.getDay(); // 0=Dom, 1=Seg, ..., 6=Sáb
+            const dataObj = new Date(horario.dia + 'T00:00:00');
+            const diaSemana = dataObj.getDay(); // 0=Dom, 1=Seg, ..., 6=Sáb
             
             if (diaSemana >= 1 && diaSemana <= 5) {
               const diaNome = dias[diaSemana - 1]; 
@@ -239,8 +234,12 @@ const DocenteVisualizarHorario = () => {
                   const key = `${diaNome}-${slot}`;
 
                   novaGrade[key] = {
-                    disciplina: horario.disciplina || 'Aula',
-                    sala: horario.sala || 'Sala não definida'
+                    disciplina: horario.disciplina || 'Horário Aprovado',
+                    sala: horario.sala || 'Sala a definir',
+                    status: horario.status || 'aprovado',
+                    semestre: horario.semestre,
+
+                    ano_letivo: horario.ano_letivo
                   };
                 }
               });
@@ -253,7 +252,8 @@ const DocenteVisualizarHorario = () => {
         setGradeHorarios(novaGrade);
         
       } else {
-        console.error("Erro ao carregar horários:", await response.text());
+        const errorText = await response.text();
+        console.error("Erro ao carregar horários:", errorText);
         setHorarios([]);
         setGradeHorarios({});
       }
