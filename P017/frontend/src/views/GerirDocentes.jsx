@@ -13,6 +13,10 @@ const GerirDocentes = () => {
   const [modalMessage, setModalMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasDepartment, setHasDepartment] = useState(true);
+  const [coordenadorDepartamento, setCoordenadorDepartamento] = useState(null);
+  const [userTipo, setUserTipo] = useState("");
+  const [userName, setUserName] = useState(""); // Adicionar estado para o nome
 
   const openModal = (msg) => {
     setModalMessage(msg);
@@ -23,9 +27,30 @@ const GerirDocentes = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     
+    const fetchUserInfo = async () => {
+      try {
+        const userResponse = await fetch("/api/user/info", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUserTipo(userData.tipo_conta);
+          setUserName(userData.nome); // Armazenar o nome do usuário
+        }
+      } catch (error) {
+        console.error("Erro ao buscar informações do usuário:", error);
+      }
+    };
+    
     const fetchData = async () => {
       try {
         setLoading(true);
+        
+        await fetchUserInfo();
         
         const docentesResponse = await fetch("/api/docentes", {
           headers: {
@@ -35,20 +60,41 @@ const GerirDocentes = () => {
         });
         
         if (docentesResponse.ok) {
-          const docentesData = await docentesResponse.json();
-          setDocentes(Array.isArray(docentesData) ? docentesData : []);
+          const data = await docentesResponse.json();
+          
+          if (data.docentes) {
+            setDocentes(Array.isArray(data.docentes) ? data.docentes : []);
+            setHasDepartment(data.has_department);
+            setCoordenadorDepartamento(data.coordenador_departamento);
+          } else {
+            setDocentes(Array.isArray(data) ? data : []);
+          }
         }
         
-        const departamentosResponse = await fetch("/api/departamentos", {
+        // Só buscar departamentos se for admin
+        const userInfoResponse = await fetch("/api/user/info", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
         
-        if (departamentosResponse.ok) {
-          const departamentosData = await departamentosResponse.json();
-          setDepartamentos(Array.isArray(departamentosData) ? departamentosData : []);
+        if (userInfoResponse.ok) {
+          const userInfo = await userInfoResponse.json();
+          
+          if (userInfo.tipo_conta === 'adm') {
+            const departamentosResponse = await fetch("/api/departamentos", {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            });
+            
+            if (departamentosResponse.ok) {
+              const departamentosData = await departamentosResponse.json();
+              setDepartamentos(Array.isArray(departamentosData) ? departamentosData : []);
+            }
+          }
         }
         
       } catch (error) {
@@ -68,6 +114,46 @@ const GerirDocentes = () => {
     pagina * itensPorPagina
   );
 
+  // Função para coordenadores - adicionar/remover docente
+  const toggleDocenteCoordenacao = async (idDocente, temCoordenador) => {
+    const token = localStorage.getItem("token");
+    const action = temCoordenador ? "remove" : "add";
+
+    try {
+      const response = await fetch(`/api/docentes/${idDocente}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: action,
+        }),
+      });
+
+      if (response.ok) {
+        const docenteAtualizado = await response.json();
+        
+        setDocentes(prev => prev.map(docente => 
+          docente.id === idDocente ? docenteAtualizado : docente
+        ));
+
+        const mensagem = action === "add" 
+          ? `Docente ${docenteAtualizado.nome} foi adicionado à sua coordenação com sucesso!`
+          : `Docente ${docenteAtualizado.nome} foi removido da sua coordenação com sucesso!`;
+        
+        openModal(mensagem);
+      } else {
+        const errorData = await response.json();
+        openModal(`Erro: ${errorData.detail || "Erro desconhecido"}`);
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar coordenação:", error);
+      openModal("Erro ao comunicar com o servidor. Tente novamente.");
+    }
+  };
+
+  // Função para administradores - alterar departamento
   const handleDepartamentoChange = (idDocente, novoDepId) => {
     setAlteracoes((prev) => ({
       ...prev,
@@ -158,12 +244,66 @@ const GerirDocentes = () => {
     );
   }
 
+  // Se for coordenador e não tem departamento
+  if (userTipo === 'coordenador' && !hasDepartment) {
+    return (
+      <div className="docentes-container">
+        <aside className="docentes-sidebar">
+          <div className="docentes-user">
+            <span>
+              Olá, <strong>{userName}</strong>
+            </span>
+            <button className="docentes-btn-perfil" onClick={handleGerirPerfil}>
+              Gerir Perfil
+            </button>
+            <hr className="docentes-divider" />
+          </div>
+          <nav className="docentes-menu">
+            <ul>
+              <li className="active" onClick={() => navigate("/GerirDocentes")}>
+                Gerir Docentes
+              </li>
+              <li onClick={() => navigate("/CoordenadorConsultar")}>
+                Disponibilidades dos Docentes
+              </li>
+              <li onClick={() => navigate("/HorarioDosDocentes")}>
+                Horário dos Docentes
+              </li>
+            </ul>
+          </nav>
+          <button className="docentes-btn-logout" onClick={handleLogout}>
+            SAIR
+          </button>
+        </aside>
+        <main className="docentes-content">
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '60vh',
+            textAlign: 'center',
+            padding: '20px'
+          }}>
+            <h2 style={{ color: '#e74c3c', marginBottom: '20px' }}>
+              Departamento Não Atribuído
+            </h2>
+            <p style={{ fontSize: '16px', color: '#7f8c8d', maxWidth: '500px', lineHeight: '1.5' }}>
+              Ainda não foi atribuído nenhum departamento a este coordenador. 
+              Entre em contato com o administrador do sistema para que seja feita a atribuição de departamento.
+            </p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="docentes-container">
       <aside className="docentes-sidebar">
         <div className="docentes-user">
           <span>
-            Olá, <strong>Coordenador</strong>
+            Olá, <strong>{userName}</strong>
           </span>
           <button className="docentes-btn-perfil" onClick={handleGerirPerfil}>
             Gerir Perfil
@@ -188,19 +328,43 @@ const GerirDocentes = () => {
         </button>
       </aside>
       <main className="docentes-content">
+        {coordenadorDepartamento && (
+          <div style={{ 
+            backgroundColor: '#e8f5e8', 
+            padding: '10px 15px', 
+            borderRadius: '5px', 
+            marginBottom: '20px',
+            border: '1px solid #27ae60'
+          }}>
+            <strong>Departamento:</strong> {coordenadorDepartamento.nome}
+          </div>
+        )}
+        
         <table className="docentes-table">
           <thead>
             <tr>
               <th>Docente</th>
-              <th>Departamento Atual</th>
-              <th style={{ textAlign: "center" }}>Adicionar/Alterar Departamento</th>
+              {userTipo === 'adm' ? (
+                <>
+                  <th>Departamento Atual</th>
+                  <th style={{ textAlign: "center" }}>Adicionar/Alterar Departamento</th>
+                </>
+              ) : (
+                <>
+                  <th>Status</th>
+                  <th style={{ textAlign: "center" }}>Ação</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
             {docentesPagina.length === 0 && (
               <tr>
                 <td colSpan={3} style={{ textAlign: "center", padding: "20px" }}>
-                  Nenhum docente encontrado.
+                  {userTipo === 'coordenador' 
+                    ? "Nenhum docente encontrado no seu departamento."
+                    : "Nenhum docente encontrado."
+                  }
                 </td>
               </tr>
             )}
@@ -209,38 +373,78 @@ const GerirDocentes = () => {
                 <td className="docentes-name" title={docente.nome}>
                   {docente.nome}
                 </td>
-                <td className="docentes-current-dept">
-                  {docente.departamento ? docente.departamento.nome : "Nenhum"}
-                </td>
-                <td className="docentes-action-cell">
-                  <select
-                    className="docentes-select"
-                    value={
-                      alteracoes[docente.id] !== undefined
-                        ? alteracoes[docente.id] === null
-                          ? ""
-                          : alteracoes[docente.id]
-                        : ""
-                    }
-                    onChange={(e) =>
-                      handleDepartamentoChange(docente.id, e.target.value)
-                    }
-                  >
-                    <option value="">Nenhum</option>
-                    {departamentos.map((dep) => (
-                      <option key={dep.id} value={dep.id}>
-                        {dep.nome}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    className="docentes-btn-confirm"
-                    onClick={() => confirmarAlteracao(docente.id)}
-                    type="button"
-                  >
-                    Confirmar
-                  </button>
-                </td>
+                
+                {userTipo === 'adm' ? (
+                  // Interface para administrador
+                  <>
+                    <td className="docentes-current-dept">
+                      {docente.departamento ? docente.departamento.nome : "Nenhum"}
+                    </td>
+                    <td className="docentes-action-cell">
+                      <select
+                        className="docentes-select"
+                        value={
+                          alteracoes[docente.id] !== undefined
+                            ? alteracoes[docente.id] === null
+                              ? ""
+                              : alteracoes[docente.id]
+                            : ""
+                        }
+                        onChange={(e) =>
+                          handleDepartamentoChange(docente.id, e.target.value)
+                        }
+                      >
+                        <option value="">Nenhum</option>
+                        {departamentos.map((dep) => (
+                          <option key={dep.id} value={dep.id}>
+                            {dep.nome}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        className="docentes-btn-confirm"
+                        onClick={() => confirmarAlteracao(docente.id)}
+                        type="button"
+                      >
+                        Confirmar
+                      </button>
+                    </td>
+                  </>
+                ) : (
+                  // Interface para coordenador
+                  <>
+                    <td className="docentes-current-dept">
+                      {docente.tem_coordenador ? (
+                        <span style={{ color: '#27ae60', fontWeight: 'bold' }}>
+                          Sob sua coordenação
+                        </span>
+                      ) : (
+                        <span style={{ color: '#e74c3c' }}>
+                          Sem coordenador
+                        </span>
+                      )}
+                    </td>
+                    <td className="docentes-action-cell">
+                      <button
+                        className={`docentes-btn-confirm ${
+                          docente.tem_coordenador ? 'btn-remove' : 'btn-add'
+                        }`}
+                        onClick={() => toggleDocenteCoordenacao(docente.id, docente.tem_coordenador)}
+                        type="button"
+                        style={{
+                          backgroundColor: docente.tem_coordenador ? '#e74c3c' : '#27ae60',
+                          color: 'white',
+                          border: 'none',
+                          padding: '8px 15px',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {docente.tem_coordenador ? 'Remover' : 'Adicionar'}
+                      </button>
+                    </td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>

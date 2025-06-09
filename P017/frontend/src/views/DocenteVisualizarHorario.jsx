@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { verificarDepartamentoDocente } from "../utils/verificarDepartamento";
 import "./DocenteVisualizarHorario.css";
 
 function getUserFromToken() {
@@ -32,10 +33,26 @@ const DocenteVisualizarHorario = () => {
   const [semanaIndex, setSemanaIndex] = useState(calcularSemanaAtual());
   const [selectedDate, setSelectedDate] = useState(null);
   const [gradeHorarios, setGradeHorarios] = useState({});
+  const [verificandoDepartamento, setVerificandoDepartamento] = useState(true);
   
   const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
   
   useEffect(() => {
+    const verificarAcesso = async () => {
+      const resultado = await verificarDepartamentoDocente(navigate);
+      if (resultado.redirecionado) {
+        return; // Já foi redirecionado
+      }
+      setVerificandoDepartamento(false);
+    };
+    
+    verificarAcesso();
+  }, [navigate]);
+
+  useEffect(() => {
+    // Só executar se já verificou o departamento
+    if (verificandoDepartamento) return;
+
     const user = getUserFromToken();
     if (user && user.nome) {
       setNomeUtilizador(user.nome);
@@ -50,7 +67,25 @@ const DocenteVisualizarHorario = () => {
     dataFim.setDate(dataInicio.getDate() + 6);
     
     buscarHorarios(dataInicio, dataFim);
-  }, [semanaIndex, navigate]);
+  }, [semanaIndex, navigate, verificandoDepartamento]);
+
+  // Se ainda está verificando o departamento, mostrar loading
+  if (verificandoDepartamento) {
+    return (
+      <div className="docente-horario-container">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          flexDirection: 'column',
+          gap: '20px'
+        }}>
+          <div className="carregando-indicador">Verificando permissões...</div>
+        </div>
+      </div>
+    );
+  }
   
   const calcularSemanaPorData = (data) => {
     const diffDias = Math.floor((data - baseDate) / (1000 * 60 * 60 * 24));
@@ -130,7 +165,7 @@ const DocenteVisualizarHorario = () => {
       const dataInicio = new Date(baseDate);
       dataInicio.setDate(baseDate.getDate() + semanaIndex * 7);
       const dataFim = new Date(dataInicio);
-      dataFim.setDate(dataInicio.getDate() + 6);
+      dataFim.setDate(dataFim.getDate() + 6);
 
       const dataInicioStr = dataInicio.toISOString().split('T')[0];
       const dataFimStr = dataFim.toISOString().split('T')[0];

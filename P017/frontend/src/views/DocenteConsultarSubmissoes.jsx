@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { verificarDepartamentoDocente } from "../utils/verificarDepartamento";
 import "./DocenteConsultarSubmissoes.css";
 
 const DocenteConsultarSubmissoes = () => {
   const navigate = useNavigate();
+  const [verificandoDepartamento, setVerificandoDepartamento] = useState(true);
 
   const [submissoes, setSubmissoes] = useState([]);
   const [pagina, setPagina] = useState(1);
@@ -182,6 +184,36 @@ const DocenteConsultarSubmissoes = () => {
       setTimeout(() => setMensagemSucesso(""), 3000);
     }
   };
+
+  useEffect(() => {
+    const verificarAcesso = async () => {
+      const resultado = await verificarDepartamentoDocente(navigate);
+      if (resultado.redirecionado) {
+        return; // Já foi redirecionado
+      }
+      setVerificandoDepartamento(false);
+    };
+    
+    verificarAcesso();
+  }, [navigate]);
+
+  // Se ainda está verificando o departamento, mostrar loading
+  if (verificandoDepartamento) {
+    return (
+      <div className="consultar-container">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          flexDirection: 'column',
+          gap: '20px'
+        }}>
+          <div className="carregando-indicador">Verificando permissões...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="docente-submissoes-container docente-submissoes-fade-in">

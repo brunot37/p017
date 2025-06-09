@@ -9,13 +9,45 @@ const GerirPerfilCoordenador = () => {
 
   const [nomeUtilizador, setNomeUtilizador] = useState("");
   const [novoNome, setNovoNome] = useState("");
-
-  // Exemplos estáticos para departamento e escola
-  const [departamento, setDepartamento] = useState("Departamento de Engenharia Informática");
-  const [escola, setEscola] = useState("Escola Superior de Tecnologia e Gestão");
+  const [departamento, setDepartamento] = useState("");
+  const [escola, setEscola] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setNomeUtilizador("Coordenador");
+    const carregarInformacoesPerfil = async () => {
+      try {
+        const response = await fetch("/api/coordenador/perfil", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setNomeUtilizador(data.nome || "Coordenador");
+          setDepartamento(data.departamento || "");
+          setEscola(data.escola || "");
+          setCargo(data.cargo || "Coordenador");
+        } else {
+          // Valores padrão em caso de erro
+          setNomeUtilizador("Coordenador");
+          setCargo("Coordenador");
+          toast.error("Erro ao carregar informações do perfil.");
+        }
+      } catch (error) {
+        console.error("Erro:", error);
+        setNomeUtilizador("Coordenador");
+        setCargo("Coordenador");
+        toast.error("Erro de comunicação com o servidor.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarInformacoesPerfil();
   }, []);
 
   const handleDisponibilidades = () => {
@@ -44,9 +76,10 @@ const GerirPerfilCoordenador = () => {
       return;
     }
     try {
-      const response = await fetch("/api/alterar-nome", {
+      const response = await fetch("/api/coordenador/alterar-nome", {
         method: "PUT",
         headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ novoNome }),
@@ -107,23 +140,28 @@ const GerirPerfilCoordenador = () => {
           </button>
         </div>
 
-       
         <section className="perfil-info-section">
           <h3>Informações do Perfil</h3>
-          <table className="perfil-table">
-            <thead>
-              <tr>
-                <th>Departamento</th>
-                <th>Escola</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{departamento}</td>
-                <td>{escola}</td>
-              </tr>
-            </tbody>
-          </table>
+          {loading ? (
+            <p>Carregando informações...</p>
+          ) : (
+            <table className="perfil-table">
+              <thead>
+                <tr>
+                  <th>Cargo</th>
+                  <th>Departamento</th>
+                  <th>Escola</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{cargo}</td>
+                  <td>{departamento || "Nada foi atribuído"}</td>
+                  <td>{escola || "Nada foi atribuído"}</td>
+                </tr>
+              </tbody>
+            </table>
+          )}
         </section>
       </main>
 

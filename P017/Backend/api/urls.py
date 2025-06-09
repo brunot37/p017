@@ -1,12 +1,13 @@
 from django.urls import path
 from .views import (
-    CoordenadorListView, DepartamentoListCreateView, DepartamentoUpdateDeleteView, 
+    CoordenadorListView, CoordenadorUpdateView, CoordenadorPerfilView, CoordenadorAlterarNomeView,
+    DepartamentoListCreateView, DepartamentoUpdateDeleteView, 
     DocenteListView, DocenteUpdateView, EscolaListCreateView, EscolaUpdateDeleteView, 
     LoginView, RegistoView, SubmeterDisponibilidadeView, UserTipoContaView, 
     UserTipoContaUpdateView, SubmeterHorarioView, ListarDocentesComHorarioView, 
     ListUsersView, VisualizarHorarioView, ConsultarDisponibilidadesView, 
     GerenciarAprovacaoView, UserInfoView, ExportarHorarioView, 
-    VisualizarHorarioDocenteView, ExportarHorarioDocenteView
+    VisualizarHorarioDocenteView, ExportarHorarioDocenteView, VerificarDepartamentoDocenteView
 )
 
 urlpatterns = [
@@ -22,6 +23,9 @@ urlpatterns = [
     path('departamentos', DepartamentoListCreateView.as_view(), name='departamentos-list-create'),
     path('departamentos/<int:id>', DepartamentoUpdateDeleteView.as_view(), name='departamentos-update-delete'),
     path('coordenadores', CoordenadorListView.as_view(), name='coordenadores-list'),
+    path('coordenadores/<int:id>', CoordenadorUpdateView.as_view(), name='coordenador-update'),
+    path('coordenador/perfil', CoordenadorPerfilView.as_view(), name='coordenador-perfil'),
+    path('coordenador/alterar-nome', CoordenadorAlterarNomeView.as_view(), name='coordenador-alterar-nome'),
     path('docentes', DocenteListView.as_view(), name='docentes-list'),
     path('docentes/<int:id>', DocenteUpdateView.as_view(), name='docente-update'),
     path('submeter-disponibilidade', SubmeterDisponibilidadeView.as_view(), name='submeter-disponibilidade'),
@@ -32,4 +36,5 @@ urlpatterns = [
     path('exportar-horario', ExportarHorarioView.as_view(), name='exportar-horario'),
     path('visualizar-horario-docente', VisualizarHorarioDocenteView.as_view(), name='visualizar-horario-docente'),
     path('exportar-horario-docente', ExportarHorarioDocenteView.as_view(), name='exportar-horario-docente'),
+    path('verificar-departamento-docente', VerificarDepartamentoDocenteView.as_view(), name='verificar-departamento-docente'),
 ]

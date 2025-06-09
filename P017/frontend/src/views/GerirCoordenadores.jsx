@@ -91,31 +91,60 @@ const GerirCoordenadores = () => {
     }));
   };
 
-  const confirmarAlteracao = (idCoord) => {
+  const confirmarAlteracao = async (idCoord) => {
     const novoDepId = alteracoes[idCoord];
     if (novoDepId === undefined) {
       abrirModal("Por favor, selecione um departamento antes de confirmar.");
       return;
     }
 
-    setCoordenadores((prev) =>
-      prev.map((c) =>
-        c.id === idCoord ? { ...c, departamentoId: novoDepId } : c
-      )
-    );
+    try {
+      const response = await fetch(`/api/coordenadores/${idCoord}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // Se você usa autenticação
+        },
+        body: JSON.stringify({
+          departamento_id: novoDepId
+        })
+      });
 
-    const coordenador = coordenadores.find((c) => c.id === idCoord);
-    const departamento = departamentos.find((d) => d.id === novoDepId);
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar coordenador');
+      }
 
-    abrirModal(
-      `Departamento "${departamento?.nome}" atribuído ao coordenador "${coordenador?.nome}".`
-    );
+      const coordenadorAtualizado = await response.json();
 
-    setAlteracoes((prev) => {
-      const copy = { ...prev };
-      delete copy[idCoord];
-      return copy;
-    });
+      // Atualizar o estado local com os dados retornados do backend
+      setCoordenadores((prev) =>
+        prev.map((c) =>
+          c.id === idCoord 
+            ? { 
+                ...c, 
+                departamentoId: coordenadorAtualizado.departamento?.id || null,
+                departamento: coordenadorAtualizado.departamento 
+              } 
+            : c
+        )
+      );
+
+      const departamento = departamentos.find((d) => d.id === novoDepId);
+      abrirModal(
+        `Departamento "${departamento?.nome}" atribuído ao coordenador com sucesso.`
+      );
+
+      // Limpar alterações pendentes
+      setAlteracoes((prev) => {
+        const copy = { ...prev };
+        delete copy[idCoord];
+        return copy;
+      });
+
+    } catch (error) {
+      console.error('Erro ao salvar alteração:', error);
+      abrirModal("Erro ao salvar alteração. Tente novamente.");
+    }
   };
 
   const paginaAnterior = () => {
@@ -203,23 +232,21 @@ const GerirCoordenadores = () => {
             <thead>
               <tr>
                 <th>Coordenador</th>
-                <th>Cargo</th>
                 <th>Alterar Departamento</th>
               </tr>
             </thead>
             <tbody>
               {coordenadoresPagina.length === 0 && (
                 <tr>
-                  <td colSpan={3} style={{ textAlign: "center" }}>
+                  <td colSpan={2} style={{ textAlign: "center" }}>
                     Nenhum coordenador encontrado
                   </td>
                 </tr>
               )}
 
-              {coordenadoresPagina.map(({ id, nome, cargo, departamentoId }) => (
+              {coordenadoresPagina.map(({ id, nome, departamentoId }) => (
                 <tr key={id}>
                   <td>{nome}</td>
-                  <td>{cargo}</td>
                   <td className="td-alterar-departamento">
                     <select
                       value={
