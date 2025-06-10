@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { navegarParaPerfilCorreto } from "../utils/navegacao";
 import "./CoordenadorConsultar.css";
 
 const getUserInfo = async () => {
@@ -285,7 +286,7 @@ const CoordenadorConsultar = () => {
       <aside className="cd-sidebar">
         <div className="cd-user">
           <span>Olá, <strong>{coordenadorNome}</strong></span>
-          <button className="cd-btn-perfil" onClick={() => navigate("/GerirPerfilCoordenador")}>Gerir Perfil</button>
+          <button className="cd-btn-perfil" onClick={() => navegarParaPerfilCorreto(navigate)}>Gerir Perfil</button>
           <hr className="cd-divider" />
         </div>
 

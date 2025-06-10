@@ -9,14 +9,52 @@ const GerirPerfilDocente = () => {
 
   const [nomeUtilizador, setNomeUtilizador] = useState("");
   const [novoNome, setNovoNome] = useState("");
-
-  // Exemplo estático de departamento e escola
-  const [departamento, setDepartamento] = useState("Departamento de Matemática");
-  const [escola, setEscola] = useState("Escola Superior de Ciências");
+  const [loading, setLoading] = useState(true);
+  const [perfilData, setPerfilData] = useState({
+    nome: "",
+    email: "",
+    cargo: "",
+    departamento: "",
+    escola: ""
+  });
 
   useEffect(() => {
-    setNomeUtilizador("Docente");
+    buscarPerfilDocente();
   }, []);
+
+  const buscarPerfilDocente = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/');
+        return;
+      }
+
+      const response = await fetch("/api/docente/perfil", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPerfilData(data);
+        setNomeUtilizador(data.nome);
+      } else if (response.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/');
+      } else {
+        toast.error("Erro ao carregar informações do perfil.");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar perfil do docente:", error);
+      toast.error("Erro de comunicação com o servidor.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmeterDisponibilidade = () => {
     navigate("/DocenteSubmeter");
@@ -31,6 +69,7 @@ const GerirPerfilDocente = () => {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     navigate("/");
   };
 
@@ -41,18 +80,27 @@ const GerirPerfilDocente = () => {
       toast.error("Por favor, digite um nome válido com pelo menos 3 caracteres.");
       return;
     }
+
     try {
-      const response = await fetch("/api/alterar-nome", {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/');
+        return;
+      }
+
+      const response = await fetch("/api/docente/alterar-nome", {
         method: "PUT",
         headers: {
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ novoNome }),
+        body: JSON.stringify({ novoNome: novoNome.trim() }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setNomeUtilizador(novoNome);
+        setNomeUtilizador(data.nome);
+        setPerfilData(prev => ({ ...prev, nome: data.nome }));
         setNovoNome("");
         toast.success(data.message || "Nome alterado com sucesso!");
       } else {
@@ -60,9 +108,26 @@ const GerirPerfilDocente = () => {
         toast.error(errorData.message || "Erro ao alterar nome.");
       }
     } catch (error) {
+      console.error("Erro ao alterar nome:", error);
       toast.error("Erro de comunicação com o servidor.");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="docente-container fade-in">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '18px' 
+        }}>
+          Carregando...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="docente-container fade-in">
@@ -112,14 +177,30 @@ const GerirPerfilDocente = () => {
           <table className="docente-table">
             <thead>
               <tr>
-                <th>Departamento</th>
-                <th>Escola</th>
+                <th>Campo</th>
+                <th>Informação</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>{departamento}</td>
-                <td>{escola}</td>
+                <td><strong>Nome</strong></td>
+                <td>{perfilData.nome}</td>
+              </tr>
+              <tr>
+                <td><strong>Email</strong></td>
+                <td>{perfilData.email}</td>
+              </tr>
+              <tr>
+                <td><strong>Cargo</strong></td>
+                <td>{perfilData.cargo}</td>
+              </tr>
+              <tr>
+                <td><strong>Departamento</strong></td>
+                <td>{perfilData.departamento}</td>
+              </tr>
+              <tr>
+                <td><strong>Escola</strong></td>
+                <td>{perfilData.escola}</td>
               </tr>
             </tbody>
           </table>

@@ -13,6 +13,13 @@ const GerirPerfilCoordenador = () => {
   const [escola, setEscola] = useState("");
   const [cargo, setCargo] = useState("");
   const [loading, setLoading] = useState(true);
+  const [perfilData, setPerfilData] = useState({
+    nome: "",
+    email: "",
+    cargo: "",
+    departamento: "",
+    escola: "",
+  });
 
   useEffect(() => {
     const carregarInformacoesPerfil = async () => {
@@ -20,21 +27,19 @@ const GerirPerfilCoordenador = () => {
         const response = await fetch("/api/coordenador/perfil", {
           method: "GET",
           headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json"
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
         });
 
         if (response.ok) {
           const data = await response.json();
-          setNomeUtilizador(data.nome || "Coordenador");
-          setDepartamento(data.departamento || "");
-          setEscola(data.escola || "");
-          setCargo(data.cargo || "Coordenador");
+          setPerfilData(data);
+          setNomeUtilizador(data.nome);
+        } else if (response.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/");
         } else {
-          // Valores padrão em caso de erro
-          setNomeUtilizador("Coordenador");
-          setCargo("Coordenador");
           toast.error("Erro ao carregar informações do perfil.");
         }
       } catch (error) {
@@ -72,15 +77,17 @@ const GerirPerfilCoordenador = () => {
 
   const handleAlterarNome = async () => {
     if (novoNome.trim().length < 3) {
-      toast.error("Por favor, digite um nome válido com pelo menos 3 caracteres.");
+      toast.error(
+        "Por favor, digite um nome válido com pelo menos 3 caracteres."
+      );
       return;
     }
     try {
       const response = await fetch("/api/coordenador/alterar-nome", {
         method: "PUT",
         headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json"
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ novoNome }),
       });
@@ -103,7 +110,9 @@ const GerirPerfilCoordenador = () => {
     <div className="coordenador-container fade-in">
       <aside className="coordenador-sidebar">
         <div className="user-greeting">
-          <p>Olá, <strong>{nomeUtilizador || "Utilizador"}</strong></p>
+          <p>
+            Olá, <strong>{nomeUtilizador || "Utilizador"}</strong>
+          </p>
           <div className="blue-line-top" />
           <button className="btn-gerir-perfil" onClick={handleGerirPerfil}>
             Gerir Perfil
@@ -113,7 +122,9 @@ const GerirPerfilCoordenador = () => {
         <nav className="menu">
           <ul>
             <li onClick={handleGerirDocentes}>Gerir Docentes</li>
-            <li onClick={handleDisponibilidades}>Disponibilidades dos Docentes</li>
+            <li onClick={handleDisponibilidades}>
+              Disponibilidades dos Docentes
+            </li>
             <li onClick={handleHorarioDocentes}>Horário dos Docentes</li>
           </ul>
         </nav>
@@ -148,16 +159,40 @@ const GerirPerfilCoordenador = () => {
             <table className="perfil-table">
               <thead>
                 <tr>
-                  <th>Cargo</th>
-                  <th>Departamento</th>
-                  <th>Escola</th>
+                  <th>Campo</th>
+                  <th>Informação</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>{cargo}</td>
-                  <td>{departamento || "Nada foi atribuído"}</td>
-                  <td>{escola || "Nada foi atribuído"}</td>
+                  <td>
+                    <strong>Nome</strong>
+                  </td>
+                  <td>{perfilData.nome}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Email</strong>
+                  </td>
+                  <td>{perfilData.email}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Cargo</strong>
+                  </td>
+                  <td>{perfilData.cargo}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Departamento</strong>
+                  </td>
+                  <td>{perfilData.departamento}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Escola</strong>
+                  </td>
+                  <td>{perfilData.escola}</td>
                 </tr>
               </tbody>
             </table>
@@ -165,15 +200,15 @@ const GerirPerfilCoordenador = () => {
         </section>
       </main>
 
-      <ToastContainer 
-        position="top-center" 
-        autoClose={3000} 
-        hideProgressBar={false} 
-        newestOnTop={false} 
-        closeOnClick 
-        rtl={false} 
-        pauseOnFocusLoss 
-        draggable 
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
         pauseOnHover
       />
     </div>
@@ -181,4 +216,3 @@ const GerirPerfilCoordenador = () => {
 };
 
 export default GerirPerfilCoordenador;
-

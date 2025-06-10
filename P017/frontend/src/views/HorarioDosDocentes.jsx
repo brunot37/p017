@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { navegarParaPerfilCorreto, getUserFromToken } from '../utils/navegacao';
 import "./HorarioDosDocentes.css";
-
-function getUserFromToken() {
-  const token = localStorage.getItem("token");
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload;
-  } catch (e) {
-    console.error("Erro a ler token JWT:", e);
-    return null;
-  }
-}
 
 const HorarioDosDocentes = () => {
   const navigate = useNavigate();
@@ -334,7 +323,7 @@ const HorarioDosDocentes = () => {
       <aside className="hd-sidebar">
         <div className="hd-user-greeting">
           <span>Olá, <strong>{nomeUtilizador}</strong></span>
-          <button className="hd-gerir-perfil-btn" onClick={() => navigate("/GerirPerfilCoordenador")}>Gerir Perfil</button>
+          <button className="hd-gerir-perfil-btn" onClick={() => navegarParaPerfilCorreto(navigate)}>Gerir Perfil</button>
           <hr className="hd-divider" />
         </div>
 

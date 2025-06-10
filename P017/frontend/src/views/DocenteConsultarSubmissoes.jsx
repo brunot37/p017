@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { verificarDepartamentoDocente } from "../utils/verificarDepartamento";
+import { navegarParaPerfilCorreto } from "../utils/navegacao";
 import "./DocenteConsultarSubmissoes.css";
 
 const DocenteConsultarSubmissoes = () => {
@@ -119,7 +120,7 @@ const DocenteConsultarSubmissoes = () => {
   };
 
   const handleGerirPerfil = () => {
-    navigate("/GerirPerfilDocente");
+    navegarParaPerfilCorreto(navigate);
   };
 
   const paginasPorMostrar = 10;

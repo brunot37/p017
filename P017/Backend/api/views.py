@@ -274,17 +274,21 @@ class DocenteListView(APIView):
                     "docentes": []
                 }, status=200)
             
-            # Buscar apenas docentes do mesmo departamento ou sem coordenador
-            docentes = User.objects.filter(
-                tipo_conta="docente",
-                departamento=user.departamento
-            ).select_related('departamento', 'coordenador')
+            # MUDANÇA: Buscar TODOS os docentes, não apenas do mesmo departamento
+            docentes = User.objects.filter(tipo_conta="docente").select_related('departamento', 'coordenador')
         else:
             # Para admin, mostrar todos os docentes
             docentes = User.objects.filter(tipo_conta="docente").select_related('departamento', 'coordenador')
         
         docentes_data = []
         for docente in docentes:
+            # Para coordenadores, verificar se o docente já está sob sua coordenação
+            tem_coordenador = False
+            if user.tipo_conta == "coordenador":
+                tem_coordenador = docente.coordenador == user
+            else:
+                tem_coordenador = docente.coordenador is not None
+            
             docentes_data.append({
                 "id": docente.id,
                 "nome": docente.nome,
@@ -297,7 +301,7 @@ class DocenteListView(APIView):
                     "id": docente.coordenador.id,
                     "nome": docente.coordenador.nome
                 } if docente.coordenador else None,
-                "tem_coordenador": docente.coordenador is not None
+                "tem_coordenador": tem_coordenador
             })
         
         return Response({
@@ -326,17 +330,26 @@ class DocenteUpdateView(APIView):
             if not user.departamento:
                 return Response({"detail": "Coordenador não tem departamento atribuído."}, status=403)
             
-            # Verificar se o docente pertence ao mesmo departamento
-            if docente.departamento != user.departamento:
-                return Response({"detail": "Este docente não pertence ao seu departamento."}, status=403)
-            
-            # Atualizar apenas o coordenador
+            # Atualizar coordenador e departamento
             action = request.data.get("action")  # "add" ou "remove"
+            departamento_id = request.data.get("departamento_id")  # Receber departamento_id do frontend
             
             if action == "add":
                 docente.coordenador = user
+                # Se departamento_id foi fornecido, usar ele; senão, usar o departamento do coordenador
+                if departamento_id:
+                    try:
+                        departamento = Departamento.objects.get(id=departamento_id)
+                        docente.departamento = departamento
+                    except Departamento.DoesNotExist:
+                        return Response({"detail": "Departamento não encontrado."}, status=404)
+                else:
+                    # Usar o departamento do coordenador como padrão
+                    docente.departamento = user.departamento
+                    
             elif action == "remove":
                 docente.coordenador = None
+                # Não remover o departamento ao remover coordenador
             else:
                 return Response({"detail": "Ação inválida."}, status=400)
         
@@ -1368,8 +1381,8 @@ class CoordenadorPerfilView(APIView):
                 "nome": user.nome,
                 "email": user.email,
                 "cargo": "Coordenador",
-                "departamento": user.departamento.nome if user.departamento else None,
-                "escola": user.escola.nome if hasattr(user, 'escola') and user.escola else None
+                "departamento": user.departamento.nome if user.departamento else "Não atribuído",
+                "escola": user.departamento.escola.nome if user.departamento and hasattr(user.departamento, 'escola') and user.departamento.escola else "Não definida"
             }
             
             return Response(response_data, status=200)
@@ -1392,6 +1405,84 @@ class CoordenadorAlterarNomeView(APIView):
             if user.tipo_conta != 'coordenador':
                 return Response({
                     "detail": "Acesso negado. Apenas coordenadores podem alterar o nome."
+                }, status=403)
+            
+            novo_nome = request.data.get('novoNome')
+            
+            if not novo_nome:
+                return Response({
+                    "message": "Nome é obrigatório."
+                }, status=400)
+            
+            # Validar nome
+            if len(novo_nome.strip()) < 3:
+                return Response({
+                    "message": "Nome deve ter pelo menos 3 caracteres."
+                }, status=400)
+            
+            # Verificar se o nome já existe (opcional)
+            if User.objects.filter(nome=novo_nome.strip()).exclude(id=user.id).exists():
+                return Response({
+                    "message": "Este nome já está em uso."
+                }, status=400)
+            
+            # Atualizar nome
+            user.nome = novo_nome.strip()
+            user.save()
+            
+            return Response({
+                "message": "Nome alterado com sucesso!",
+                "nome": user.nome
+            }, status=200)
+            
+        except Exception as e:
+            return Response({
+                "message": f"Erro ao alterar nome: {str(e)}"
+            }, status=500)
+
+class DocentePerfilView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Buscar informações do perfil do docente"""
+        try:
+            user = request.user
+            
+            # Verificar se é docente
+            if user.tipo_conta != 'docente':
+                return Response({
+                    "detail": "Acesso negado. Apenas docentes podem acessar esta área."
+                }, status=403)
+            
+            # Buscar informações do docente
+            response_data = {
+                "nome": user.nome,
+                "email": user.email,
+                "cargo": "Docente",
+                "departamento": user.departamento.nome if user.departamento else "Não atribuído",
+                "escola": user.departamento.escola.nome if user.departamento and hasattr(user.departamento, 'escola') and user.departamento.escola else "Não definida"
+            }
+            
+            return Response(response_data, status=200)
+            
+        except Exception as e:
+            return Response({
+                "detail": f"Erro ao buscar informações do perfil: {str(e)}"
+            }, status=500)
+
+
+class DocenteAlterarNomeView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def put(self, request):
+        """Alterar nome do docente"""
+        try:
+            user = request.user
+            
+            # Verificar se é docente
+            if user.tipo_conta != 'docente':
+                return Response({
+                    "detail": "Acesso negado. Apenas docentes podem alterar o nome."
                 }, status=403)
             
             novo_nome = request.data.get('novoNome')

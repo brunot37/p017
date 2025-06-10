@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { verificarDepartamentoDocente } from "../utils/verificarDepartamento";
+import { navegarParaPerfilCorreto } from "../utils/navegacao";
 import "./DocenteVisualizarHorario.css";
 
 function getUserFromToken() {
@@ -149,7 +150,7 @@ const DocenteVisualizarHorario = () => {
   };
 
   const handleGerirPerfil = () => {
-    navigate("/GerirPerfilDocente");
+    navegarParaPerfilCorreto(navigate);
   };
 
   const exportarHorario = async (formato) => {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { verificarDepartamentoDocente } from "../utils/verificarDepartamento";
+import { navegarParaPerfilCorreto } from "../utils/navegacao";
 import "./DocenteSubmeter.css";
 
 const Modal = ({ message, onClose }) => (
@@ -181,7 +182,7 @@ const DocenteSubmeter = () => {
     navigate("/");
   };
   const handleConsultarSubmissoes = () => navigate("/DocenteConsultarSubmissoes");
-  const handleGerirPerfil = () => navigate("/GerirPerfilDocente");
+  const handleGerirPerfil = () => navegarParaPerfilCorreto(navigate);
 
   useEffect(() => {
     const verificarAcesso = async () => {

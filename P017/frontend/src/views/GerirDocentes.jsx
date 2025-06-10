@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { navegarParaPerfilCorreto } from "../utils/navegacao";
 import "./GerirDocentes.css";
 
 const GerirDocentes = () => {
@@ -120,15 +121,22 @@ const GerirDocentes = () => {
     const action = temCoordenador ? "remove" : "add";
 
     try {
+      const requestBody = {
+        action: action,
+      };
+
+      // Se está adicionando e tem departamento do coordenador, incluir o departamento_id
+      if (action === "add" && coordenadorDepartamento) {
+        requestBody.departamento_id = coordenadorDepartamento.id;
+      }
+
       const response = await fetch(`/api/docentes/${idDocente}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          action: action,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
@@ -139,7 +147,7 @@ const GerirDocentes = () => {
         ));
 
         const mensagem = action === "add" 
-          ? `Docente ${docenteAtualizado.nome} foi adicionado à sua coordenação com sucesso!`
+          ? `Docente ${docenteAtualizado.nome} foi adicionado à sua coordenação e vinculado ao departamento ${coordenadorDepartamento?.nome} com sucesso!`
           : `Docente ${docenteAtualizado.nome} foi removido da sua coordenação com sucesso!`;
         
         openModal(mensagem);
@@ -225,7 +233,7 @@ const GerirDocentes = () => {
   };
 
   const handleGerirPerfil = () => {
-    navigate("/GerirPerfilCoordenador");
+    navegarParaPerfilCorreto(navigate);
   };
 
   if (loading) {
