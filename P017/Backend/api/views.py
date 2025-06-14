@@ -263,55 +263,37 @@ class DocenteListView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        user = request.user
-        
-        # Se for coordenador, verificar se tem departamento
-        if user.tipo_conta == "coordenador":
-            if not user.departamento:
-                return Response({
-                    "message": "Nenhum departamento foi atribuído a este coordenador ainda.",
-                    "has_department": False,
-                    "docentes": []
-                }, status=200)
+        try:
+            # Buscar todos os usuários com tipo_conta = 'docente'
+            docentes = User.objects.filter(tipo_conta='docente').select_related('departamento')
             
-            # MUDANÇA: Buscar TODOS os docentes, não apenas do mesmo departamento
-            docentes = User.objects.filter(tipo_conta="docente").select_related('departamento', 'coordenador')
-        else:
-            # Para admin, mostrar todos os docentes
-            docentes = User.objects.filter(tipo_conta="docente").select_related('departamento', 'coordenador')
-        
-        docentes_data = []
-        for docente in docentes:
-            # Para coordenadores, verificar se o docente já está sob sua coordenação
-            tem_coordenador = False
-            if user.tipo_conta == "coordenador":
-                tem_coordenador = docente.coordenador == user
-            else:
-                tem_coordenador = docente.coordenador is not None
+            docentes_data = []
+            for docente in docentes:
+                docente_info = {
+                    'id': docente.id,
+                    'nome': docente.nome,
+                    'email': docente.email,
+                    'departamento': None
+                }
+                
+                # Verificar se o docente tem departamento associado
+                if hasattr(docente, 'departamento') and docente.departamento:
+                    docente_info['departamento'] = {
+                        'id': docente.departamento.id,
+                        'nome': docente.departamento.nome
+                    }
+                
+                docentes_data.append(docente_info)
             
-            docentes_data.append({
-                "id": docente.id,
-                "nome": docente.nome,
-                "email": docente.email,
-                "departamento": {
-                    "id": docente.departamento.id,
-                    "nome": docente.departamento.nome
-                } if docente.departamento else None,
-                "coordenador": {
-                    "id": docente.coordenador.id,
-                    "nome": docente.coordenador.nome
-                } if docente.coordenador else None,
-                "tem_coordenador": tem_coordenador
-            })
-        
-        return Response({
-            "docentes": docentes_data,
-            "has_department": True if user.tipo_conta != "coordenador" else user.departamento is not None,
-            "coordenador_departamento": {
-                "id": user.departamento.id,
-                "nome": user.departamento.nome
-            } if user.tipo_conta == "coordenador" and user.departamento else None
-        })
+            print(f"Docentes encontrados: {len(docentes_data)}")  # Debug
+            return Response(docentes_data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(f"Erro ao buscar docentes: {str(e)}")  # Debug
+            return Response(
+                {"error": f"Erro ao buscar docentes: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class DocenteUpdateView(APIView):

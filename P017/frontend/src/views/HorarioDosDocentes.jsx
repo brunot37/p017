@@ -13,20 +13,25 @@ const HorarioDosDocentes = () => {
   const [carregando, setCarregando] = useState(false);
   const [gradeHorarios, setGradeHorarios] = useState({});
 
-  const baseDate = new Date("2025-09-14");
-  
   const calcularSemanaAtual = () => {
     const hoje = new Date();
-    const diffDias = Math.floor((hoje - baseDate) / (1000 * 60 * 60 * 24));
-    return Math.floor(diffDias / 7);
+    const inicioSemana = new Date(hoje);
+    // Ajustar para segunda-feira (dia 1)
+    const diaSemana = hoje.getDay();
+    const diasParaSegunda = diaSemana === 0 ? -6 : 1 - diaSemana;
+    inicioSemana.setDate(hoje.getDate() + diasParaSegunda);
+    return inicioSemana;
   };
 
   const calcularSemanaPorData = (data) => {
-    const diffDias = Math.floor((data - baseDate) / (1000 * 60 * 60 * 24));
-    return Math.floor(diffDias / 7);
+    const inicioSemana = new Date(data);
+    const diaSemana = data.getDay();
+    const diasParaSegunda = diaSemana === 0 ? -6 : 1 - diaSemana;
+    inicioSemana.setDate(data.getDate() + diasParaSegunda);
+    return inicioSemana;
   };
 
-  const [semanaIndex, setSemanaIndex] = useState(calcularSemanaAtual());
+  const [dataInicioSemana, setDataInicioSemana] = useState(calcularSemanaAtual());
   const [selectedDate, setSelectedDate] = useState(null);
   const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 
@@ -48,10 +53,9 @@ const HorarioDosDocentes = () => {
   };
 
   const horas = gerarHoras();
-  const dataInicio = new Date(baseDate);
-  dataInicio.setDate(baseDate.getDate() + semanaIndex * 7);
+  const dataInicio = new Date(dataInicioSemana);
   const dataFim = new Date(dataInicio);
-  dataFim.setDate(dataInicio.getDate() + 6);
+  dataFim.setDate(dataInicio.getDate() + 4); // Sexta-feira (4 dias após segunda)
 
   const formatarData = (data) => data.toLocaleDateString("pt-PT");
 
@@ -100,7 +104,7 @@ const HorarioDosDocentes = () => {
     } else {
       setGradeHorarios({});
     }
-  }, [docenteSelecionado, semanaIndex]);
+  }, [docenteSelecionado, dataInicioSemana]);
 
   const buscarHorariosDocente = async () => {
     if (!docenteSelecionado) return;
@@ -200,16 +204,18 @@ const HorarioDosDocentes = () => {
     if (!e.target.value) return;
     const novaData = new Date(e.target.value);
     setSelectedDate(e.target.value);
-    setSemanaIndex(calcularSemanaPorData(novaData));
+    setDataInicioSemana(calcularSemanaPorData(novaData));
   };
 
   const mudarSemana = (direcao) => {
-    setSemanaIndex((prev) => prev + direcao);
+    const novaData = new Date(dataInicioSemana);
+    novaData.setDate(dataInicioSemana.getDate() + (direcao * 7));
+    setDataInicioSemana(novaData);
     setSelectedDate(null);
   };
 
   const voltarHoje = () => {
-    setSemanaIndex(calcularSemanaAtual());
+    setDataInicioSemana(calcularSemanaAtual());
     setSelectedDate(null);
   };
 
@@ -403,13 +409,24 @@ const HorarioDosDocentes = () => {
               Horário de: {
                 docentes.find(d => d.id.toString() === docenteSelecionado)?.nome
               }<br />
+              <small>Departamento: {
+                docentes.find(d => d.id.toString() === docenteSelecionado)?.departamento || "Não definido"
+              }</small><br />
               {formatarData(dataInicio)} - {formatarData(dataFim)}
             </h2>
-
-            <div className="hd-tabela-wrapper">
-              {carregando ? (
-                <div className="carregando-indicador">Carregando horários...</div>
-              ) : (
+            
+            {carregando ? (
+              <div className="carregando-indicador">
+                <div className="spinner"></div>
+                Carregando horários de {docentes.find(d => d.id.toString() === docenteSelecionado)?.nome}...
+              </div>
+            ) : Object.keys(gradeHorarios).length === 0 ? (
+              <div className="hd-sem-horarios">
+                <p>📅 Nenhum horário aprovado encontrado para este docente no período selecionado.</p>
+                <p><small>Os horários mostrados aqui são apenas as disponibilidades já aprovadas pelo coordenador.</small></p>
+              </div>
+            ) : (
+              <div className="hd-tabela-wrapper">
                 <table className="hd-tabela">
                   <thead>
                     <tr>
@@ -447,8 +464,8 @@ const HorarioDosDocentes = () => {
                     ))}
                   </tbody>
                 </table>
-              )}
-            </div>
+              </div>
+            )}
 
             <div className="hd-navegacao">
               <button onClick={() => mudarSemana(-1)} className="hd-btn-seta" title="Semana Anterior">
@@ -463,7 +480,11 @@ const HorarioDosDocentes = () => {
             </div>
           </>
         ) : (
-          <p className="hd-aviso">Selecione um docente para visualizar o horário.</p>
+          <div className="hd-selecao-docente">
+            <div className="hd-icone-selecao">👨‍🏫</div>
+            <h3>Selecione um docente para visualizar o horário</h3>
+            <p>Escolha um docente na lista acima para ver seus horários aprovados.</p>
+          </div>
         )}
       </main>
 

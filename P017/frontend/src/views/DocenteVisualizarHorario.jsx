@@ -18,12 +18,23 @@ function getUserFromToken() {
 
 const DocenteVisualizarHorario = () => {
   const navigate = useNavigate();
-  const baseDate = new Date("2025-09-14");
   
   const calcularSemanaAtual = () => {
     const hoje = new Date();
-    const diffDias = Math.floor((hoje - baseDate) / (1000 * 60 * 60 * 24));
-    return Math.floor(diffDias / 7);
+    const inicioSemana = new Date(hoje);
+    // Ajustar para segunda-feira (dia 1)
+    const diaSemana = hoje.getDay();
+    const diasParaSegunda = diaSemana === 0 ? -6 : 1 - diaSemana;
+    inicioSemana.setDate(hoje.getDate() + diasParaSegunda);
+    return inicioSemana;
+  };
+
+  const calcularSemanaPorData = (data) => {
+    const inicioSemana = new Date(data);
+    const diaSemana = data.getDay();
+    const diasParaSegunda = diaSemana === 0 ? -6 : 1 - diaSemana;
+    inicioSemana.setDate(data.getDate() + diasParaSegunda);
+    return inicioSemana;
   };
   
   const [nomeUtilizador, setNomeUtilizador] = useState("");
@@ -31,7 +42,7 @@ const DocenteVisualizarHorario = () => {
   const [horarios, setHorarios] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [popupMensagem, setPopupMensagem] = useState(null);
-  const [semanaIndex, setSemanaIndex] = useState(calcularSemanaAtual());
+  const [dataInicioSemana, setDataInicioSemana] = useState(calcularSemanaAtual());
   const [selectedDate, setSelectedDate] = useState(null);
   const [gradeHorarios, setGradeHorarios] = useState({});
   const [verificandoDepartamento, setVerificandoDepartamento] = useState(true);
@@ -61,14 +72,11 @@ const DocenteVisualizarHorario = () => {
       setNomeUtilizador("Docente");
     }
     
-    const dataInicio = new Date(baseDate);
-    dataInicio.setDate(baseDate.getDate() + semanaIndex * 7);
+    const dataFim = new Date(dataInicioSemana);
+    dataFim.setDate(dataInicioSemana.getDate() + 4); // Sexta-feira (4 dias após segunda)
     
-    const dataFim = new Date(dataInicio);
-    dataFim.setDate(dataInicio.getDate() + 6);
-    
-    buscarHorarios(dataInicio, dataFim);
-  }, [semanaIndex, navigate, verificandoDepartamento]);
+    buscarHorarios(dataInicioSemana, dataFim);
+  }, [dataInicioSemana, navigate, verificandoDepartamento]);
 
   // Se ainda está verificando o departamento, mostrar loading
   if (verificandoDepartamento) {
@@ -87,11 +95,6 @@ const DocenteVisualizarHorario = () => {
       </div>
     );
   }
-  
-  const calcularSemanaPorData = (data) => {
-    const diffDias = Math.floor((data - baseDate) / (1000 * 60 * 60 * 24));
-    return Math.floor(diffDias / 7);
-  };
   
   const gerarHoras = () => {
     const horas = [];
@@ -112,10 +115,9 @@ const DocenteVisualizarHorario = () => {
 
   const horas = gerarHoras();
 
-  const dataInicio = new Date(baseDate);
-  dataInicio.setDate(baseDate.getDate() + semanaIndex * 7);
+  const dataInicio = new Date(dataInicioSemana);
   const dataFim = new Date(dataInicio);
-  dataFim.setDate(dataInicio.getDate() + 6);
+  dataFim.setDate(dataInicio.getDate() + 4); // Sexta-feira (4 dias após segunda)
 
   const formatarData = (data) => data.toLocaleDateString("pt-PT");
 
@@ -123,16 +125,18 @@ const DocenteVisualizarHorario = () => {
     if (!e.target.value) return;
     const novaData = new Date(e.target.value);
     setSelectedDate(e.target.value);
-    setSemanaIndex(calcularSemanaPorData(novaData));
+    setDataInicioSemana(calcularSemanaPorData(novaData));
   };
 
   const mudarSemana = (direcao) => {
-    setSemanaIndex((prev) => prev + direcao);
+    const novaData = new Date(dataInicioSemana);
+    novaData.setDate(dataInicioSemana.getDate() + (direcao * 7));
+    setDataInicioSemana(novaData);
     setSelectedDate(null);
   };
 
   const voltarHoje = () => {
-    setSemanaIndex(calcularSemanaAtual());
+    setDataInicioSemana(calcularSemanaAtual());
     setSelectedDate(null);
   };
 
@@ -163,10 +167,9 @@ const DocenteVisualizarHorario = () => {
         throw new Error("Token não encontrado");
       }
 
-      const dataInicio = new Date(baseDate);
-      dataInicio.setDate(baseDate.getDate() + semanaIndex * 7);
+      const dataInicio = new Date(dataInicioSemana);
       const dataFim = new Date(dataInicio);
-      dataFim.setDate(dataFim.getDate() + 6);
+      dataFim.setDate(dataInicio.getDate() + 4);
 
       const dataInicioStr = dataInicio.toISOString().split('T')[0];
       const dataFimStr = dataFim.toISOString().split('T')[0];
