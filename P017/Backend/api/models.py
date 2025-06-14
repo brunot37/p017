@@ -79,18 +79,6 @@ class Disponibilidade(models.Model):
         return f"{self.utilizador.email} - {self.dia}"
 
 
-class Horario(models.Model):
-    utilizador = models.ForeignKey(User, on_delete=models.CASCADE, default=1, related_name='horarios')
-    dia = models.DateField(default=timezone.now)
-    hora_inicio = models.TimeField()
-    hora_fim = models.TimeField()
-    semestre = models.CharField(max_length=20, null=True, blank=True)
-    ano_letivo = models.CharField(max_length=20, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.utilizador.email} - {self.dia}"
-
-
 class Escola(models.Model):
     nome = models.CharField(max_length=255)
 
@@ -104,27 +92,6 @@ class Departamento(models.Model):
     
     def __str__(self):
         return self.nome
-
-
-class Coordenador(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='perfil_coordenador')
-    departamento = models.ForeignKey(Departamento, null=True, blank=True, on_delete=models.SET_NULL, related_name='coordenadores')
-    cargo_status = models.CharField(
-        max_length=20,
-        choices=[('Ativo', 'Ativo'), ('Pendente', 'Pendente')],
-        default='Pendente'
-    )
-
-    def __str__(self):
-        return f"{self.user.nome} - {self.departamento}"
-
-
-class Docente(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='perfil_docente')
-    coordenador = models.ForeignKey(Coordenador, null=True, blank=True, on_delete=models.SET_NULL, related_name='docentes_supervisionados_perfil')
-
-    def __str__(self):
-        return self.user.nome
 
 
 class AprovacaoDisponibilidade(models.Model):

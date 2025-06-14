@@ -8,12 +8,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics, permissions
 from django.http import HttpResponse
-from .models import AprovacaoDisponibilidade, Coordenador, Departamento, Escola, Horario, Disponibilidade
+from .models import AprovacaoDisponibilidade, Departamento, Escola, Disponibilidade
 from .serializers import (
-    CoordenadorSerializer,
     DepartamentoSerializer,
     EscolaSerializer,
-    HorarioSerializer,
     DisponibilidadeSerializer,
     UserTipoContaUpdateSerializer,
     UserSerializer,
@@ -115,44 +113,42 @@ class UserTipoContaUpdateView(generics.UpdateAPIView):
     lookup_field = 'id'
 
 
-class SubmeterHorarioView(APIView):
-    permission_classes = [IsAuthenticated]
+# class SubmeterHorarioView(APIView):
+#     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        user = request.user
-        horarios = request.data.get('horarios', [])
+#     def post(self, request):
+#         user = request.user
+#         horarios = request.data.get('horarios', [])
 
-        for horario_data in horarios:
-            serializer = HorarioSerializer(data=horario_data)
-            if serializer.is_valid():
-                serializer.save(utilizador=user)
-            else:
-                return Response({"message": "Erro ao submeter horário."}, status=status.HTTP_400_BAD_REQUEST)
+#         for horario_data in horarios:
+#             serializer = HorarioSerializer(data=horario_data)
+#             if serializer.is_valid():
+#                 serializer.save(utilizador=user)
+#             else:
+#                 return Response({"message": "Erro ao submeter horário."}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"message": "Horários submetidos com sucesso!"}, status=status.HTTP_201_CREATED)
+#         return Response({"message": "Horários submetidos com sucesso!"}, status=status.HTTP_201_CREATED)
 
-    def get(self, request):
-        user = request.user
-        horarios = Horario.objects.filter(utilizador=user)
-        serializer = HorarioSerializer(horarios, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+#     def get(self, request):
+#         user = request.user
+#         serializer = HorarioSerializer(many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ListarDocentesComHorarioView(APIView):
-    def get(self, request):
-        docentes_com_horarios = User.objects.filter(horario__isnull=False).distinct()
+# class ListarDocentesComHorarioView(APIView):
+#     def get(self, request):
+#         docentes_com_horarios = User.objects.filter(horario__isnull=False).distinct()
 
-        docentes_data = []
-        for docente in docentes_com_horarios:
-            horarios = Horario.objects.filter(utilizador=docente)
-            horarios_data = HorarioSerializer(horarios, many=True).data
-            docentes_data.append({
-                "id": docente.id,
-                "nome": docente.nome,
-                "disponibilidade": horarios_data,
-            })
+#         docentes_data = []
+#         for docente in docentes_com_horarios:
+#             horarios_data = HorarioSerializer(many=True).data
+#             docentes_data.append({
+#                 "id": docente.id,
+#                 "nome": docente.nome,
+#                 "disponibilidade": horarios_data,
+#             })
 
-        return Response(docentes_data)
+#         return Response(docentes_data)
 
 
 class ListUsersView(APIView):
