@@ -75,18 +75,6 @@ class Disponibilidade(models.Model):
         return f"{self.utilizador.email} - {self.dia}"
 
 
-class Horario(models.Model):
-    utilizador = models.ForeignKey(User, on_delete=models.CASCADE, default=1, related_name='horarios')
-    dia = models.DateField(default=timezone.now)
-    hora_inicio = models.TimeField()
-    hora_fim = models.TimeField()
-    semestre = models.CharField(max_length=20, null=True, blank=True)
-    ano_letivo = models.CharField(max_length=20, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.utilizador.email} - {self.dia}"
-
-
 class Escola(models.Model):
     nome = models.CharField(max_length=255)
 
