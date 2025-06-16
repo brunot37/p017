@@ -83,10 +83,7 @@ class LoginView(APIView):
                 refresh = RefreshToken.for_user(user)
                 access_token = str(refresh.access_token)
 
-                if user.is_superuser or user.tipo_conta == 'adm':
-                    tipo_conta = 'adm'
-                else:
-                    tipo_conta = user.tipo_conta
+                tipo_conta = user.tipo_conta
 
                 return Response({
                     "message": f"Login de {tipo_conta} com sucesso",

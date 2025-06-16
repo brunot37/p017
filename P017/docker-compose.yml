@@ -3,8 +3,7 @@ services:
     build:
       context: ./Backend
       dockerfile: Dockerfile
-      # Força rebuild se houver mudanças
-    command: python manage.py runserver 0.0.0.0:8000
+    command: ./start.sh
     volumes:
       - ./Backend:/app
       # Excluir cache Python

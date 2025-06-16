@@ -5,7 +5,10 @@ services:
     build:
       context: ./Backend
       dockerfile: Dockerfile.prod
-    command: gunicorn Backend.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    # command: gunicorn Backend.wsgi:application --bind 0.0.0.0:8000 --workers 3
+
+    #Temporarily using start.sh for development
+    command: ./start.sh
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media

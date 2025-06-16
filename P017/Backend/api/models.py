@@ -12,15 +12,6 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("A password é obrigatória.")
         
         email = self.normalize_email(email)
-        if tipo_conta == 'coordenador':
-            extra_fields.setdefault("is_staff", True)
-            extra_fields.setdefault("is_superuser", False)
-        elif tipo_conta == 'adm':
-            extra_fields.setdefault("is_staff", True)
-            extra_fields.setdefault("is_superuser", True)
-        else:
-            extra_fields.setdefault("is_staff", False)
-            extra_fields.setdefault("is_superuser", False)
         
         user = self.model(email=email, nome=nome or email.split('@')[0], tipo_conta=tipo_conta, **extra_fields)
         user.set_password(password)
@@ -28,12 +19,8 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password, nome='admin', **extra_fields):
-        extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-        extra_fields.setdefault("is_active", True)
         
-        if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser precisa de is_staff=True.")
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser precisa de is_superuser=True.")
         
@@ -55,8 +42,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         ],
         default='pendente'
     )
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['nome']  
@@ -65,6 +50,17 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.nome} ({self.email})"
+
+    # Propriedades para compatibilidade com o sistema de autenticação do Django
+    @property
+    def is_active(self):
+        """Usuário está sempre ativo baseado no tipo_conta"""
+        return self.tipo_conta != 'pendente'
+    
+    @property
+    def is_staff(self):
+        """Determina se o usuário pode acessar o admin"""
+        return self.tipo_conta in ['coordenador', 'adm']
 
 
 class Disponibilidade(models.Model):
@@ -109,11 +105,6 @@ class Departamento(models.Model):
 class Coordenador(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='perfil_coordenador')
     departamento = models.ForeignKey(Departamento, null=True, blank=True, on_delete=models.SET_NULL, related_name='coordenadores')
-    cargo_status = models.CharField(
-        max_length=20,
-        choices=[('Ativo', 'Ativo'), ('Pendente', 'Pendente')],
-        default='Pendente'
-    )
 
     def __str__(self):
         return f"{self.user.nome} - {self.departamento}"
