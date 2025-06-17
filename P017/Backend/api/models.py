@@ -51,17 +51,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f"{self.nome} ({self.email})"
 
-    # Propriedades para compatibilidade com o sistema de autenticação do Django
-    @property
-    def is_active(self):
-        """Usuário está sempre ativo baseado no tipo_conta"""
-        return self.tipo_conta != 'pendente'
-    
-    @property
-    def is_staff(self):
-        """Determina se o usuário pode acessar o admin"""
-        return self.tipo_conta in ['coordenador', 'adm']
-
 
 class Disponibilidade(models.Model):
     utilizador = models.ForeignKey(User, on_delete=models.CASCADE, related_name='disponibilidades')

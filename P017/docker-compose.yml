@@ -3,7 +3,9 @@ services:
     build:
       context: ./Backend
       dockerfile: Dockerfile
-    command: ./start.sh
+    command: >
+        sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      
     volumes:
       - ./Backend:/app
       # Excluir cache Python
