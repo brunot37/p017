@@ -1,5 +1,5 @@
 services:
-  web:
+  django:
     build:
       context: ./Backend
       dockerfile: Dockerfile
@@ -65,7 +65,7 @@ services:
       - "3001:80"
     restart: unless-stopped
     depends_on:
-      - web
+      - django
     logging:
       driver: "json-file"
       options:

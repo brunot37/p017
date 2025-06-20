@@ -73,11 +73,11 @@ prod-deploy: ## Deploy rápido para produção (sem rebuild)
 	@echo "✅ Deploy rápido completo!"
 
 # === SERVIÇOS INDIVIDUAIS ===
-web-build: ## Rebuild apenas o serviço web
-	@echo "🔄 Rebuilding serviço web..."
-	docker compose -f $(COMPOSE_FILE) build --no-cache web
-	docker compose -f $(COMPOSE_FILE) up -d web
-	@echo "✅ Serviço web rebuilded!"
+django-build: ## Rebuild apenas o serviço django
+	@echo "🔄 Rebuilding serviço django..."
+	docker compose -f $(COMPOSE_FILE) build --no-cache django
+	docker compose -f $(COMPOSE_FILE) up -d django
+	@echo "✅ Serviço django rebuilded!"
 
 react-build: ## Rebuild apenas o serviço react
 	@echo "🔄 Rebuilding serviço react..."
@@ -94,8 +94,8 @@ db-restart: ## Reinicia apenas o banco de dados
 logs: ## Mostra logs de todos os serviços
 	docker compose -f $(COMPOSE_FILE) logs -f
 
-logs-web: ## Mostra logs apenas do serviço web
-	docker compose -f $(COMPOSE_FILE) logs -f web
+logs-django: ## Mostra logs apenas do serviço django
+	docker compose -f $(COMPOSE_FILE) logs -f django
 
 logs-react: ## Mostra logs apenas do serviço react
 	docker compose -f $(COMPOSE_FILE) logs -f react-app
@@ -107,8 +107,8 @@ logs-prod: ## Mostra logs da produção
 	docker compose -f $(COMPOSE_FILE_PROD) logs -f
 
 # === SHELL E DEBUG ===
-shell: ## Acesso shell ao container web
-	docker compose -f $(COMPOSE_FILE) exec web bash
+shell: ## Acesso shell ao container django
+	docker compose -f $(COMPOSE_FILE) exec django bash
 
 shell-react: ## Acesso shell ao container react
 	docker compose -f $(COMPOSE_FILE) exec react-app sh
@@ -117,26 +117,26 @@ shell-db: ## Acesso shell ao container do banco
 	docker compose -f $(COMPOSE_FILE) exec db psql -U bruno -d P017
 
 django-shell: ## Acesso ao Django shell
-	docker compose -f $(COMPOSE_FILE) exec web python manage.py shell
+	docker compose -f $(COMPOSE_FILE) exec django python manage.py shell
 
 # === DJANGO COMMANDS ===
 migrate: ## Executa migrações do Django
 	@echo "🔄 Executando migrações..."
-	docker compose -f $(COMPOSE_FILE) exec web python manage.py migrate
+	docker compose -f $(COMPOSE_FILE) exec django python manage.py migrate
 	@echo "✅ Migrações executadas!"
 
 makemigrations: ## Cria novas migrações
 	@echo "🔄 Criando migrações..."
-	docker compose -f $(COMPOSE_FILE) exec web python manage.py makemigrations
+	docker compose -f $(COMPOSE_FILE) exec django python manage.py makemigrations
 	@echo "✅ Migrações criadas!"
 
 collectstatic: ## Coleta arquivos estáticos
 	@echo "🔄 Coletando arquivos estáticos..."
-	docker compose -f $(COMPOSE_FILE) exec web python manage.py collectstatic --noinput
+	docker compose -f $(COMPOSE_FILE) exec django python manage.py collectstatic --noinput
 	@echo "✅ Arquivos estáticos coletados!"
 
 createsuperuser: ## Cria superusuário Django
-	docker compose -f $(COMPOSE_FILE) exec web python manage.py createsuperuser
+	docker compose -f $(COMPOSE_FILE) exec django python manage.py createsuperuser
 
 # === BACKUP E RESTORE ===
 backup: ## Backup do banco de dados
@@ -158,8 +158,8 @@ status: ## Mostra status dos containers
 
 health: ## Verifica saúde dos serviços
 	@echo "🏥 Verificando saúde dos serviços..."
-	@echo "Web: http://localhost:8000/api/"
-	@curl -f http://localhost:8000/api/ > /dev/null 2>&1 && echo "✅ Web OK" || echo "❌ Web com problemas"
+	@echo "django: http://localhost:8000/api/"
+	@curl -f http://localhost:8000/api/ > /dev/null 2>&1 && echo "✅ django OK" || echo "❌ django com problemas"
 	@echo "React: http://localhost:3001/"
 	@curl -f http://localhost:3001/ > /dev/null 2>&1 && echo "✅ React OK" || echo "❌ React com problemas"
 	@echo "Database:"
@@ -171,12 +171,12 @@ stats: ## Mostra estatísticas dos containers
 # === DESENVOLVIMENTO RÁPIDO ===
 quick-restart: ## Restart rápido (apenas restart dos containers)
 	@echo "⚡ Restart rápido..."
-	docker compose -f $(COMPOSE_FILE) restart web react-app
+	docker compose -f $(COMPOSE_FILE) restart django react-app
 	@echo "✅ Restart rápido completo!"
 
 hot-reload: ## Força hot reload do Django
 	@echo "🔥 Forçando hot reload..."
-	docker compose -f $(COMPOSE_FILE) exec web touch /app/manage.py
+	docker compose -f $(COMPOSE_FILE) exec django touch /app/manage.py
 	@echo "✅ Hot reload ativado!"
 
 # === ALIASES ÚTEIS ===
