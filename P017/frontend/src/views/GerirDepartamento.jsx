@@ -143,27 +143,73 @@ const GerirDepartamento = () => {
       return;
     }
 
+    if (!token) {
+      openModal("Sessão expirada. Por favor, faça login novamente.");
+      navigate("/");
+      return;
+    }
+
     const novoDepartamentoId = alteracoesDepartamento[idEscola];
 
-    // Atualizar o departamento com a nova escola
-    setDepartamentos((prev) =>
-      prev.map((dep) =>
-        dep.id === novoDepartamentoId ? { ...dep, escolaId: idEscola } : dep
-      )
-    );
+    console.log(`Enviando requisição para vincular escola ${idEscola} ao departamento ${novoDepartamentoId}`);
 
-    const escola = escolas.find((e) => e.id === idEscola);
-    const departamento = departamentos.find((d) => d.id === novoDepartamentoId);
+    fetch(`/api/escolas/${idEscola}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ departamento_id: novoDepartamentoId })
+    })
+      .then((res) => {
+        console.log(`Resposta da API: ${res.status}`);
+        if (!res.ok) {
+          return res.text().then(text => {
+            console.error(`Erro da API: ${text}`);
+            throw new Error(`Erro ${res.status}: ${text}`);
+          });
+        }
+        return res.json();
+      })
+      .then((escolaAtualizada) => {
+        console.log("Escola atualizada com sucesso:", escolaAtualizada);
 
-    openModal(
-      `Departamento "${departamento?.nome || "Nenhum"}" atribuído à escola "${escola.nome}".`
-    );
+        // Atualizar o estado dos departamentos localmente
+        setDepartamentos((prev) =>
+          prev.map((dep) => {
+            if (dep.id === novoDepartamentoId) {
+              return { ...dep, escolaId: idEscola };
+            }
+            else if (dep.escolaId === idEscola) {
+              return { ...dep, escolaId: null };
+            }
+            return dep;
+          })
+        );
 
-    setAlteracoesDepartamento((prev) => {
-      const copy = { ...prev };
-      delete copy[idEscola];
-      return copy;
-    });
+        const escola = escolas.find((e) => e.id === idEscola);
+        const departamento = departamentos.find((d) => d.id === novoDepartamentoId);
+
+        openModal(
+          `Departamento "${departamento?.nome || "Nenhum"}" atribuído à escola "${escola.nome}" com sucesso!`
+        );
+
+        // Limpar a seleção do estado de alterações
+        setAlteracoesDepartamento((prev) => {
+          const copy = { ...prev };
+          delete copy[idEscola];
+          return copy;
+        });
+      })
+      .catch((error) => {
+        console.error("Erro ao atualizar departamento:", error);
+        if (error.message.includes("401")) {
+          openModal("Sessão expirada. Por favor, faça login novamente.");
+          navigate("/");
+        } else {
+          openModal(`Erro ao atribuir departamento: ${error.message}`);
+        }
+      });
   };
 
   const getDepartamentoAtribuido = (idEscola) => {

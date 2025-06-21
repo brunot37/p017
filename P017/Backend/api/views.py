@@ -8,7 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics, permissions
 from django.http import HttpResponse
-from .models import AprovacaoDisponibilidade, Departamento, Escola, Disponibilidade
+from .models import AprovacaoDisponibilidade, Departamento, Docente, Escola, Disponibilidade, Coordenador
 from .serializers import (
     DepartamentoSerializer,
     EscolaSerializer,
@@ -184,6 +184,21 @@ class DepartamentoListCreateView(APIView):
     
     
 class DepartamentoUpdateDeleteView(generics.UpdateAPIView):
+    def put(self, request, id):
+        try:
+            departamento = Departamento.objects.get(id=id)
+        except Departamento.DoesNotExist:
+            return Response({"detail": "Departamento não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Apenas permitir atualização do nome do departamento
+        nome = request.data.get('nome')
+        if nome:
+            departamento.nome = nome
+            departamento.save()
+        
+        serializer = DepartamentoSerializer(departamento)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
     def delete(self, request, id):
         try:
             departamento = Departamento.objects.get(id=id)
@@ -218,11 +233,28 @@ class EscolaUpdateDeleteView(generics.UpdateAPIView):
             escola = Escola.objects.get(id=id)
         except Escola.DoesNotExist:
             return Response({"detail": "Escola não encontrada."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = EscolaSerializer(escola, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verificar se há departamento_id no request
+        departamento_id = request.data.get('departamento_id')
+        if departamento_id is not None:
+            if departamento_id == "" or departamento_id is None:
+                escola.departamento = None
+            else:
+                try:
+                    departamento = Departamento.objects.get(id=departamento_id)
+                    escola.departamento = departamento
+                except Departamento.DoesNotExist:
+                    return Response({"detail": "Departamento não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Verificar se há outros campos para atualizar (como nome)
+        nome = request.data.get('nome')
+        if nome:
+            escola.nome = nome
+        
+        escola.save()
+        
+        serializer = EscolaSerializer(escola)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, id):
         try:
@@ -293,82 +325,187 @@ class DocenteUpdateView(APIView):
     permission_classes = [IsAuthenticated]
     
     def put(self, request, id):
-        try:
-            docente = User.objects.get(id=id, tipo_conta="docente")
-        except User.DoesNotExist:
-            return Response({"detail": "Docente não encontrado."}, status=404)
-        
-        user = request.user
-        
-        # Se for coordenador, só pode atribuir/remover a si mesmo
-        if user.tipo_conta == "coordenador":
-            if not user.departamento:
-                return Response({"detail": "Coordenador não tem departamento atribuído."}, status=403)
+            try:
+                docente = User.objects.get(id=id, tipo_conta="docente")
+            except User.DoesNotExist:
+                return Response({"detail": "Docente não encontrado."}, status=404)
             
-            # Atualizar coordenador e departamento
-            action = request.data.get("action")  # "add" ou "remove"
-            departamento_id = request.data.get("departamento_id")  # Receber departamento_id do frontend
+            user = request.user
             
-            if action == "add":
-                docente.coordenador = user
-                # Se departamento_id foi fornecido, usar ele; senão, usar o departamento do coordenador
-                if departamento_id:
-                    try:
-                        departamento = Departamento.objects.get(id=departamento_id)
-                        docente.departamento = departamento
-                    except Departamento.DoesNotExist:
-                        return Response({"detail": "Departamento não encontrado."}, status=404)
-                else:
-                    # Usar o departamento do coordenador como padrão
-                    docente.departamento = user.departamento
+            # Se for coordenador, só pode atribuir/remover a si mesmo
+            if user.tipo_conta == "coordenador":
+                if not user.departamento:
+                    return Response({"detail": "Coordenador não tem departamento atribuído."}, status=403)
+                
+                # Atualizar coordenador e departamento
+                action = request.data.get("action")  # "add" ou "remove"
+                departamento_id = request.data.get("departamento_id")  # Receber departamento_id do frontend
+                
+                if action == "add":
+                    # Obter ou criar o objeto Coordenador associado ao usuário
+                    coordenador_obj, created = Coordenador.objects.get_or_create(user=user)
+                    docente.coordenador = coordenador_obj  # Atribuir o objeto Coordenador, não o User
                     
-            elif action == "remove":
-                docente.coordenador = None
-                # Não remover o departamento ao remover coordenador
-            else:
-                return Response({"detail": "Ação inválida."}, status=400)
-        
-        else:
-            # Para admin, manter funcionalidade original
-            departamento_id = request.data.get("departamento_id")
-            if departamento_id is not None:
-                if departamento_id == "":
-                    docente.departamento = None
+                    # Se departamento_id foi fornecido, usar ele; senão, usar o departamento do coordenador
+                    if departamento_id:
+                        try:
+                            departamento = Departamento.objects.get(id=departamento_id)
+                            docente.departamento = departamento
+                        except Departamento.DoesNotExist:
+                            return Response({"detail": "Departamento não encontrado."}, status=404)
+                    else:
+                        # Usar o departamento do coordenador como padrão
+                        docente.departamento = user.departamento
+                        
+                elif action == "remove":
+                    docente.coordenador = None
+                    # Não remover o departamento ao remover coordenador
                 else:
-                    try:
-                        departamento = Departamento.objects.get(id=departamento_id)
-                        docente.departamento = departamento
-                    except Departamento.DoesNotExist:
-                        return Response({"detail": "Departamento não encontrado."}, status=404)
+                    return Response({"detail": "Ação inválida."}, status=400)
+        
+            else:
+                # Para admin, manter funcionalidade original
+                departamento_id = request.data.get("departamento_id")
+                if departamento_id is not None:
+                    if departamento_id == "":
+                        docente.departamento = None
+                    else:
+                        try:
+                            departamento = Departamento.objects.get(id=departamento_id)
+                            docente.departamento = departamento
+                        except Departamento.DoesNotExist:
+                            return Response({"detail": "Departamento não encontrado."}, status=404)
             
-            coordenador_id = request.data.get("coordenador_id")
-            if coordenador_id:
-                try:
-                    coordenador = User.objects.get(id=coordenador_id, tipo_conta="coordenador")
-                    docente.coordenador = coordenador
-                except User.DoesNotExist:
-                    return Response({"detail": "Coordenador não encontrado."}, status=404)
+                coordenador_id = request.data.get("coordenador_id")
+                if coordenador_id:
+                    try:
+                        coordenador = User.objects.get(id=coordenador_id, tipo_conta="coordenador")
+                        coordenador_obj, created = Coordenador.objects.get_or_create(user=coordenador)
+                        docente.coordenador = coordenador_obj
+                    except User.DoesNotExist:
+                        return Response({"detail": "Coordenador não encontrado."}, status=404)
         
-        docente.save()
-        
-        # Retornar dados atualizados do docente
-        response_data = {
-            "id": docente.id,
-            "nome": docente.nome,
-            "email": docente.email,
-            "departamento": {
-                "id": docente.departamento.id,
-                "nome": docente.departamento.nome
-            } if docente.departamento else None,
-            "coordenador": {
-                "id": docente.coordenador.id,
-                "nome": docente.coordenador.nome
-            } if docente.coordenador else None,
-            "tem_coordenador": docente.coordenador is not None
-        }
-        
-        return Response(response_data)
+            docente.save()
+            
+            # Retornar dados atualizados do docente
+            response_data = {
+                "id": docente.id,
+                "nome": docente.nome,
+                "email": docente.email,
+                "departamento": {
+                    "id": docente.departamento.id,
+                    "nome": docente.departamento.nome
+                } if docente.departamento else None,
+                "coordenador": {
+                    "id": docente.coordenador.id,
+                    "nome": docente.coordenador.user.nome  # CORRIGIDO: acessar nome através do relacionamento user
+                } if docente.coordenador else None,
+                "tem_coordenador": docente.coordenador is not None
+            }
+            
+            return Response(response_data)
     
+
+class ConsultarDisponibilidadesView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        # Verificar se é coordenador ou admin
+        if request.user.tipo_conta not in ['coordenador', 'adm']:
+            return Response({
+                "detail": f"Acesso negado. Tipo de conta atual: {request.user.tipo_conta}. Apenas coordenadores podem acessar esta área."
+            }, status=403)
+        
+        try:
+            # Buscar docentes que têm disponibilidades submetidas
+            # Use a relação através do modelo Docente
+            docentes_com_disponibilidades = User.objects.filter(
+                tipo_conta='docente',
+                docente__disponibilidades__isnull=False  # Correção: usar docente__disponibilidades
+            ).distinct().prefetch_related('docente__disponibilidades')
+            
+            print(f"Encontrados {docentes_com_disponibilidades.count()} docentes com disponibilidades")
+            
+            # Obter o objeto Coordenador se o usuário for coordenador
+            coordenador_obj = None
+            if request.user.tipo_conta == 'coordenador':
+                try:
+                    coordenador_obj = Coordenador.objects.get(user=request.user)
+                except Coordenador.DoesNotExist:
+                    # Se não existe objeto Coordenador, criar um
+                    coordenador_obj = Coordenador.objects.create(user=request.user)
+            
+            docentes_data = []
+            for docente_user in docentes_com_disponibilidades:
+                # Obter o objeto Docente relacionado
+                try:
+                    docente_obj = docente_user.docente
+                    disponibilidades = docente_obj.disponibilidades.all().order_by('dia', 'hora_inicio')
+                except:
+                    continue  # Pular se não há objeto Docente relacionado
+                
+                disponibilidades_agrupadas = {}
+                
+                for disp in disponibilidades:
+                    if disp.dia:  # Verificar se dia existe
+                        dia_da_semana_num = disp.dia.weekday()
+                        dias_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
+                        dia_semana = dias_semana[dia_da_semana_num]
+                        
+                        if dia_semana not in disponibilidades_agrupadas:
+                            disponibilidades_agrupadas[dia_semana] = []
+                        
+                        # Verificar aprovação - usar coordenador_obj se existir
+                        aprovacao = None
+                        if coordenador_obj:
+                            aprovacao = AprovacaoDisponibilidade.objects.filter(
+                                disponibilidade=disp,
+                                coordenador=coordenador_obj  # Usar coordenador_obj em vez de coordenador__user
+                            ).first()
+                        
+                        status_aprovacao = aprovacao.status if aprovacao else 'pendente'
+                        
+                        if disp.hora_inicio and disp.hora_fim:
+                            hora_formatada = f"{disp.hora_inicio.strftime('%H:%M')}-{disp.hora_fim.strftime('%H:%M')}"
+                        else:
+                            hora_formatada = disp.intervalo or 'N/A'
+                            
+                        disponibilidades_agrupadas[dia_semana].append({
+                            'id': disp.id,
+                            'hora': hora_formatada,
+                            'data': disp.dia.strftime('%Y-%m-%d') if disp.dia else 'N/A',
+                            'semestre': disp.semestre,
+                            'ano_letivo': disp.ano_letivo,
+                            'status': status_aprovacao
+                        })
+                
+                disponibilidade_lista = []
+                for dia, detalhes in disponibilidades_agrupadas.items():
+                    horas_disponiveis = [d['hora'] for d in detalhes if d['status'] == 'pendente']
+                    
+                    if horas_disponiveis:
+                        disponibilidade_lista.append({
+                            'dia': dia,
+                            'horas': horas_disponiveis,
+                            'detalhes': detalhes
+                        })
+                
+                if disponibilidade_lista:
+                    docentes_data.append({
+                        'id': docente_user.id,
+                        'nome': docente_user.nome,
+                        'email': docente_user.email,
+                        'departamento': docente_user.departamento.nome if docente_user.departamento else None,
+                        'disponibilidade': disponibilidade_lista
+                    })
+            
+            return Response(docentes_data)
+            
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return Response({"detail": f"Erro interno: {str(e)}"}, status=500)
+
 
 class SubmeterDisponibilidadeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -377,6 +514,9 @@ class SubmeterDisponibilidadeView(APIView):
         # Apenas docentes podem submeter disponibilidades
         if request.user.tipo_conta != 'docente':
             return Response({"detail": "Apenas docentes podem submeter disponibilidades."}, status=403)
+        
+        # Verificar se existe objeto Docente para o usuário
+        docente_obj, created = Docente.objects.get_or_create(user=request.user)
         
         horarios = request.data.get('horarios', [])
         
@@ -395,23 +535,31 @@ class SubmeterDisponibilidadeView(APIView):
             if not all([dia, hora_inicio, hora_fim, semestre, ano_letivo]):
                 return Response({"detail": "Dados incompletos no horário."}, status=400)
             
+            # Converter string de data
+            try:
+                dia_dt = datetime.strptime(dia, '%Y-%m-%d').date()
+                hora_inicio_dt = datetime.strptime(hora_inicio, '%H:%M').time()
+                hora_fim_dt = datetime.strptime(hora_fim, '%H:%M').time()
+            except ValueError:
+                return Response({"detail": "Formato de data/hora inválido."}, status=400)
+            
             # Verificar se já existe uma disponibilidade para este docente neste dia/hora
             disponibilidade_existente = Disponibilidade.objects.filter(
-                utilizador=request.user,
-                dia=dia,
-                hora_inicio=hora_inicio,
-                hora_fim=hora_fim
+                docente=docente_obj,  # Usar docente_obj em vez de request.user
+                dia=dia_dt,
+                hora_inicio=hora_inicio_dt,
+                hora_fim=hora_fim_dt
             ).first()
             
             if disponibilidade_existente:
-                continue  # Pular se já existe
+                continue
             
             # Criar nova disponibilidade
             disponibilidade = Disponibilidade.objects.create(
-                utilizador=request.user,
-                dia=dia,
-                hora_inicio=hora_inicio,
-                hora_fim=hora_fim,
+                docente=docente_obj,  # Usar docente_obj em vez de request.user
+                dia=dia_dt,
+                hora_inicio=hora_inicio_dt,
+                hora_fim=hora_fim_dt,
                 semestre=semestre,
                 ano_letivo=ano_letivo
             )
@@ -427,7 +575,12 @@ class SubmeterDisponibilidadeView(APIView):
         if request.user.tipo_conta != 'docente':
             return Response({"detail": "Acesso negado."}, status=403)
         
-        disponibilidades = Disponibilidade.objects.filter(utilizador=request.user).order_by('dia', 'hora_inicio')
+        try:
+            docente_obj = request.user.docente
+            disponibilidades = docente_obj.disponibilidades.all().order_by('dia', 'hora_inicio')
+        except:
+            disponibilidades = Disponibilidade.objects.none()
+        
         serializer = DisponibilidadeSerializer(disponibilidades, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -436,9 +589,16 @@ class SubmeterDisponibilidadeView(APIView):
             return Response({"message": "ID da disponibilidade é obrigatório"}, status=status.HTTP_400_BAD_REQUEST)
             
         try:
-            disponibilidade = Disponibilidade.objects.get(id=id, utilizador=request.user)
+            # Obter o objeto Docente relacionado ao usuário
+            docente_obj = request.user.docente
+            
+            # Buscar a disponibilidade usando o objeto Docente
+            disponibilidade = Disponibilidade.objects.get(id=id, docente=docente_obj)
             disponibilidade.delete()
             return Response({"message": "Disponibilidade removida com sucesso"}, status=status.HTTP_204_NO_CONTENT)
+        except User.docente.RelatedObjectDoesNotExist:
+            return Response({"message": "Objeto Docente não encontrado para o usuário"}, 
+                          status=status.HTTP_404_NOT_FOUND)
         except Disponibilidade.DoesNotExist:
             return Response({"message": "Disponibilidade não encontrada ou não pertence ao usuário"}, 
                           status=status.HTTP_404_NOT_FOUND)
@@ -466,12 +626,18 @@ class VisualizarHorarioView(APIView):
             data_fim_dt = datetime.strptime(data_fim, '%Y-%m-%d').date()
 
             # Buscar apenas disponibilidades APROVADAS do docente
-            disponibilidades_aprovadas = Disponibilidade.objects.filter(
-                utilizador=user,
-                dia__gte=data_inicio_dt,
-                dia__lte=data_fim_dt,
-                aprovacoes__status='aprovado'  # Filtrar apenas as aprovadas
-            ).distinct()
+            # Corrigido: verificar se existe objeto Docente para o usuário
+            try:
+                docente_obj = user.docente
+                disponibilidades_aprovadas = Disponibilidade.objects.filter(
+                    docente=docente_obj,
+                    dia__gte=data_inicio_dt,
+                    dia__lte=data_fim_dt,
+                    aprovacoes__status='aprovado'  # Filtrar apenas as aprovadas
+                ).distinct()
+            except User.docente.RelatedObjectDoesNotExist:
+                # Se não existe objeto Docente, retornar lista vazia
+                disponibilidades_aprovadas = Disponibilidade.objects.none()
             
             print(f"Disponibilidades aprovadas encontradas: {disponibilidades_aprovadas.count()}")  # Debug
             
@@ -501,83 +667,6 @@ class VisualizarHorarioView(APIView):
             )
 
 
-class ConsultarDisponibilidadesView(APIView):
-    permission_classes = [IsAuthenticated]
-    
-    def get(self, request):
-        
-        # Verificar se é coordenador ou admin
-        if request.user.tipo_conta not in ['coordenador', 'adm']:
-            return Response({
-                "detail": f"Acesso negado. Tipo de conta atual: {request.user.tipo_conta}. Apenas coordenadores podem acessar esta área."
-            }, status=403)
-        
-        try:
-            # Buscar docentes que têm disponibilidades submetidas
-            docentes_com_disponibilidades = User.objects.filter(
-                tipo_conta='docente',
-                disponibilidades__isnull=False
-            ).distinct().prefetch_related('disponibilidades')
-            
-            print(f"Encontrados {docentes_com_disponibilidades.count()} docentes com disponibilidades")  # Debug
-            
-            docentes_data = []
-            for docente in docentes_com_disponibilidades:
-                disponibilidades = docente.disponibilidades.all().order_by('dia', 'hora_inicio')
-                
-                disponibilidades_agrupadas = {}
-                
-                for disp in disponibilidades:
-                    dia_da_semana_num = disp.dia.weekday()  # 0=segunda, 1=terça, etc.
-                    dias_semana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
-                    dia_semana = dias_semana[dia_da_semana_num]
-                    
-                    if dia_semana not in disponibilidades_agrupadas:
-                        disponibilidades_agrupadas[dia_semana] = []
-                    
-                    aprovacao = AprovacaoDisponibilidade.objects.filter(
-                        disponibilidade=disp,
-                        coordenador=request.user
-                    ).first()
-                    
-                    status_aprovacao = aprovacao.status if aprovacao else 'pendente'
-                    
-                    hora_formatada = f"{disp.hora_inicio.strftime('%H:%M')}-{disp.hora_fim.strftime('%H:%M')}"
-                    disponibilidades_agrupadas[dia_semana].append({
-                        'id': disp.id,
-                        'hora': hora_formatada,
-                        'data': disp.dia.strftime('%Y-%m-%d'),
-                        'semestre': disp.semestre,
-                        'ano_letivo': disp.ano_letivo,
-                        'status': status_aprovacao
-                    })
-                
-                disponibilidade_lista = []
-                for dia, detalhes in disponibilidades_agrupadas.items():
-                    horas_disponiveis = [d['hora'] for d in detalhes if d['status'] == 'pendente']
-                    
-                    if horas_disponiveis:  # Só mostrar dias com disponibilidades pendentes
-                        disponibilidade_lista.append({
-                            'dia': dia,
-                            'horas': horas_disponiveis,
-                            'detalhes': detalhes
-                        })
-                
-                if disponibilidade_lista:
-                    docentes_data.append({
-                        'id': docente.id,
-                        'nome': docente.nome,
-                        'email': docente.email,
-                        'departamento': docente.departamento.nome if docente.departamento else None,
-                        'disponibilidade': disponibilidade_lista
-                    })
-            
-            return Response(docentes_data)
-            
-        except Exception as e:
-            return Response({"detail": f"Erro interno: {str(e)}"}, status=500)
-
-
 class GerenciarAprovacaoView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -601,12 +690,15 @@ class GerenciarAprovacaoView(APIView):
         except Disponibilidade.DoesNotExist:
             return Response({"detail": "Disponibilidade não encontrada."}, status=404)
         
+        # Obter ou criar o objeto Coordenador para o usuário atual
+        coordenador_obj, created = Coordenador.objects.get_or_create(user=request.user)
+        
         # Criar ou atualizar aprovação
         status_aprovacao = 'aprovado' if acao == 'aprovar' else 'rejeitado'
         
         aprovacao, created = AprovacaoDisponibilidade.objects.get_or_create(
             disponibilidade=disponibilidade,
-            coordenador=request.user,
+            coordenador=coordenador_obj,  # Usar coordenador_obj em vez de request.user
             defaults={
                 'status': status_aprovacao,
                 'observacoes': observacoes
@@ -632,15 +724,22 @@ class GerenciarAprovacaoView(APIView):
         if request.user.tipo_conta != 'coordenador':
             return Response({"detail": "Acesso negado."}, status=403)
         
+        try:
+            # Obter o objeto Coordenador para o usuário atual
+            coordenador_obj = Coordenador.objects.get(user=request.user)
+        except Coordenador.DoesNotExist:
+            # Se não existe objeto Coordenador, retornar lista vazia
+            return Response([])
+        
         aprovacoes = AprovacaoDisponibilidade.objects.filter(
-            coordenador=request.user
-        ).select_related('disponibilidade__utilizador')
+            coordenador=coordenador_obj  # Usar coordenador_obj em vez de request.user
+        ).select_related('disponibilidade__docente__user')
         
         aprovacoes_data = []
         for aprovacao in aprovacoes:
             aprovacoes_data.append({
                 "id": aprovacao.id,
-                "docente_nome": aprovacao.disponibilidade.utilizador.nome,
+                "docente_nome": aprovacao.disponibilidade.docente.user.nome,  # Correção: usar docente.user.nome
                 "dia": aprovacao.disponibilidade.dia.strftime('%Y-%m-%d'),
                 "hora_inicio": aprovacao.disponibilidade.hora_inicio.strftime('%H:%M'),
                 "hora_fim": aprovacao.disponibilidade.hora_fim.strftime('%H:%M'),
@@ -690,8 +789,9 @@ class ExportarHorarioView(APIView):
                 )
             
             # Buscar disponibilidades aprovadas do docente
+            # Corrigido: usar docente__user em vez de utilizador
             disponibilidades_aprovadas = Disponibilidade.objects.filter(
-                utilizador=request.user,
+                docente__user=request.user,
                 dia__gte=data_inicio_dt,
                 dia__lte=data_fim_dt,
                 aprovacoes__status='aprovado'
@@ -958,8 +1058,9 @@ class VisualizarHorarioDocenteView(APIView):
                 return Response({"error": "Formato de data inválido. Use YYYY-MM-DD"}, status=400)
             
             # Buscar disponibilidades aprovadas do docente
+            # Corrigido: usar docente__user em vez de utilizador
             disponibilidades_aprovadas = Disponibilidade.objects.filter(
-                utilizador=docente,
+                docente__user=docente,
                 dia__gte=data_inicio_dt,
                 dia__lte=data_fim_dt,
                 aprovacoes__status='aprovado'
@@ -1018,8 +1119,9 @@ class ExportarHorarioDocenteView(APIView):
                 return Response({"error": "Formato de data inválido. Use YYYY-MM-DD"}, status=400)
             
             # Buscar disponibilidades aprovadas do docente
+            # Corrigido: usar docente__user em vez de utilizador
             disponibilidades_aprovadas = Disponibilidade.objects.filter(
-                utilizador=docente,
+                docente__user=docente,
                 dia__gte=data_inicio_dt,
                 dia__lte=data_fim_dt,
                 aprovacoes__status='aprovado'

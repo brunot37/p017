@@ -50,10 +50,10 @@ const DocenteConsultarSubmissoes = () => {
           } else {
             dataSubmissao = new Date();
           }
-          
+
           return {
             id: item.id,
-            dataSubmissao: formatarDataHora(dataSubmissao), 
+            dataSubmissao: formatarDataHora(dataSubmissao),
             estado: item.estado || "Pendente",
             dia: item.dia,
             hora_inicio: item.hora_inicio,
@@ -62,7 +62,7 @@ const DocenteConsultarSubmissoes = () => {
             ano_letivo: item.ano_letivo
           };
         });
-        
+
         setSubmissoes(submissoesFormatadas);
       } else {
         console.error("Erro ao carregar submissões:", await response.text());
@@ -81,13 +81,13 @@ const DocenteConsultarSubmissoes = () => {
       console.warn("Data inválida fornecida:", data);
       return "Data não disponível";
     }
-    
+
     try {
       return data.toLocaleString('pt-BR', {
-        day: '2-digit', 
-        month: '2-digit', 
+        day: '2-digit',
+        month: '2-digit',
         year: 'numeric',
-        hour: '2-digit', 
+        hour: '2-digit',
         minute: '2-digit',
         hour12: false
       });
@@ -168,7 +168,7 @@ const DocenteConsultarSubmissoes = () => {
       if (response.ok) {
         setSubmissoes((prev) => prev.filter((sub) => sub.id !== submissaoParaApagar.id));
         setMensagemSucesso("Submissão apagada com sucesso.");
-        
+
         if ((pagina - 1) * paginasPorMostrar >= submissoes.length - 1 && pagina > 1) {
           setPagina(pagina - 1);
         }
@@ -194,7 +194,7 @@ const DocenteConsultarSubmissoes = () => {
       }
       setVerificandoDepartamento(false);
     };
-    
+
     verificarAcesso();
   }, [navigate]);
 
@@ -202,10 +202,10 @@ const DocenteConsultarSubmissoes = () => {
   if (verificandoDepartamento) {
     return (
       <div className="consultar-container">
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           height: '100vh',
           flexDirection: 'column',
           gap: '20px'
@@ -228,23 +228,23 @@ const DocenteConsultarSubmissoes = () => {
           </button>
         </div>
 
-      <nav className="docente-submissoes-menu">
-  <ul>
-    <li onClick={handleSubmeterDisponibilidade}>Submeter Disponibilidade</li>
-    <li
-      onClick={handleConsultarSubmissoes}
-      className={paginaAtiva === "consultarSubmissoes" ? "active" : ""}
-    >
-      Consultar Submissões
-    </li>
-    <li
-      onClick={handleVisualizarHorario}
-      className={paginaAtiva === "visualizarHorario" ? "active" : ""}
-    >
-      Visualizar Horário
-    </li>
-  </ul>
-</nav>
+        <nav className="docente-submissoes-menu">
+          <ul>
+            <li onClick={handleSubmeterDisponibilidade}>Submeter Disponibilidade</li>
+            <li
+              onClick={handleConsultarSubmissoes}
+              className={paginaAtiva === "consultarSubmissoes" ? "active" : ""}
+            >
+              Consultar Submissões
+            </li>
+            <li
+              onClick={handleVisualizarHorario}
+              className={paginaAtiva === "visualizarHorario" ? "active" : ""}
+            >
+              Visualizar Horário
+            </li>
+          </ul>
+        </nav>
 
 
         <button onClick={handleLogout} className="docente-submissoes-logout">
@@ -282,18 +282,21 @@ const DocenteConsultarSubmissoes = () => {
                 </thead>
                 <tbody>
                   {paginacaoSubmissoes.map((submissao) => {
-                    const dataObj = submissao.dia ? new Date(submissao.dia) : null;
-                    const diaSemana = dataObj ? 
-                      ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][dataObj.getDay()] : 
-                      '—';
-                    
+                    let diaSemana = '—';
+                    if (submissao.dia) {
+                      // Criar data dividindo a string para evitar problemas de timezone
+                      const [ano, mes, dia] = submissao.dia.split('-');
+                      const dataObj = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+                      diaSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][dataObj.getDay()];
+                    }
+
                     return (
                       <tr key={submissao.id}>
                         <td className="docente-submissoes-celula">{submissao.dataSubmissao}</td>
                         <td className="docente-submissoes-celula">{diaSemana}</td>
                         <td className="docente-submissoes-celula">
-                          {submissao.hora_inicio && submissao.hora_fim 
-                            ? `${submissao.hora_inicio} às ${submissao.hora_fim}` 
+                          {submissao.hora_inicio && submissao.hora_fim
+                            ? `${submissao.hora_inicio} às ${submissao.hora_fim}`
                             : '—'}
                         </td>
                         <td className="docente-submissoes-celula">

@@ -42,7 +42,7 @@ const DocenteSubmeter = () => {
             "Content-Type": "application/json",
           },
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           setSubmissoes(data);
@@ -53,7 +53,7 @@ const DocenteSubmeter = () => {
         console.error("Erro ao buscar submissões:", error);
       }
     };
-    
+
     fetchSubmissoes();
   }, []);
 
@@ -137,7 +137,22 @@ const DocenteSubmeter = () => {
       return;
     }
 
-    const dateObj = getNextDateOfWeekday(weekdayNum);
+    // Corrigir a função para calcular a próxima data corretamente
+    const getNextDateForWeekday = (targetWeekday) => {
+      const today = new Date();
+      const todayWeekday = today.getDay(); // 0=domingo, 1=segunda, 2=terça, etc.
+
+      let daysToAdd = targetWeekday - todayWeekday;
+      if (daysToAdd <= 0) {
+        daysToAdd += 7; // Se já passou ou é hoje, pegar a próxima semana
+      }
+
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() + daysToAdd);
+      return targetDate;
+    };
+
+    const dateObj = getNextDateForWeekday(weekdayNum);
     const dia = dateObj.toISOString().split("T")[0];
 
     const horarios = [
@@ -166,9 +181,9 @@ const DocenteSubmeter = () => {
         return response.json();
       })
       .then((data) => {
-        setSelectedWeekDay("");
-        setHoraInicio("");
-        setHoraFim("");
+        setSelectedWeekDay(dia);
+        setHoraInicio(horaInicio);
+        setHoraFim(horaFim);
         openModal(criarMensagemSucesso());
       })
       .catch((error) => {
@@ -192,7 +207,7 @@ const DocenteSubmeter = () => {
       }
       setVerificandoDepartamento(false);
     };
-    
+
     verificarAcesso();
   }, [navigate]);
 
@@ -200,10 +215,10 @@ const DocenteSubmeter = () => {
   if (verificandoDepartamento) {
     return (
       <div className="submeter-container">
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           height: '100vh',
           flexDirection: 'column',
           gap: '20px'

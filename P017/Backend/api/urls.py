@@ -32,6 +32,7 @@ urlpatterns = [
     path('docente/perfil', DocentePerfilView.as_view(), name='docente-perfil'),
     path('docente/alterar-nome', DocenteAlterarNomeView.as_view(), name='docente-alterar-nome'),
     path('submeter-disponibilidade', SubmeterDisponibilidadeView.as_view(), name='submeter-disponibilidade'),
+    path('submeter-disponibilidade/<int:id>', SubmeterDisponibilidadeView.as_view(), name='deletar-disponibilidade'),
     path('visualizar-horario', VisualizarHorarioView.as_view(), name='visualizar-horario'),
     path('user/info', UserInfoView.as_view(), name='user-info'),
     path('consultar-disponibilidades', ConsultarDisponibilidadesView.as_view(), name='consultar-disponibilidades'),
