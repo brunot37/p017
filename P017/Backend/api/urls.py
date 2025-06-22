@@ -9,7 +9,8 @@ from .views import (
     ListUsersView, VisualizarHorarioView, ConsultarDisponibilidadesView, 
     GerenciarAprovacaoView, UserInfoView, ExportarHorarioView, 
     VisualizarHorarioDocenteView, ExportarHorarioDocenteView, VerificarDepartamentoDocenteView,
-    NotificacaoListView, NotificacaoMarkAsReadView, NotificacaoMarkAllAsReadView
+    NotificacaoListView, NotificacaoMarkAsReadView, NotificacaoMarkAllAsReadView,
+    CriarHorarioView, AlterarDepartamentoDocenteView
 )
 
 urlpatterns = [
@@ -44,4 +45,7 @@ urlpatterns = [
     path('notificacoes', NotificacaoListView.as_view(), name='notificacoes-list'),
     path('notificacoes/<int:notificacao_id>/marcar-lida', NotificacaoMarkAsReadView.as_view(), name='notificacao-marcar-lida'),
     path('notificacoes/marcar-todas-lidas', NotificacaoMarkAllAsReadView.as_view(), name='notificacoes-marcar-todas-lidas'),
+    # Novas funcionalidades com notificações
+    path('criar-horario', CriarHorarioView.as_view(), name='criar-horario'),
+    path('docentes/<int:docente_id>/alterar-departamento', AlterarDepartamentoDocenteView.as_view(), name='alterar-departamento-docente'),
 ]

@@ -58,6 +58,16 @@ class RegistoView(APIView):
         if serializer.is_valid():
             try:
                 serializer.save()
+                
+                # Criar notificação para o novo usuário
+                criar_notificacao(
+                    usuario=nome,
+                    tipo='geral',
+                    titulo='Bem-vindo ao Sistema',
+                    mensagem=f'Olá {nome}, sua conta foi criada com sucesso. Aguarde a aprovação do administrador para definir seu tipo de conta.',
+                    user_ref=nome
+                )
+                
                 return Response({
                     "message": "Conta criada com sucesso!",
                     "tipo_conta": "pendente"
@@ -109,6 +119,50 @@ class UserTipoContaUpdateView(generics.UpdateAPIView):
     serializer_class = UserTipoContaUpdateSerializer
     permission_classes = [permissions.IsAdminUser]
     lookup_field = 'id'
+    
+    def perform_update(self, serializer):
+        user = self.get_object()
+        old_tipo = user.tipo_conta
+        
+        # Salvar as alterações
+        serializer.save()
+        
+        # Obter o novo tipo
+        new_tipo = serializer.validated_data.get('tipo_conta')
+        
+        # Criar notificação se o tipo mudou
+        if old_tipo != new_tipo:
+            tipo_display = {
+                'pendente': 'Pendente',
+                'docente': 'Docente',
+                'coordenador': 'Coordenador',
+                'adm': 'Administrador'
+            }
+            
+            if new_tipo == 'coordenador':
+                criar_notificacao(
+                    usuario=user,
+                    tipo='coordenador_atribuido',
+                    titulo='Coordenador Atribuído',
+                    mensagem=f'Parabéns! Você foi designado como coordenador. Agora tem acesso às funcionalidades de gestão de departamento.',
+                    user_ref=user
+                )
+            elif new_tipo == 'docente':
+                criar_notificacao(
+                    usuario=user,
+                    tipo='docente_adicionado',
+                    titulo='Conta de Docente Ativada',
+                    mensagem=f'Sua conta foi aprovada como docente. Agora pode submeter suas disponibilidades e consultar seus horários.',
+                    user_ref=user
+                )
+            elif old_tipo == 'pendente' and new_tipo in ['docente', 'coordenador', 'adm']:
+                criar_notificacao(
+                    usuario=user,
+                    tipo='geral',
+                    titulo='Conta Aprovada',
+                    mensagem=f'Sua conta foi aprovada e você agora é um {tipo_display.get(new_tipo, new_tipo)}. Bem-vindo ao sistema!',
+                    user_ref=user
+                )
 
 
 # class SubmeterHorarioView(APIView):
@@ -146,7 +200,7 @@ class UserTipoContaUpdateView(generics.UpdateAPIView):
 #                 "disponibilidade": horarios_data,
 #             })
 
-#         return Response(docentes_data)
+#         return Response(docentes_data, status=status.HTTP_200_OK)
 
 
 class ListUsersView(APIView):
@@ -713,7 +767,7 @@ class GerenciarAprovacaoView(APIView):
         
         # Criar notificação para o docente
         docente_user = disponibilidade.docente.user
-        coordenador_nome = request.user.nome or request.user.email
+        coordenador_nome = request.user.nome
         
         if status_aprovacao == 'aprovado':
             titulo = "Disponibilidade Aprovada"
@@ -1393,6 +1447,139 @@ class ExportarHorarioDocenteView(APIView):
             return Response({"error": f"Erro ao gerar PDF: {str(e)}"}, status=500)
 
 
+class CriarHorarioView(APIView):
+    """
+    View para criar horários e notificar docentes
+    Esta é uma funcionalidade exemplo para demonstrar notificações de horário criado
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request):
+        if request.user.tipo_conta not in ['coordenador', 'adm']:
+            return Response({"detail": "Acesso negado."}, status=403)
+        
+        data = request.data
+        docente_id = data.get('docente_id')
+        descricao = data.get('descricao', 'Horário atribuído')
+        
+        if not docente_id:
+            return Response({"detail": "ID do docente é obrigatório."}, status=400)
+        
+        try:
+            docente = User.objects.get(id=docente_id, tipo_conta='docente')
+        except User.DoesNotExist:
+            return Response({"detail": "Docente não encontrado."}, status=404)
+        
+        # Criar horário (aqui seria a lógica real de criação)
+        # Por enquanto, apenas criar a notificação
+        
+        coordenador_nome = request.user.nome
+        
+        criar_notificacao(
+            usuario=docente,
+            tipo='horario_criado',
+            titulo='Novo Horário Atribuído',
+            mensagem=f'Coordenador {coordenador_nome} criou um novo horário para você: {descricao}',
+            user_ref=request.user
+        )
+        
+        return Response({
+            "message": "Horário criado e docente notificado com sucesso!",
+            "docente": docente.nome,
+            "coordenador": coordenador_nome
+        }, status=201)
+
+
+class AlterarDepartamentoDocenteView(APIView):
+    """
+    View para alterar departamento de um docente e notificar
+    """
+    permission_classes = [permissions.IsAdminUser]
+    
+    def put(self, request, docente_id):
+        novo_departamento_id = request.data.get('departamento_id')
+        
+        if not novo_departamento_id:
+            return Response({"detail": "ID do departamento é obrigatório."}, status=400)
+        
+        try:
+            docente = User.objects.get(id=docente_id, tipo_conta='docente')
+            novo_departamento = Departamento.objects.get(id=novo_departamento_id)
+        except User.DoesNotExist:
+            return Response({"detail": "Docente não encontrado."}, status=404)
+        except Departamento.DoesNotExist:
+            return Response({"detail": "Departamento não encontrado."}, status=404)
+        
+        # Salvar departamento anterior para comparação
+        departamento_anterior = docente.departamento.nome if docente.departamento else "Nenhum"
+        
+        # Atualizar departamento
+        docente.departamento = novo_departamento
+        docente.save()
+        
+        # Criar notificação
+        criar_notificacao(
+            usuario=docente,
+            tipo='departamento_alterado',
+            titulo='Departamento Alterado',
+            mensagem=f'Seu departamento foi alterado de "{departamento_anterior}" para "{novo_departamento.nome}".',
+            user_ref=request.user
+        )
+        
+        return Response({
+            "message": "Departamento alterado com sucesso!",
+            "docente": docente.nome,
+            "departamento_anterior": departamento_anterior,
+            "novo_departamento": novo_departamento.nome
+        }, status=200)
+        
+
+class NotificacaoListView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Listar todas as notificações do usuário autenticado"""
+        try:
+            user = request.user
+            notificacoes = Notificacao.objects.filter(usuario=user)
+            serializer = NotificacaoSerializer(notificacoes, many=True)
+            
+            return Response({
+                "notificacoes": serializer.data,
+                "total": notificacoes.count(),
+                "nao_lidas": notificacoes.filter(lida=False).count()
+            }, status=200)
+            
+        except Exception as e:
+            return Response({
+                "message": f"Erro ao buscar notificações: {str(e)}"
+            }, status=500)
+
+
+class NotificacaoMarkAsReadView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, notificacao_id):
+        """Marcar notificação como lida"""
+        try:
+            user = request.user
+            notificacao = Notificacao.objects.get(id=notificacao_id, usuario=user)
+            notificacao.lida = True
+            notificacao.save()
+            
+            return Response({
+                "message": "Notificação marcada como lida"
+            }, status=200)
+            
+        except Notificacao.DoesNotExist:
+            return Response({
+                "message": "Notificação não encontrada"
+            }, status=404)
+        except Exception as e:
+            return Response({
+                "message": f"Erro ao marcar notificação: {str(e)}"
+            }, status=500)
+        
 class CoordenadorUpdateView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -1428,40 +1615,7 @@ class CoordenadorUpdateView(APIView):
         }
         
         return Response(response_data)
-
-class VerificarDepartamentoDocenteView(APIView):
-    permission_classes = [IsAuthenticated]
     
-    def get(self, request):
-        """Verificar se o docente tem departamento atribuído"""
-        try:
-            user = request.user
-            
-            # Verificar se é docente
-            if user.tipo_conta != 'docente':
-                return Response({
-                    "tem_departamento": True,  # Não docentes não precisam de departamento
-                    "message": "Usuário não é docente"
-                })
-            
-            # Verificar se tem departamento
-            tem_departamento = user.departamento is not None
-            
-            response_data = {
-                "tem_departamento": tem_departamento,
-                "departamento": {
-                    "id": user.departamento.id,
-                    "nome": user.departamento.nome
-                } if user.departamento else None
-            }
-            
-            return Response(response_data, status=200)
-            
-        except Exception as e:
-            return Response({
-                "error": f"Erro ao verificar departamento: {str(e)}",
-                "tem_departamento": False
-            }, status=500)
 
 class CoordenadorPerfilView(APIView):
     permission_classes = [IsAuthenticated]
@@ -1492,7 +1646,7 @@ class CoordenadorPerfilView(APIView):
             return Response({
                 "detail": f"Erro ao buscar informações do perfil: {str(e)}"
             }, status=500)
-
+        
 
 class CoordenadorAlterarNomeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -1540,7 +1694,7 @@ class CoordenadorAlterarNomeView(APIView):
             return Response({
                 "message": f"Erro ao alterar nome: {str(e)}"
             }, status=500)
-
+        
 
 class DocentePerfilView(APIView):
     permission_classes = [IsAuthenticated]
@@ -1619,52 +1773,40 @@ class DocenteAlterarNomeView(APIView):
             return Response({
                 "message": f"Erro ao alterar nome: {str(e)}"
             }, status=500)
+        
 
-
-class NotificacaoListView(APIView):
+class VerificarDepartamentoDocenteView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        """Listar todas as notificações do usuário autenticado"""
+        """Verificar se o docente tem departamento atribuído"""
         try:
             user = request.user
-            notificacoes = Notificacao.objects.filter(usuario=user)
-            serializer = NotificacaoSerializer(notificacoes, many=True)
             
-            return Response({
-                "notificacoes": serializer.data,
-                "total": notificacoes.count(),
-                "nao_lidas": notificacoes.filter(lida=False).count()
-            }, status=200)
+            # Verificar se é docente
+            if user.tipo_conta != 'docente':
+                return Response({
+                    "tem_departamento": True,  # Não docentes não precisam de departamento
+                    "message": "Usuário não é docente"
+                })
+            
+            # Verificar se tem departamento
+            tem_departamento = user.departamento is not None
+            
+            response_data = {
+                "tem_departamento": tem_departamento,
+                "departamento": {
+                    "id": user.departamento.id,
+                    "nome": user.departamento.nome
+                } if user.departamento else None
+            }
+            
+            return Response(response_data, status=200)
             
         except Exception as e:
             return Response({
-                "message": f"Erro ao buscar notificações: {str(e)}"
-            }, status=500)
-
-
-class NotificacaoMarkAsReadView(APIView):
-    permission_classes = [IsAuthenticated]
-    
-    def post(self, request, notificacao_id):
-        """Marcar notificação como lida"""
-        try:
-            user = request.user
-            notificacao = Notificacao.objects.get(id=notificacao_id, usuario=user)
-            notificacao.lida = True
-            notificacao.save()
-            
-            return Response({
-                "message": "Notificação marcada como lida"
-            }, status=200)
-            
-        except Notificacao.DoesNotExist:
-            return Response({
-                "message": "Notificação não encontrada"
-            }, status=404)
-        except Exception as e:
-            return Response({
-                "message": f"Erro ao marcar notificação: {str(e)}"
+                "error": f"Erro ao verificar departamento: {str(e)}",
+                "tem_departamento": False
             }, status=500)
 
 
