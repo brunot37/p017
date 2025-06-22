@@ -36,6 +36,13 @@ html, body {
   gap: 16px;
 }
 
+.sidebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
 .cd-btn-perfil {
   background: transparent;
   border: none;

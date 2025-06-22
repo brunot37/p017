@@ -48,6 +48,13 @@ html, body {
   margin: 0;
 }
 
+.sidebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
 .btn-gerir-perfil {
   display: block;
   width: 100%;

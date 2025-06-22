@@ -30,6 +30,31 @@ html, body {
   padding: 20px;
 }
 
+.adm-user {
+  width: 100%;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.adm-divider {
+  border: none;
+  border-top: 1px solid #3282B8;
+  width: 100%;
+  margin: 0;
+}
+
+.sidebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
 .adm-menu {
   width: 100%;
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { verificarDepartamentoDocente } from "../utils/verificarDepartamento";
 import { navegarParaPerfilCorreto } from "../utils/navegacao";
+import NotificationDropdown from "../components/NotificationDropdown";
 import "./DocenteSubmeter.css";
 
 const Modal = ({ message, onClose }) => (
@@ -237,9 +238,12 @@ const DocenteSubmeter = () => {
             <p>
               Olá, <strong>{nomeUtilizador || "Utilizador"}</strong>
             </p>
-            <button className="btn-gerir-perfil" onClick={handleGerirPerfil}>
-              Gerir Perfil
-            </button>
+            <div className="sidebar-actions">
+              <button className="btn-gerir-perfil" onClick={handleGerirPerfil}>
+                Gerir Perfil
+              </button>
+              <NotificationDropdown />
+            </div>
           </div>
 
           <nav className="menu">

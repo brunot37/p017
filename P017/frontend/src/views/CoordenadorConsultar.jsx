@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { navegarParaPerfilCorreto } from "../utils/navegacao";
+import NotificationDropdown from "../components/NotificationDropdown";
 import "./CoordenadorConsultar.css";
 
 const getUserInfo = async () => {
@@ -286,7 +287,10 @@ const CoordenadorConsultar = () => {
       <aside className="cd-sidebar">
         <div className="cd-user">
           <span>Olá, <strong>{coordenadorNome}</strong></span>
-          <button className="cd-btn-perfil" onClick={() => navegarParaPerfilCorreto(navigate)}>Gerir Perfil</button>
+          <div className="sidebar-actions">
+            <button className="cd-btn-perfil" onClick={() => navegarParaPerfilCorreto(navigate)}>Gerir Perfil</button>
+            <NotificationDropdown />
+          </div>
           <hr className="cd-divider" />
         </div>
 

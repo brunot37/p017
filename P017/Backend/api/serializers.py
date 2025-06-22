@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Coordenador, Departamento, Escola, Horario, Disponibilidade, User, AprovacaoDisponibilidade
+from .models import Coordenador, Departamento, Escola, Horario, Disponibilidade, User, AprovacaoDisponibilidade, Notificacao
 
 class HorarioSerializer(serializers.ModelSerializer):
     class Meta:
@@ -81,3 +81,32 @@ class AprovacaoDisponibilidadeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AprovacaoDisponibilidade
         fields = ['id', 'disponibilidade', 'coordenador', 'status', 'data_aprovacao', 'observacoes', 'docente_nome']
+
+
+class NotificacaoSerializer(serializers.ModelSerializer):
+    tempo_relativo = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Notificacao
+        fields = ['id', 'tipo', 'titulo', 'mensagem', 'lida', 'data_criacao', 'tempo_relativo']
+    
+    def get_tempo_relativo(self, obj):
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        agora = timezone.now()
+        diff = agora - obj.data_criacao
+        
+        if diff < timedelta(minutes=1):
+            return "Agora mesmo"
+        elif diff < timedelta(hours=1):
+            minutos = int(diff.total_seconds() / 60)
+            return f"Há {minutos} minuto{'s' if minutos > 1 else ''}"
+        elif diff < timedelta(days=1):
+            horas = int(diff.total_seconds() / 3600)
+            return f"Há {horas} hora{'s' if horas > 1 else ''}"
+        elif diff < timedelta(days=7):
+            dias = diff.days
+            return f"Há {dias} dia{'s' if dias > 1 else ''}"
+        else:
+            return obj.data_criacao.strftime("%d/%m/%Y às %H:%M")

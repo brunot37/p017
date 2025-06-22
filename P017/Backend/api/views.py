@@ -8,13 +8,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics, permissions
 from django.http import HttpResponse
-from .models import AprovacaoDisponibilidade, Departamento, Docente, Escola, Disponibilidade, Coordenador
+from .models import AprovacaoDisponibilidade, Departamento, Docente, Escola, Disponibilidade, Coordenador, Notificacao
 from .serializers import (
     DepartamentoSerializer,
     EscolaSerializer,
     DisponibilidadeSerializer,
     UserTipoContaUpdateSerializer,
     UserSerializer,
+    NotificacaoSerializer,
 )
 import pandas as pd
 from reportlab.pdfgen import canvas
@@ -709,6 +710,29 @@ class GerenciarAprovacaoView(APIView):
             aprovacao.status = status_aprovacao
             aprovacao.observacoes = observacoes
             aprovacao.save()
+        
+        # Criar notificação para o docente
+        docente_user = disponibilidade.docente.user
+        coordenador_nome = request.user.nome or request.user.email
+        
+        if status_aprovacao == 'aprovado':
+            titulo = "Disponibilidade Aprovada"
+            mensagem = f"Coordenador {coordenador_nome} aprovou sua disponibilidade na {disponibilidade.dia.strftime('%A, %d/%m/%Y')} das {disponibilidade.hora_inicio} às {disponibilidade.hora_fim}"
+            tipo = 'disponibilidade_aprovada'
+        else:
+            titulo = "Disponibilidade Rejeitada"
+            mensagem = f"Coordenador {coordenador_nome} rejeitou sua disponibilidade na {disponibilidade.dia.strftime('%A, %d/%m/%Y')} das {disponibilidade.hora_inicio} às {disponibilidade.hora_fim}"
+            if observacoes:
+                mensagem += f". Motivo: {observacoes}"
+            tipo = 'disponibilidade_rejeitada'
+        
+        criar_notificacao(
+            usuario=docente_user,
+            tipo=tipo,
+            titulo=titulo,
+            mensagem=mensagem,
+            disponibilidade_ref=disponibilidade
+        )
         
         return Response({
             "message": f"Disponibilidade {status_aprovacao} com sucesso!",
@@ -1517,6 +1541,7 @@ class CoordenadorAlterarNomeView(APIView):
                 "message": f"Erro ao alterar nome: {str(e)}"
             }, status=500)
 
+
 class DocentePerfilView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -1594,3 +1619,94 @@ class DocenteAlterarNomeView(APIView):
             return Response({
                 "message": f"Erro ao alterar nome: {str(e)}"
             }, status=500)
+
+
+class NotificacaoListView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Listar todas as notificações do usuário autenticado"""
+        try:
+            user = request.user
+            notificacoes = Notificacao.objects.filter(usuario=user)
+            serializer = NotificacaoSerializer(notificacoes, many=True)
+            
+            return Response({
+                "notificacoes": serializer.data,
+                "total": notificacoes.count(),
+                "nao_lidas": notificacoes.filter(lida=False).count()
+            }, status=200)
+            
+        except Exception as e:
+            return Response({
+                "message": f"Erro ao buscar notificações: {str(e)}"
+            }, status=500)
+
+
+class NotificacaoMarkAsReadView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, notificacao_id):
+        """Marcar notificação como lida"""
+        try:
+            user = request.user
+            notificacao = Notificacao.objects.get(id=notificacao_id, usuario=user)
+            notificacao.lida = True
+            notificacao.save()
+            
+            return Response({
+                "message": "Notificação marcada como lida"
+            }, status=200)
+            
+        except Notificacao.DoesNotExist:
+            return Response({
+                "message": "Notificação não encontrada"
+            }, status=404)
+        except Exception as e:
+            return Response({
+                "message": f"Erro ao marcar notificação: {str(e)}"
+            }, status=500)
+
+
+class NotificacaoMarkAllAsReadView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        """Marcar todas as notificações como lidas"""
+        try:
+            user = request.user
+            Notificacao.objects.filter(usuario=user, lida=False).update(lida=True)
+            
+            return Response({
+                "message": "Todas as notificações foram marcadas como lidas"
+            }, status=200)
+            
+        except Exception as e:
+            return Response({
+                "message": f"Erro ao marcar notificações: {str(e)}"
+            }, status=500)
+
+
+# Função utilitária para criar notificações
+def criar_notificacao(usuario, tipo, titulo, mensagem, **refs):
+    """
+    Criar uma nova notificação
+    Args:
+        usuario: User instance
+        tipo: string do tipo de notificação
+        titulo: string do título
+        mensagem: string da mensagem
+        **refs: referencias opcionais (disponibilidade_ref, horario_ref, user_ref)
+    """
+    try:
+        notificacao = Notificacao.objects.create(
+            usuario=usuario,
+            tipo=tipo,
+            titulo=titulo,
+            mensagem=mensagem,
+            **refs
+        )
+        return notificacao
+    except Exception as e:
+        print(f"Erro ao criar notificação: {str(e)}")
+        return None

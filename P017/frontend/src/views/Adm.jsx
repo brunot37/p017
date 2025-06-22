@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import NotificationDropdown from "../components/NotificationDropdown";
 import "./Adm.css";
 
 const Modal = ({ message, onClose }) => (
@@ -196,6 +197,14 @@ const Adm = () => {
   return (
     <div className="adm-container fade-in">
       <aside className="adm-sidebar">
+        <div className="adm-user">
+          <span>Olá, <strong>Administrador</strong></span>
+          <div className="sidebar-actions">
+            <NotificationDropdown />
+          </div>
+          <hr className="adm-divider" />
+        </div>
+        
         <nav className="adm-menu">
           <ul>
             <li

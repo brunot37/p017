@@ -29,6 +29,30 @@ html, body {
   padding: 20px;
 }
 
+.user-greeting {
+  width: 100%;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #3282B8;
+  margin-bottom: 20px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-greeting p {
+  margin: 0;
+}
+
+.sidebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
 .docente-submissoes-menu {
   width: 100%;
 }

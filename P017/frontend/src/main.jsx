@@ -21,6 +21,7 @@ import HorarioDosDocentes from './views/HorarioDosDocentes.jsx';
 import AlterarPassword from './views/AlterarPassword.jsx';
 import GerirEscolas from './views/GerirEscolas.jsx'
 import DocenteAguardarDepartamento from './views/DocenteAguardarDepartamento.jsx';
+import Notificacoes from './views/Notificacoes.jsx';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -97,6 +98,10 @@ const router = createBrowserRouter([
   {
     path: "/DocenteAguardarDepartamento",
     element: <DocenteAguardarDepartamento />,
+  },
+  {
+    path: "/notificacoes",
+    element: <Notificacoes />,
   }
 ]);
 

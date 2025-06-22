@@ -142,3 +142,33 @@ class AprovacaoDisponibilidade(models.Model):
     
     def __str__(self):
         return f"{self.disponibilidade.docente.user.nome or self.disponibilidade.docente.user.username} - {self.status}"
+
+
+class Notificacao(models.Model):
+    TIPO_CHOICES = [
+        ('disponibilidade_aprovada', 'Disponibilidade Aprovada'),
+        ('disponibilidade_rejeitada', 'Disponibilidade Rejeitada'),
+        ('horario_criado', 'Horário Criado'),
+        ('docente_adicionado', 'Docente Adicionado'),
+        ('coordenador_atribuido', 'Coordenador Atribuído'),
+        ('departamento_alterado', 'Departamento Alterado'),
+        ('geral', 'Geral'),
+    ]
+    
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notificacoes')
+    tipo = models.CharField(max_length=30, choices=TIPO_CHOICES)
+    titulo = models.CharField(max_length=255)
+    mensagem = models.TextField()
+    lida = models.BooleanField(default=False)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    
+    # Campos opcionais para referências específicas
+    disponibilidade_ref = models.ForeignKey(Disponibilidade, on_delete=models.CASCADE, null=True, blank=True)
+    horario_ref = models.ForeignKey(Horario, on_delete=models.CASCADE, null=True, blank=True)
+    user_ref = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='notificacoes_referencia')
+    
+    class Meta:
+        ordering = ['-data_criacao']
+    
+    def __str__(self):
+        return f"{self.usuario.nome} - {self.titulo}"
