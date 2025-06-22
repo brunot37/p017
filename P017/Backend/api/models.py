@@ -22,19 +22,24 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password, username=None, **extra_fields):
-        extra_fields.setdefault("is_superuser", True)
-        extra_fields.setdefault("is_staff", True)
+    def create_superuser(self, email, password=None, **extra_fields):
+        """
+        Create and return a superuser with the given email and password.
+        """
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('tipo_conta', 'adm')  # Set tipo_conta to 'adm' for superusers
         
-        if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser precisa de is_superuser=True.")
-        
-        return self.create_user(
-            email, 
-            password, 
-            username=username or "admin", 
-            **extra_fields
-        )
+        # If no name provided, use a default name or extract from email
+        if not extra_fields.get('nome'):
+            extra_fields['nome'] = f"Admin {email.split('@')[0]}"
+    
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+            
+        return self.create_user(email, password, **extra_fields)
 
 
 class Departamento(models.Model):
@@ -71,12 +76,25 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []  
+    REQUIRED_FIELDS = ['nome']
 
     objects = CustomUserManager()
 
     def __str__(self):
         return f"{self.nome or self.username} ({self.email})"
+    
+    
+class Horario(models.Model):
+    utilizador = models.ForeignKey(User, on_delete=models.CASCADE, default=1, related_name='horarios')
+    dia = models.DateField(default=timezone.now)
+    hora_inicio = models.TimeField()
+    hora_fim = models.TimeField()
+    semestre = models.CharField(max_length=20, null=True, blank=True)
+    ano_letivo = models.CharField(max_length=20, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.utilizador.email} - {self.dia}"
+
 
 
 class Coordenador(models.Model):
