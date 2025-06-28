@@ -18,4 +18,22 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token inválido ou expirado
+      console.log('Token inválido ou expirado, fazendo logout...')
+      localStorage.removeItem('token')
+      localStorage.removeItem('userType')
+      localStorage.removeItem('userName')
+
+      if (window.location.pathname !== '/' && window.location.pathname !== '/Login') {
+        window.location.href = '/'
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
 export default apiClient

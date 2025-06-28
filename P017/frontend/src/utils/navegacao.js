@@ -9,7 +9,7 @@
 export const getUserFromToken = () => {
   const token = localStorage.getItem("token");
   if (!token) return null;
-  
+
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
     return payload;
@@ -26,7 +26,7 @@ export const getUserFromToken = () => {
 export const getUserInfo = async () => {
   const token = localStorage.getItem("token");
   if (!token) return null;
-  
+
   try {
     const response = await fetch("/api/user/info", {
       headers: {
@@ -34,7 +34,7 @@ export const getUserInfo = async () => {
         "Content-Type": "application/json",
       },
     });
-    
+
     if (response.ok) {
       return await response.json();
     }
@@ -52,7 +52,7 @@ export const getUserInfo = async () => {
 export const navegarParaPerfilCorreto = async (navigate) => {
   try {
     const userInfo = await getUserInfo();
-    
+
     if (!userInfo || !userInfo.tipo_conta) {
       console.error("Não foi possível obter o tipo de conta do usuário");
       // Fallback: try to get from localStorage
@@ -65,7 +65,7 @@ export const navegarParaPerfilCorreto = async (navigate) => {
       navigate("/");
       return;
     }
-    
+
     navegarPorTipo(userInfo.tipo_conta, navigate);
   } catch (error) {
     console.error("Erro ao navegar para perfil:", error);
@@ -113,17 +113,17 @@ const navegarPorTipo = (tipoUtilizador, navigate) => {
 export const verificarPermissaoAcesso = async (requiredType, navigate) => {
   try {
     const userInfo = await getUserInfo();
-    
+
     if (!userInfo) {
       navigate("/");
       return false;
     }
-    
+
     // Admin tem acesso a todas as páginas
     if (userInfo.tipo_conta === 'adm') {
       return true;
     }
-    
+
     // Verificar se o tipo do usuário corresponde ao exigido
     if (userInfo.tipo_conta !== requiredType) {
       // Redirecionar para a página correta baseada no tipo do usuário
@@ -140,11 +140,36 @@ export const verificarPermissaoAcesso = async (requiredType, navigate) => {
       }
       return false;
     }
-    
+
     return true;
   } catch (error) {
     console.error("Erro ao verificar permissão:", error);
     navigate("/");
     return false;
   }
+};
+
+/**
+ * Setup axios interceptor for automatic logout on 401 responses
+ */
+export const setupAuthInterceptor = (navigate) => {
+  window.axios_response_interceptor?.();
+
+  const interceptor = window.axios?.interceptors?.response?.use?.(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        // Token inválido ou expirado
+        localStorage.removeItem('token');
+        localStorage.removeItem('userType');
+        localStorage.removeItem('userName');
+        navigate('/');
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  window.axios_response_interceptor = () => {
+    window.axios?.interceptors?.response?.eject?.(interceptor);
+  };
 };

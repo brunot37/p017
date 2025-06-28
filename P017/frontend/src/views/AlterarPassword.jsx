@@ -23,15 +23,14 @@ const AlterarPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
 
-  const [showNewPwd, setShowNewPwd] = useState(true);       
-  const [showConfirmPwd, setShowConfirmPwd] = useState(true); l
+  const [showNewPwd, setShowNewPwd] = useState(true);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(true);
 
   const [newPwdError, setNewPwdError] = useState("");
   const [confirmPwdError, setConfirmPwdError] = useState("");
 
-  const pwdRegex = /^.{6,}$/;
-
   useEffect(() => {
+    const pwdRegex = /^.{6,}$/;
     if (newPassword.length > 0 && !pwdRegex.test(newPassword)) {
       setNewPwdError("Senha deve ter pelo menos 6 caracteres.");
     } else {
@@ -69,7 +68,7 @@ const AlterarPassword = () => {
       return;
     }
 
-    
+
     const fakeSuccess = true;
 
     if (fakeSuccess) {
@@ -87,7 +86,7 @@ const AlterarPassword = () => {
       setCurrentPassword("");
       setNewPassword("");
       setNewPasswordConfirm("");
-      navigate("/login");
+      navigate("/Login");
     }
   };
 

@@ -1,8 +1,11 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
+import './utils/fetchInterceptor.js';
 import App from './App.jsx';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
+import TokenCleaner from './components/TokenCleaner.jsx';
 import Registo from './views/Registo.jsx';
 import Login from './views/Login.jsx';
 import RecuperarPassword from './views/RecuperarPassword.jsx';
@@ -40,74 +43,143 @@ const router = createBrowserRouter([
     element: <RecuperarPassword />,
   },
   {
-    path: "/DocenteVisualizarHorario",
-    element: <DocenteVisualizarHorario />,
-  },
-  {
-    path: "/DocenteSubmeter",
-    element: <DocenteSubmeter />,
-  },
-  {
-    path: "/DocenteConsultarSubmissoes",
-    element: <DocenteConsultarSubmissoes />,
-  },
-  {
-    path: "/CoordenadorConsultar",
-    element: <CoordenadorConsultar />,
-  },
-  {
-    path: "/Adm",
-    element: <Adm />,
+    path: "/AlterarPassword",
+    element: (
+      <ProtectedRoute>
+        <AlterarPassword />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/Pendente",
-    element: <Pendente />,
+    element: (
+      <ProtectedRoute allowedRoles={['pendente']}>
+        <Pendente />
+      </ProtectedRoute>
+    ),
   },
-   {
-    path: "/GerirCoordenadores",
-    element: <GerirCoordenadores />,
+  // Rotas de Docente
+  {
+    path: "/DocenteVisualizarHorario",
+    element: (
+      <ProtectedRoute allowedRoles={['docente']}>
+        <DocenteVisualizarHorario />
+      </ProtectedRoute>
+    ),
   },
   {
-    path: "/GerirDepartamento",
-    element: <GerirDepartamento />,
+    path: "/DocenteSubmeter",
+    element: (
+      <ProtectedRoute allowedRoles={['docente']}>
+        <DocenteSubmeter />
+      </ProtectedRoute>
+    ),
   },
   {
-    path: "/GerirPerfilDocente",
-    element: <GerirPerfilDocente />,
-  },
-   {
-    path: "/GerirPerfilCoordenador",
-    element: <GerirPerfilCoordenador />,
-  },
-    {
-    path: "/HorarioDosDocentes",
-    element: <HorarioDosDocentes />,
-  },
-    {
-    path: "/AlterarPassword",
-    element: <AlterarPassword />,
-  },
-    {
-    path: "/GerirEscolas",
-    element: <GerirEscolas />,
-  },
-  {
-    path: "/GerirDocentes",
-    element: <GerirDocentes />,
+    path: "/DocenteConsultarSubmissoes",
+    element: (
+      <ProtectedRoute allowedRoles={['docente']}>
+        <DocenteConsultarSubmissoes />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/DocenteAguardarDepartamento",
-    element: <DocenteAguardarDepartamento />,
+    element: (
+      <ProtectedRoute allowedRoles={['docente']}>
+        <DocenteAguardarDepartamento />
+      </ProtectedRoute>
+    ),
   },
   {
+    path: "/GerirPerfilDocente",
+    element: (
+      <ProtectedRoute allowedRoles={['docente']}>
+        <GerirPerfilDocente />
+      </ProtectedRoute>
+    ),
+  },
+  // Rotas de Coordenador
+  {
+    path: "/CoordenadorConsultar",
+    element: (
+      <ProtectedRoute allowedRoles={['coordenador']}>
+        <CoordenadorConsultar />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/GerirDocentes",
+    element: (
+      <ProtectedRoute allowedRoles={['coordenador']}>
+        <GerirDocentes />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/HorarioDosDocentes",
+    element: (
+      <ProtectedRoute allowedRoles={['coordenador']}>
+        <HorarioDosDocentes />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/GerirPerfilCoordenador",
+    element: (
+      <ProtectedRoute allowedRoles={['coordenador']}>
+        <GerirPerfilCoordenador />
+      </ProtectedRoute>
+    ),
+  },
+  // Rotas de Admin
+  {
+    path: "/Adm",
+    element: (
+      <ProtectedRoute allowedRoles={['adm']}>
+        <Adm />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/GerirCoordenadores",
+    element: (
+      <ProtectedRoute allowedRoles={['adm']}>
+        <GerirCoordenadores />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/GerirDepartamento",
+    element: (
+      <ProtectedRoute allowedRoles={['adm']}>
+        <GerirDepartamento />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/GerirEscolas",
+    element: (
+      <ProtectedRoute allowedRoles={['adm']}>
+        <GerirEscolas />
+      </ProtectedRoute>
+    ),
+  },
+  // Rotas acessíveis a usuários autenticados (qualquer role)
+  {
     path: "/notificacoes",
-    element: <Notificacoes />,
+    element: (
+      <ProtectedRoute>
+        <Notificacoes />
+      </ProtectedRoute>
+    ),
   }
 ]);
 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
+    <TokenCleaner />
     <RouterProvider router={router} />
   </StrictMode>
 );

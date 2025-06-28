@@ -37,7 +37,7 @@ const Notificacoes = () => {
   const [userTipo, setUserTipo] = useState("");
   const [totalNotificacoes, setTotalNotificacoes] = useState(0);
   const [naoLidas, setNaoLidas] = useState(0);
-  
+
   // Modal states
   const [modalMessage, setModalMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,7 +47,7 @@ const Notificacoes = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/login");
+      navigate("/Login");
       return;
     }
 
@@ -71,7 +71,7 @@ const Notificacoes = () => {
     try {
       setLoading(true);
       const response = await apiCliente.get("/notificacoes");
-      
+
       if (response.data) {
         setNotificacoes(response.data.notificacoes || []);
         setTotalNotificacoes(response.data.total || 0);
@@ -88,16 +88,16 @@ const Notificacoes = () => {
   const marcarComoLida = async (notificacaoId) => {
     try {
       await apiCliente.post(`/notificacoes/${notificacaoId}/marcar-lida`);
-      
+
       // Atualizar estado local
-      setNotificacoes(prev => 
-        prev.map(notif => 
-          notif.id === notificacaoId 
+      setNotificacoes(prev =>
+        prev.map(notif =>
+          notif.id === notificacaoId
             ? { ...notif, lida: true }
             : notif
         )
       );
-      
+
       setNaoLidas(prev => prev - 1);
     } catch (error) {
       console.error("Erro ao marcar notificação como lida:", error);
@@ -108,12 +108,12 @@ const Notificacoes = () => {
   const marcarTodasComoLidas = async () => {
     try {
       await apiCliente.post("/notificacoes/marcar-todas-lidas");
-      
+
       // Atualizar estado local
-      setNotificacoes(prev => 
+      setNotificacoes(prev =>
         prev.map(notif => ({ ...notif, lida: true }))
       );
-      
+
       setNaoLidas(0);
       openModal("Todas as notificações foram marcadas como lidas!");
     } catch (error) {
@@ -151,7 +151,7 @@ const Notificacoes = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/Login");
   };
 
   const getMenuItems = () => {

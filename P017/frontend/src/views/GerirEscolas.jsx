@@ -61,7 +61,7 @@ const GerirEscolas = () => {
   };
   const closeModal = () => setIsModalOpen(false);
 
-  const handleGerirUtilizadores = () => navigate("/ADM");
+  const handleGerirUtilizadores = () => navigate("/Adm");
   const handleGerirEscolas = () => navigate("/GerirEscolas");
   const handleGerirDepartamento = () => navigate("/GerirDepartamento");
   const handleGerirCoordenadores = () => navigate("/GerirCoordenadores");

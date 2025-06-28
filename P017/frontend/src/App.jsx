@@ -1,11 +1,24 @@
-import React from "react";
-import { useNavigate } from "react-router-dom"; 
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { isTokenExpired, isValidJWTFormat, clearAuthData } from './utils/tokenUtils';
 import "./App.css";
 import LogoAgenda from './assets/LogoAgenda.png';
 
 
-const App = () => {  
+const App = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      // Se há um token, verificar se é válido
+      if (!isValidJWTFormat(token) || isTokenExpired(token)) {
+        console.log('Token inválido ou expirado encontrado na página inicial, limpando...');
+        clearAuthData();
+      }
+    }
+  }, []);
 
   return (
     <div className="home-container animate-fade-in">

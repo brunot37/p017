@@ -63,7 +63,7 @@ const GerirDepartamento = () => {
   };
   const closeModal = () => setIsModalOpen(false);
 
-  const handleGerirUtilizadores = () => navigate("/ADM");
+  const handleGerirUtilizadores = () => navigate("/Adm");
   const handleGerirEscolas = () => navigate("/GerirEscolas");
   const handleGerirDepartamento = () => navigate("/GerirDepartamento");
   const handleGerirCoordenadores = () => navigate("/GerirCoordenadores");
@@ -123,7 +123,7 @@ const GerirDepartamento = () => {
         setConfirmModalOpen(false);
         if (err.response && err.response.status === 401) {
           openModal("Sessão expirada. Faça login novamente.");
-          navigate("/login");
+          navigate("/Login");
         } else {
           openModal("Erro ao remover departamento.");
         }
