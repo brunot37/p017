@@ -5,7 +5,6 @@ import { clearAuthData, isTokenExpired, isValidJWTFormat } from './tokenUtils';
  * Adiciona automaticamente o token de autorização e trata erros 401
  */
 
-// Verificar e limpar token inválido na inicialização
 const initializeTokenValidation = () => {
   const token = localStorage.getItem('token');
 
@@ -17,15 +16,11 @@ const initializeTokenValidation = () => {
   }
 };
 
-// Executar verificação na inicialização
 initializeTokenValidation();
 
-// Salvar a função fetch original
 const originalFetch = window.fetch;
 
-// Criar uma versão interceptada do fetch
 window.fetch = async (url, options = {}) => {
-  // Adicionar token de autorização se disponível
   const token = localStorage.getItem('token');
 
   if (token && !options.headers?.Authorization) {
@@ -37,12 +32,10 @@ window.fetch = async (url, options = {}) => {
 
   const response = await originalFetch(url, options);
 
-  // Se receber 401, limpar dados de autenticação e redirecionar
   if (response.status === 401) {
     console.log('Token inválido ou expirado detectado em fetch, fazendo logout...');
     clearAuthData();
 
-    // Redirecionar apenas se não estivermos já na página de login
     if (window.location.pathname !== '/' && window.location.pathname !== '/Login') {
       window.location.href = '/';
     }

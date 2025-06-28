@@ -14,17 +14,15 @@ export const isTokenExpired = (token) => {
     const payload = JSON.parse(atob(token.split('.')[1]));
     const currentTime = Math.floor(Date.now() / 1000);
 
-    // Se o token tem campo 'exp' (expiration time)
     if (payload.exp) {
       return payload.exp < currentTime;
     }
 
-    // Se não tem campo de expiração, considerar válido por 24 horas
     const tokenAge = currentTime - (payload.iat || 0);
     return tokenAge > 24 * 60 * 60; // 24 horas em segundos
   } catch (error) {
     console.error('Erro ao verificar expiração do token:', error);
-    return true; // Se não conseguir decodificar, considerar expirado
+    return true;
   }
 };
 
@@ -83,10 +81,8 @@ export const clearAuthData = () => {
 export const hasPermissionForRoute = (userType, allowedRoles) => {
   if (!userType) return false;
 
-  // Admin sempre tem acesso
   if (userType === 'adm') return true;
 
-  // Se não especificou roles, qualquer usuário autenticado pode acessar
   if (!allowedRoles || allowedRoles.length === 0) return true;
 
   return allowedRoles.includes(userType);
